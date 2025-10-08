@@ -1,4 +1,12 @@
 ﻿The Rink
+Link PWS: https://angga-tri41-therink.pbp.cs.ui.ac.id/
+
+Anggota:
+1. Muhammad Derriel Ramadhan - 2406345186
+2. Yafi Alifuddin - 2406437155
+3. Angga Tri Setiawan - 2406350614
+4. Rusydan Mujtaba Ibnu Ramadhan - 2406421081
+5. Waldan Rafid - 2406346693
 
 Sebuah platform web untuk destinasi olahraga es (ice skate, hockey, curling) premium yang menargetkan audiens di wilayah urban. Website ini berfungsi sebagai pusat digital untuk semua layanan, mulai dari pembelian e-ticket, penyewaan alat perlengkapan, pemesanan jasa coaching, reservasi experience package, hingga informasi seputar olahraga es, seperti tips dan trik bermain ice skate bagi pemula.
 
@@ -48,21 +56,20 @@ Persona 2: The Trendsetter
         Proses booking dan pembayaran: alur pemesanan yang mulus dan sepenuhnya digital dari awal hingga akhir.
 
 Daftar Modul
-1. Authentication & User Management
-Modul ini berfokus pada page autentikasi (register dan login) user serta untuk reset dan update account info. Selain itu, fungsi untuk RBAC (Role-based Access Control) untuk user terdaftar, admin, dan guest.
-- User terdaftar = Bisa melakukan transaksi, pemesanan/booking pelatihan
-- Admin = menambahkan produk, pengaturan produk (gear, ice rink, paket pelatihan)
-- guest = tetap dapat melihat produk yang ditawarkan dan/atau konten seperti informasi paket (informasi halaman utama)
+1. Authentication & User Management, Admin Dashboard
+Modul ini adalah gerbang utama bagi pengguna, menangani semua proses terkait akun mulai dari registrasi, login, hingga manajemen profil. Selain itu, modul ini juga mencakup Admin Dashboard yang berfungsi sebagai pusat kendali bagi staf untuk mengelola seluruh data dan aktivitas di website.
+
 
 2. Gear Rental
-Modul ini memiliki fungsionalitas untuk membuat katalog produk gear untuk cabang olahraga ice hockey, skating, dan curling. Ada fitur filter berdasarkan kategori, ukuran, harga, dan sebagainya. Tiap produk memiliki detail page dan terintegrasi dengan cart management serta rental checkout.
+Modul ini menyediakan fungsionalitas e-commerce untuk penyewaan peralatan. Pengguna dapat menelusuri katalog gear yang tersedia, menggunakan filter untuk pencarian, memasukkan item ke keranjang sewa (cart), dan menyelesaikan transaksi melalui proses checkout yang simpel.
 
 3. Arena Booking
-Modul yang memiliki fungsionalitas penjadwalan arena (calendar view untuk live slot booking per arena). Modul ini juga menampilkan detail page arena untuk deskripsi, lokasi, dan kapasitas. Modul booking arena dirancang untuk mencegah double booking dan booking yang kurang masuk akal secara operasional (misal booking ice hockey tidak bisa langsung setelah curling karena harus set peralatan dsb.)
+Sebagai inti dari layanan, modul ini menawarkan sistem penjadwalan berbasis kalender yang interaktif. Pengguna dapat secara visual memeriksa ketersediaan slot waktu, memilih jadwal yang diinginkan, dan melakukan booking secara online dengan sistem yang otomatis mencegah penjadwalan ganda.
 
 4. Experience Package & Event
-Modul yang memiliki fungsionalitas untuk mengatur produk paket aktivitas seperti kelas, pelatihan, dan juga acara/event yang diadakan oleh komunitas cabang olahraga. Penanganan untuk listing dan booking tempat (integrasi dengan arena booking module) serta membuat sistem RSVP untuk melakukan tracking peserta event. 
+Modul ini berfungsi sebagai papan pengumuman dan platform pendaftaran untuk berbagai kegiatan khusus, seperti kelas pelatihan atau acara komunitas. Pengguna dapat menemukan informasi detail mengenai setiap event dan melakukan pendaftaran (RSVP) langsung dari halaman tersebut.
 
-5. Payment, Admin Dashboard & Integration
-Modul ini memiliki fungsionalitas untuk integrasi pembayaran, sistem voucher dan diskon, serta CRUD pada dashboard Admin (untuk kondisi terkini produk-produk penjualan gear, slot booking arena, experience packages dan events). Selain itu, fungsi pelaporan revenue, item terkini/populer, konfirmasi pembayaran dan booking arena, serta pembatalan booking dan rental.
+5. Community and Forum Module
+Modul ini bertujuan membangun interaksi sosial antar pengguna melalui sebuah forum diskusi. Pengguna dapat memulai topik baru (post), berpartisipasi dalam diskusi dengan membalas (reply), dan memberikan apresiasi melalui fitur upvote untuk menciptakan komunitas yang aktif.
+
 
