@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'navbar.html' %}
+{% include 'modal.html' %}
+    <!-- MODAL: create post -->
+     <button onclick="showModal()" 
+      class="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-semibold outline outline-2 outline-blue-600 outline-offset-[-2px] rounded-md hover:bg-blue-600 hover:text-white transition-colors mb-4">
+      Create a New Post
+    </button>
+
+    <!-- Post Cards -->
+    <section class="max-w-6xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for post in posts %}
+            <div class="bg-white rounded-xl shadow-md border border-blue-100 p-6 hover:shadow-lg transition">
+                <div class="flex items-center mb-3">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-semibold mr-3">
+                        {{ post.author.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">{{ post.author.username }}</p>
+                        <p class="text-sm text-gray-500">{{ post.created_at|timesince }} yang lalu</p>
+                    </div>
+                </div>
+                <h2 class="text-lg font-bold text-blue-800 mb-2">{{ post.title }}</h2>
+                <p class="text-gray-600 text-sm mb-4">{{ post.content|truncatechars:120 }}</p>
+                <div class="flex justify-between text-blue-600 text-sm font-semibold">
+                    <button onclick="openPostModal('{{ post.id }}')"
+                            class="hover:underline text-blue-600">
+                        → {{ post.replies.count }} Balasan
+                    </button>
+                    <span>{{ post.upvotes.count }} Upvote 👍</span>
+                </div>
+                <div class="flex items-center gap-2 mt-3">
+
+                  <!-- Tombol Upvote -->
+                  <button id="upvote-btn-{{ post.id }}" onclick="toggleVote('{{ post.id }}', 'post', true)"
+                    class="text-gray-400 hover:text-orange-500 transition duration-200">
+                    ⬆️
+                  </button>
+
+                  <!-- Total Upvote dan Downvote -->
+                  <span id="vote-count-{{ post.id }}" class="text-sm font-semibold">
+                    {{ post.total_upvotes|add:"-"|add:post.total_downvotes }}
+                  </span>
+
+                  <!-- Tombol Downvote -->
+                  <button id="downvote-btn-{{ post.id }}" onclick="toggleVote('{{ post.id }}', 'post', false)"
+                    class="text-gray-400 hover:text-blue-500 transition duration-200">
+                    ⬇️
+                  </button>
+                </div>
+            </div>
+            {% empty %}
+            <p class="col-span-3 text-center text-gray-500">No one in here</p>
+            {% endfor %}
+        </div>
+    </section>
+
+     <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <p class="text-gray-600 mt-3">Loading replies...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden"></div>
+
+    <!-- Post Grid -->
+    <div id="grid" class="hidden"></div>
+
+     <!-- Empty State -->
+    <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
+      <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
+    </div>
+
+    <div class="flex flex-col items-center gap-1">
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-6 text-center text-sm">
+        <p>&copy; 2025 The Rink Forum — Dibangun dengan ❤️ oleh komunitas.</p>
+    </footer>
+
+<script>
+const post_API_ENDPOINT = "{% url 'forum:show_json' %}";
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+const loadingSpinner = document.getElementById('loading');
+const errorMessage = document.getElementById('error');
+const emptyStateDisplay = document.getElementById('empty');
+const postGridContainer = document.getElementById('grid');
+
+function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+  loadingSpinner.classList.toggle('hidden', !showLoading);
+  errorMessage.classList.toggle('hidden', !showError);
+  emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+  postGridContainer.classList.toggle('hidden', !showGrid);
+  if (showGrid) postGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+}
+
+function createPost(item) {
+  const post = document.createElement('div');
+  post.className = 'bg-white rounded-lg border border-gray-200 hover:shadow-lg transition flex flex-col h-full';
+  const editDeleteHtml = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(item.user_id)
+    ? `<div class='flex space-x-2'>
+         <button onclick='showEditModal(${JSON.stringify(item)})' class='text-gray-600 hover:text-gray-700 text-sm'>Edit</button>
+         <button onclick='openDeleteModal("${item.id}")' class='text-red-600 hover:text-red-700 text-sm'>Delete</button>
+       </div>` : '';
+  
+  post.innerHTML = `
+    <div class="aspect-[16/9] relative overflow-hidden">
+      ${item.thumbnail ? `<img src="${item.thumbnail}" class="w-full h-full object-cover">` :
+      `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">No Image</div>`}
+    </div>
+    <div class="p-5 flex flex-col flex-1">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">${item.title}</h3>
+      <p class="text-gray-600 text-sm mb-4 line-clamp-3">${item.content}</p>
+      <div class="mt-auto pt-3 border-t flex justify-between items-center">
+        <button onclick='openPostModal("${item.id}")' class="text-blue-600 hover:text-blue-700 font-medium text-sm">Read more</button>
+        ${editDeleteHtml}
+      </div>
+    </div>`;
+  return post;
+}
+
+function renderPosts(posts) {
+  postGridContainer.innerHTML = '';
+  posts.forEach(p => postGridContainer.appendChild(createPost(p)));
+}
+
+async function fetchPostFromServer() {
+  try {
+    displayPageSection({ showLoading: true });
+    const res = await fetch(post_API_ENDPOINT);
+    if (!res.ok) throw new Error();
+    const posts = await res.json();
+
+    displayPageSection({ showGrid: true });
+    renderPosts(posts);
+  } 
+  catch {
+    displayPageSection({ showError: true });
+  }
+}
+
+async function openPostModal(postId) {
+  
+  let modal = document.getElementById('postDetailModal');
+  let modalContent = document.getElementById('postModalContent');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'postDetailModal';
+    modal.className = 'fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center';
+    modal.innerHTML = `
+      <div id="postModalContent" class="bg-white rounded-lg shadow-xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[80vh] overflow-y-auto opacity-0 scale-95 transition-all duration-200">
+        <div class="p-5 border-b flex justify-between items-center">
+          <h2 id="detailTitle" class="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p id="detailAuthor" class="text-sm text-gray-500"></p>
+          <button onclick="closepostModal()" class="text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+        </div>
+        <div class="p-5 space-y-4">
+          <img id="detailThumbnail" src="" alt="Post image" class="w-full max-h-[400px] object-contain rounded-lg border bg-gray-50 mx-auto">
+          <p id="detailContent" class="text-gray-700 leading-relaxed"></p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modalContent = document.getElementById('postModalContent');
+  }
+
+  document.getElementById('detailTitle').textContent = 'Loading...';
+  document.getElementById('detailContent').textContent = '';
+  document.getElementById('detailThumbnail').src = '';
+
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modalContent.classList.replace('opacity-0', 'opacity-100');
+    modalContent.classList.replace('scale-95', 'scale-100');
+  }, 50);
+
+  try {
+    await fetch(`/ajax-increment-views/${postId}/`, { method: "POST" });
+    const res = await fetch(`/json/${postId}/`);
+    if (!res.ok) throw new Error('Failed to fetch post');
+    const post = await res.json();
+
+    document.getElementById('detailTitle').textContent = post.title;
+    document.getElementById('detailContent').textContent = post.content;
+    document.getElementById('detailAuthor').textContent = post.user_username || 'Unknown';
+    document.getElementById('detailThumbnail').src = post.thumbnail || 'https://via.placeholder.com/400x300?text=No+Image';
+  } catch (err) {
+    document.getElementById('detailTitle').textContent = 'Error';
+    document.getElementById('detailContent').textContent = 'Could not load post.';
+  }
+}
+
+function closepostModal() {
+  const modal = document.getElementById('postDetailModal');
+  const modalContent = document.getElementById('postModalContent');
+  modalContent.classList.replace('opacity-100', 'opacity-0');
+  modalContent.classList.replace('scale-100', 'scale-95');
+  setTimeout(() => modal.classList.add('hidden'), 150);
+}
+
+function toggleVote(id, type, isUpvote) {
+  console.log(`Toggling ${isUpvote ? 'upvote' : 'downvote'} for ${type} ${id}`);
+}
+
+// Refresh post 
+function refreshposts() {
+  showToast("Refreshing", "Showing latest posts...");
+  fetchPostFromServer();
+}
+
+// Refresh post list when post added, edited, or deleted
+document.addEventListener('postAdded', fetchPostFromServer);
+
+document.addEventListener('click', e => {
+  const modal = document.getElementById('postDetailModal');
+  if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+    closepostModal();
+  }
+});
+// Load post data on page load
+fetchPostFromServer();
+</script>
+
+{% endblock %}
