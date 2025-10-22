@@ -27,16 +27,21 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def get_total_price(self):
-        return self.gear.price * self.quantity
-
-
+        return self.gear.price_per_day * self.quantity
 
 
 class Rental(models.Model):
     customer_name = models.CharField(max_length=100)
-    items = models.ManyToManyField(CartItem)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True) 
     rental_date = models.DateTimeField(auto_now_add=True)
     return_date = models.DateField()
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
 
-    def total_cost(self):
-        return sum(item.total_price() for item in self.items.all())
+class RentalItem(models.Model): #Buat simpan detail gear yang di rental
+    rental = models.ForeignKey(Rental, related_name='items', on_delete=models.CASCADE) 
+    gear_name = models.CharField(max_length=100) 
+    quantity = models.PositiveIntegerField(default=1)
+    price_per_day_at_checkout = models.DecimalField(max_digits=8, decimal_places=2)
+
+    def get_subtotal(self):
+        return self.price_per_day_at_checkout * self.quantity
