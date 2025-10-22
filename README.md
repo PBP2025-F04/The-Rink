@@ -72,4 +72,10 @@ Modul ini berfungsi sebagai papan pengumuman dan platform pendaftaran untuk berb
 5. Community and Forum Module
 Modul ini bertujuan membangun interaksi sosial antar pengguna melalui sebuah forum diskusi. Pengguna dapat memulai topik baru (post), berpartisipasi dalam diskusi dengan membalas (reply), dan memberikan apresiasi melalui fitur upvote untuk menciptakan komunitas yang aktif.
 
+Link Dataset:
+1. curling: https://thecurlingstore.com/?srsltid=AfmBOorg0QNl6B8ubRlpweD2XdBGArpkuivhs-NTqD51YcNmf5p89a5P
+2. figure skating: https://figureskatingstore.com/skates/?srsltid=AfmBOorLfuW7HpWzLCT72uNMpES0KLgfAJI8o54o67zbXg__m37Kg2is
+3. Hockey: https://www.hockeymonkey.com/
+
+
 
