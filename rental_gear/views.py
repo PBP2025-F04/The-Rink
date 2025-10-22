@@ -114,7 +114,6 @@ def add_to_cart_ajax(request, gear_id):
 
     gear = get_object_or_404(Gear, id=gear_id)
 
-    # parse quantity and days from JSON body if provided
     qty = days = 1
     try:
         body = json.loads(request.body.decode() or '{}')
