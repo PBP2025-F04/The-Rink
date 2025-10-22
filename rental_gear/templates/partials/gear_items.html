@@ -1,0 +1,19 @@
+{% for gear in gears %}
+<article class="product-card">
+  <div class="card-image">
+    {% if gear.image %}
+      <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:6px;" />
+    {% else %}
+      Image
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <h3>{{ gear.name }}</h3>
+    <div class="price">Rp{{ gear.price_per_day }}</div>
+    <p class="muted">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
+    <a class="card-btn" href="{% url 'gear_detail' gear.id %}">Detail</a>
+  </div>
+</article>
+{% empty %}
+<p>No items found.</p>
+{% endfor %}

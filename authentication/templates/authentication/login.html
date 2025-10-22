@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - The Rink</title>
+    <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}">
+    <style>
+        .login-page { max-width: 400px; margin: 60px auto; padding: 20px; }
+        .login-form { background: var(--card); padding: 24px; border-radius: 12px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 10px; border-radius: 6px; }
+        .error { color: #e53; margin: 8px 0; }
+        .register-link { text-align: center; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="brand">The Rink</div>
+        <nav class="top-nav">
+            <a href="{% url 'catalog' %}">Products</a>
+            <a>Solutions</a>
+            <a>Community</a>
+            <a>Contact</a>
+        </nav>
+    </header>
+
+    <main class="login-page">
+        <div class="login-form">
+            <h2 style="margin-top:0">Login</h2>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="error">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post">{% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+
+                <button type="submit" class="form-btn">Login</button>
+            </form>
+            
+            <div class="register-link">
+                <p>Don't have an account? <a href="{% url 'authentication:register' %}">Register</a></p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

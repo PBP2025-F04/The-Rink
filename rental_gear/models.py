@@ -25,9 +25,10 @@ class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     gear = models.ForeignKey(Gear, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    days = models.PositiveIntegerField(default=1)
 
     def get_total_price(self):
-        return self.gear.price_per_day * self.quantity
+        return self.gear.price_per_day * self.quantity * self.days
 
 
 class Rental(models.Model):
