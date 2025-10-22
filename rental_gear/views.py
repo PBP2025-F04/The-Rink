@@ -4,6 +4,8 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction  # Impor transaction
 from .models import Gear, CartItem
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 def catalog(request):
@@ -86,4 +88,86 @@ def checkout(request):
     return render(request, 'rental_gear/checkout.html', {
         'cart_items': cart_items,
         'total': total
+    })
+
+@login_required
+@require_POST
+@csrf_exempt
+def add_to_cart_ajax(request, gear_id):
+    """Menambahkan barang ke keranjang via AJAX"""
+    gear = get_object_or_404(Gear, id=gear_id)
+    item, created = CartItem.objects.get_or_create(user=request.user, gear=gear)
+
+    if not created:
+        item.quantity += 1
+    item.save()
+
+    total_items = CartItem.objects.filter(user=request.user).count()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"{gear.name} ditambahkan ke keranjang!",
+        'item_quantity': item.quantity,
+        'total_items': total_items
+    })
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def remove_from_cart_ajax(request, item_id):
+    """Menghapus item dari keranjang via AJAX"""
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
+    gear_name = item.gear.name
+    item.delete()
+
+    total_items = CartItem.objects.filter(user=request.user).count()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"{gear_name} dihapus dari keranjang.",
+        'total_items': total_items
+    })
+
+
+@login_required
+@csrf_exempt
+@transaction.atomic
+def checkout_ajax(request):
+    """Checkout keranjang via AJAX"""
+    cart_items = CartItem.objects.filter(user=request.user)
+
+    if not cart_items.exists():
+        return JsonResponse({
+            'success': False,
+            'message': "Keranjang kamu masih kosong!"
+        })
+
+    total = sum(item.get_total_price() for item in cart_items)
+
+    if request.method == "POST":
+        # Cek stok terlebih dahulu
+        for item in cart_items:
+            if item.gear.stock < item.quantity:
+                return JsonResponse({
+                    'success': False,
+                    'message': f"Stok '{item.gear.name}' tidak mencukupi (tersisa {item.gear.stock})."
+                })
+
+        # Update stok dan hapus cart
+        for item in cart_items:
+            gear = item.gear
+            gear.stock -= item.quantity
+            gear.save()
+            item.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Checkout berhasil! Total pembayaran: Rp{total}",
+            'total': total
+        })
+
+    return JsonResponse({
+        'success': False,
+        'message': "Gunakan metode POST untuk checkout."
     })
