@@ -1,6 +1,7 @@
 from django.urls import path
 from rental_gear.views import catalog, filter_gear, view_cart, add_to_cart, remove_from_cart,add_to_cart_ajax, remove_from_cart_ajax, checkout_ajax, gear_detail, checkout
 
+app_name = 'rental_gear'
 
 urlpatterns = [
     path('', catalog, name='catalog'),

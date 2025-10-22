@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>The Rink - Ice Sports Center</title>
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="hero-section">
+  <div class="hero-content">
+    <h1>Welcome to The Rink</h1>
+    <p>Your Premier Ice Sports Destination</p>
+    <a href="{% url 'rental_gear:catalog' %}" class="cta-button">Explore Gear</a>
+  </div>
+</div>
+
+<div class="features-section">
+  <div class="feature-card">
+    <div class="feature-icon">🎯</div>
+    <h3>Book Arena</h3>
+    <p>Reserve your ice time for practice or events</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">⛸️</div>
+    <h3>Rent Equipment</h3>
+    <p>Quality gear for all skill levels</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🏆</div>
+    <h3>Join Events</h3>
+    <p>Participate in competitions and workshops</p>
+  </div>
+</div>
+
+<div class="testimonials-section">
+  <h2>What Our Members Say</h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <p>"The best ice rink facility I've ever been to. Professional staff and excellent equipment!"</p>
+      <h4>- Sarah Johnson</h4>
+    </div>
+    <div class="testimonial-card">
+      <p>"Perfect place for both beginners and professionals. Great learning environment!"</p>
+      <h4>- Mike Thompson</h4>
+    </div>
+  </div>
+</div>
+{% endblock content %}
