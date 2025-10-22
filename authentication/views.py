@@ -27,7 +27,7 @@ def login_user(request):
             user = form.get_user()
             login(request, user)
             
-            return redirect('/')
+            return redirect('/rental/')
 
    else:
       form = AuthenticationForm(request)
