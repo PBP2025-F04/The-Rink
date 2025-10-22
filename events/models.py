@@ -93,3 +93,61 @@ class EventRegistration(models.Model):
 
     def __str__(self):
         return f"{self.user.username} terdaftar di {self.event.name}"
+    
+# events/models.py
+from django.db import models
+from django.conf import settings # Selalu pakai ini untuk merujuk ke User model
+
+class Package(models.Model):
+    """(Template) Paket layanan, e.g., Belajar Curling."""
+    name = models.CharField(max_length=100, verbose_name="Nama Paket")
+    description = models.TextField(verbose_name="Deskripsi")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Harga")
+    duration_hours = models.FloatField(default=2.0, verbose_name="Durasi (Jam)")
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+class PackageBooking(models.Model):
+    """(Transaksi) Siapa memesan paket apa untuk kapan."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    package = models.ForeignKey(Package, on_delete=models.PROTECT)
+    scheduled_datetime = models.DateTimeField(verbose_name="Jadwal Penggunaan")
+    booking_time = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="Confirmed")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.package.name}"
+
+class EventCategory(models.Model):
+    """Kategori untuk filter, e.g., 'Hockey', 'Workshop', 'Figure Skating'."""
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Event(models.Model):
+    """(Acara) Event spesifik dengan jadwal tetap."""
+    category = models.ForeignKey(EventCategory, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=150, verbose_name="Nama Event")
+    description = models.TextField(verbose_name="Deskripsi Event")
+    start_datetime = models.DateTimeField(verbose_name="Waktu Mulai")
+    end_datetime = models.DateTimeField(verbose_name="Waktu Selesai")
+    registration_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_published = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+class EventRegistration(models.Model):
+    """(Pendaftaran) Jembatan M-N antara User dan Event."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="registrations")
+    registration_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'event') # 1 user hanya bisa daftar 1x per event
+
+    def __str__(self):
+        return f"{self.user.username} @ {self.event.name}"

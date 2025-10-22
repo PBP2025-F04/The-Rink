@@ -20,7 +20,6 @@ class Gear(models.Model):
     def __str__(self):
         return self.name
 
-
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     gear = models.ForeignKey(Gear, on_delete=models.CASCADE)

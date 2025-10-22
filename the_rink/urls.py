@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rental/', include('rental_gear.urls')),
     path('accounts/', include('authentication.urls')),
+    path('events', include('events.urls'))
 ]
 
 if settings.DEBUG:
