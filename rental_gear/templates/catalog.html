@@ -6,6 +6,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Catalog — The Rink</title>
     <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
+    <style>
+      /* ===== Ice & Winter Theme ===== */
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        background: linear-gradient(180deg, #eaf7ff 0%, #d5ecfa 100%);
+        color: #0e2b47;
+      }
+
+      .site-header {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(200, 230, 255, 0.6);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 50, 100, 0.1);
+      }
+
+      .brand {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1b4d8a;
+      }
+
+      .top-nav a, .top-nav button.sign {
+        text-decoration: none;
+        margin-left: 1rem;
+        color: #0e2b47;
+        background: none;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .top-nav a:hover, .top-nav button.sign:hover {
+        color: #1b4d8a;
+        text-shadow: 0 0 4px rgba(150, 210, 255, 0.8);
+      }
+
+      .top-nav .sign {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #b6e3ff, #9ad6f9);
+        border-radius: 6px;
+        color: #083a63;
+        font-weight: 600;
+      }
+
+      .catalog-hero {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+      }
+
+      .catalog-hero h1 {
+        font-size: 2.5rem;
+        color: #083a63;
+        margin-bottom: 0.5rem;
+      }
+
+      .catalog-hero .lead {
+        color: #406b8e;
+      }
+
+      .filter-bar {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+      }
+
+      .filter-btn {
+        border: 1px solid #b3dfff;
+        background: rgba(255, 255, 255, 0.8);
+        color: #0e2b47;
+        padding: 8px 18px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.25s ease;
+      }
+
+      .filter-btn:hover {
+        background: #d5f1ff;
+        border-color: #88cfff;
+      }
+
+      .filter-btn.active {
+        background: linear-gradient(135deg, #8ed0ff, #b7e4ff);
+        color: #083a63;
+        font-weight: 600;
+        box-shadow: 0 0 8px rgba(150, 220, 255, 0.6);
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .product-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(200, 230, 255, 0.7);
+        border-radius: 12px;
+        box-shadow: 0 6px 14px rgba(100, 160, 200, 0.15);
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(120, 190, 255, 0.3);
+      }
+
+      .card-image {
+        height: 200px;
+        background: linear-gradient(135deg, #d0edff, #bde4ff);
+      }
+
+      .card-body {
+        padding: 1rem 1.2rem 1.5rem;
+      }
+
+      .card-body h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #0b3c61;
+      }
+
+      .price {
+        font-weight: 700;
+        color: #1b4d8a;
+        margin: 6px 0;
+      }
+
+      .muted {
+        color: #5f7991;
+        font-size: 0.9rem;
+      }
+
+      .card-btn {
+        background: linear-gradient(135deg, #a8dcff, #c7ecff);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #083a63;
+        transition: 0.2s;
+      }
+
+      .card-btn:hover {
+        background: linear-gradient(135deg, #93d0ff, #b0e2ff);
+        transform: scale(1.05);
+      }
+
+      .site-footer {
+        background: #f4fbff;
+        border-top: 1px solid #cde9ff;
+        padding: 2rem 1rem;
+        margin-top: 3rem;
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        max-width: 1100px;
+        margin: auto;
+        color: #406b8e;
+      }
+
+      .footer-inner .logo {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1b4d8a;
+      }
+
+      #toast {
+        background: rgba(0, 40, 80, 0.8);
+        border: 1px solid #bde4ff;
+        color: #eaf7ff;
+      }
+    </style>
   </head>
   <body>
     <header class="site-header">
@@ -46,9 +235,7 @@
             <div class="card-image">
               {% if gear.image %}
                 <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:6px;" />
-              {% else %}
-                Image
-              {% endif %}
+              {% else %} Image {% endif %}
             </div>
             <div class="card-body">
               <h3>{{ gear.name }}</h3>
@@ -71,20 +258,26 @@
       <div class="footer-inner">
         <div class="logo">BR</div>
         <div class="links">
-          <div>Use cases<ul><li>UI design</li><li>UX design</li></ul></div>
+          <div>
+            Use cases
+            <ul>
+              <li>UI design</li>
+              <li>UX design</li>
+            </ul>
+          </div>
         </div>
       </div>
     </footer>
 
-    <div id="toast" style="position:fixed;right:20px;bottom:20px;min-width:200px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:9999"></div>
+    <div id="toast"></div>
   </body>
+
   <script>
     // Filter functionality
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        
         const category = this.dataset.category;
         fetch(`{% url 'filter_gear' %}?category=${category}`)
           .then(r => r.text())
