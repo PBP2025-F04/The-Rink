@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Arenas — The Rink</title>
+{% endblock meta %}
+
+{% block content %}
+<style>
+  /* Custom styles inspired by your CSS */
+  body {
+    background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .arena-item-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  .arena-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0, 102, 153, 0.15);
+  }
+  .arena-item-card img {
+      height: 200px; /* Consistent image height */
+      object-fit: cover;
+  }
+</style>
+
+<div class="container mx-auto px-4 py-12">
+  <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for arena in arenas %}
+      <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block rounded-2xl overflow-hidden shadow-lg arena-item-card">
+        {% if arena.img %}
+          <img class="w-full" src="{{ arena.img.url }}" alt="{{ arena.name }}">
+        {% else %}
+          <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-500">No Image</span>
+          </div>
+        {% endif %}
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
+          <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
+          <p class="text-gray-700 text-base line-clamp-2"> {# Limit description lines #}
+            {{ arena.description }}
+          </p>
+        </div>
+        <div class="px-6 pt-2 pb-4">
+          <span class="inline-block bg-sky-100 rounded-full px-3 py-1 text-sm font-semibold text-sky-700 mr-2 mb-2">Capacity: {{ arena.capacity }}</span>
+          {# Bisa tambah tag lain jika perlu #}
+        </div>
+      </a>
+    {% empty %}
+      <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available at the moment.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

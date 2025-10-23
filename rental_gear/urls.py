@@ -1,8 +1,17 @@
 from django.urls import path
-from rental_gear.views import catalog, filter_gear, view_cart, add_to_cart, remove_from_cart,add_to_cart_ajax, remove_from_cart_ajax, checkout_ajax, gear_detail, checkout
+from rental_gear.views import (
+    catalog, filter_gear, view_cart, add_to_cart, remove_from_cart, 
+    add_to_cart_ajax, remove_from_cart_ajax, checkout_ajax, gear_detail, 
+    checkout, create_gear, update_gear, delete_gear
+)
 
+app_name = 'rental_gear'
 
 urlpatterns = [
+    # Admin CRUD URLs
+    path('gear/add/', create_gear, name='create_gear'),
+    path('gear/<int:id>/edit/', update_gear, name='update_gear'),
+    path('gear/<int:id>/delete/', delete_gear, name='delete_gear'),
     path('', catalog, name='catalog'),
     path('filter/', filter_gear, name='filter_gear'),
     path('cart/', view_cart, name='view_cart'),

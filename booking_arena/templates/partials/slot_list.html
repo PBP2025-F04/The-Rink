@@ -1,0 +1,41 @@
+{# File: booking_arena/templates/partials/slot_list.html #}
+
+{% if error %}
+  <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded relative mt-3" role="alert">
+    {{ error }}
+  </div>
+{% elif not slots_data %}
+  <p class="text-gray-500 mt-3 text-sm">No available slots for {{ selected_date|date:"l, d F Y" }}.</p>
+{% else %}
+  <h4 class="mt-4 mb-2 text-base font-semibold text-sky-800">Available Slots for {{ selected_date|date:"l, d F Y" }}:</h4>
+  {% for item in slots_data %}
+    <div class="flex justify-between items-center bg-white bg-opacity-90 px-4 py-2.5 rounded-lg mb-2 border border-sky-100 slot-item" id="slot-item-{{ item.slot.id }}">
+      {# Info Waktu Slot #}
+      <span class="font-medium text-sky-900 text-sm">
+        {{ item.slot.start_time|time:"H:i" }} - {{ item.slot.end_time|time:"H:i" }}
+      </span>
+
+      {# Status Slot (Booked / Tombol Book) #}
+      {% if item.is_booked %}
+        <span class="text-xs italic text-gray-500">
+          Booked {% if item.booking_info %}by {{ item.booking_info.user.username }}{% endif %}
+        </span>
+      {% elif is_bookable_date %}
+        {# Tombol Book #}
+        <button class="px-3 py-1 bg-sky-600 text-white text-xs font-semibold rounded-md hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition duration-200 btn-book"
+                data-bs-toggle="modal"
+                data-bs-target="#bookingModal"
+                data-slot-id="{{ item.slot.id }}"
+                data-date="{{ selected_date|date:'Y-m-d' }}"
+                data-slot-time="{{ item.slot.start_time|time:'H:i'}} - {{ item.slot.end_time|time:'H:i'}}">
+          Book Now
+        </button>
+      {% else %}
+         {# Tombol Disabled #}
+         <button class="px-3 py-1 bg-gray-400 text-white text-xs font-semibold rounded-md cursor-not-allowed btn-book" disabled>
+           Cannot Book
+         </button>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% endif %}

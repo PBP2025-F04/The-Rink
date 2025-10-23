@@ -1,333 +1,199 @@
+{% extends 'base.html' %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catalog — The Rink</title>
-    <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
-    <style>
-      /* ===== Ice & Winter Theme ===== */
-      body {
-        font-family: "Poppins", sans-serif;
-        margin: 0;
-        background: linear-gradient(180deg, #eaf7ff 0%, #d5ecfa 100%);
-        color: #0e2b47;
-      }
 
-      .site-header {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(6px);
-        border-bottom: 1px solid rgba(200, 230, 255, 0.6);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 50, 100, 0.1);
-      }
+{% block meta %}
+<title>Catalog — The Rink</title>
+<link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}">
+{% endblock meta %}
 
-      .brand {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #1b4d8a;
-      }
+{% block content %}
+<!-- Hero Section -->
+<section class="text-center py-16 bg-gradient-to-b from-blue-50 via-blue-100 to-sky-200">
+  <div class="container mx-auto px-4">
+    <h1 class="text-4xl font-extrabold text-sky-900 mb-4 drop-shadow-sm">Our Gear Catalog</h1>
+    <p class="text-sky-800 mb-6">Glide through our premium ice gear ❄️</p>
+    
+    {% if user.is_superuser %}
+    <div class="mb-6">
+      <a href="{% url 'rental_gear:create_gear' %}" class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-5 py-2 rounded-full hover:from-sky-600 hover:to-blue-600 transition-all shadow-lg">Add New Equipment</a>
+    </div>
+    {% endif %}
 
-      .top-nav a, .top-nav button.sign {
-        text-decoration: none;
-        margin-left: 1rem;
-        color: #0e2b47;
-        background: none;
-        border: none;
-        font-weight: 500;
-        cursor: pointer;
-        transition: 0.2s;
-      }
+    <!-- Search Bar -->
+    <div class="mb-8 flex justify-center">
+      <div class="relative w-full sm:w-96">
+        <input 
+          id="search-bar"
+          type="text" 
+          placeholder="Search gear..."
+          class="w-full px-5 py-3 rounded-full border border-sky-200 bg-white/70 backdrop-blur-lg text-sky-900 placeholder-sky-400 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300" />
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+          class="absolute right-4 top-3.5 w-5 h-5 text-sky-500 pointer-events-none">
+          <path stroke-linecap="round" stroke-linejoin="round" 
+                d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 7.5 7.5a7.5 7.5 0 0 0 9.15 9.15z" />
+        </svg>
+      </div>
+    </div>
 
-      .top-nav a:hover, .top-nav button.sign:hover {
-        color: #1b4d8a;
-        text-shadow: 0 0 4px rgba(150, 210, 255, 0.8);
-      }
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap justify-center gap-3">
+      <button class="filter-btn active px-5 py-2.5 rounded-full bg-sky-600 text-white shadow-md transition" data-category="">All</button>
+      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="hockey">Hockey</button>
+      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="curling">Curling</button>
+      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="ice_skating">Ice Skating</button>
+    </div>
+  </div>
+</section>
 
-      .top-nav .sign {
-        padding: 6px 12px;
-        background: linear-gradient(135deg, #b6e3ff, #9ad6f9);
-        border-radius: 6px;
-        color: #083a63;
-        font-weight: 600;
-      }
-
-      .catalog-hero {
-        text-align: center;
-        padding: 3rem 1rem 2rem;
-      }
-
-      .catalog-hero h1 {
-        font-size: 2.5rem;
-        color: #083a63;
-        margin-bottom: 0.5rem;
-      }
-
-      .catalog-hero .lead {
-        color: #406b8e;
-      }
-
-      .filter-bar {
-        margin-top: 1.5rem;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-      }
-
-      .filter-btn {
-        border: 1px solid #b3dfff;
-        background: rgba(255, 255, 255, 0.8);
-        color: #0e2b47;
-        padding: 8px 18px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.25s ease;
-      }
-
-      .filter-btn:hover {
-        background: #d5f1ff;
-        border-color: #88cfff;
-      }
-
-      .filter-btn.active {
-        background: linear-gradient(135deg, #8ed0ff, #b7e4ff);
-        color: #083a63;
-        font-weight: 600;
-        box-shadow: 0 0 8px rgba(150, 220, 255, 0.6);
-      }
-
-      .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .product-card {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(200, 230, 255, 0.7);
-        border-radius: 12px;
-        box-shadow: 0 6px 14px rgba(100, 160, 200, 0.15);
-        overflow: hidden;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-      }
-
-      .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(120, 190, 255, 0.3);
-      }
-
-      .card-image {
-        height: 200px;
-        background: linear-gradient(135deg, #d0edff, #bde4ff);
-      }
-
-      .card-body {
-        padding: 1rem 1.2rem 1.5rem;
-      }
-
-      .card-body h3 {
-        margin: 0;
-        font-size: 1.2rem;
-        color: #0b3c61;
-      }
-
-      .price {
-        font-weight: 700;
-        color: #1b4d8a;
-        margin: 6px 0;
-      }
-
-      .muted {
-        color: #5f7991;
-        font-size: 0.9rem;
-      }
-
-      .card-btn {
-        background: linear-gradient(135deg, #a8dcff, #c7ecff);
-        border: none;
-        border-radius: 8px;
-        padding: 6px 12px;
-        cursor: pointer;
-        font-weight: 600;
-        color: #083a63;
-        transition: 0.2s;
-      }
-
-      .card-btn:hover {
-        background: linear-gradient(135deg, #93d0ff, #b0e2ff);
-        transform: scale(1.05);
-      }
-
-      .site-footer {
-        background: #f4fbff;
-        border-top: 1px solid #cde9ff;
-        padding: 2rem 1rem;
-        margin-top: 3rem;
-      }
-
-      .footer-inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        max-width: 1100px;
-        margin: auto;
-        color: #406b8e;
-      }
-
-      .footer-inner .logo {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1b4d8a;
-      }
-
-      #toast {
-        background: rgba(0, 40, 80, 0.8);
-        border: 1px solid #bde4ff;
-        color: #eaf7ff;
-      }
-    </style>
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="brand">The Rink</div>
-      <nav class="top-nav">
-        <a>Products</a>
-        <a>Solutions</a>
-        <a>Community</a>
-        <a>Contact</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'view_cart' %}">Cart</a>
-          <form method="post" action="{% url 'authentication:logout' %}" style="display:inline">
-            {% csrf_token %}
-            <button class="sign">Logout</button>
-          </form>
+<!-- Product Grid -->
+<section class="py-16 bg-gradient-to-b from-sky-100 via-blue-50 to-white">
+  <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-6 transition-all" id="product-grid">
+    {% if gears %}
+      {% for gear in gears %}
+      <article class="product-card relative border border-sky-100 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-md flex flex-col justify-between">
+        {% if gear.image %}
+          <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-56 object-cover">
         {% else %}
-          <a href="{% url 'authentication:login' %}?next={{ request.path }}" class="sign">Sign in</a>
+          <div class="w-full h-56 bg-sky-50 flex items-center justify-center text-sky-300 italic">No Image</div>
         {% endif %}
-      </nav>
-    </header>
-
-    <main class="catalog-page">
-      <section class="catalog-hero">
-        <h1>Products</h1>
-        <p class="lead">Browse and rent the gear you need for the rink.</p>
-        <div class="filter-bar">
-          <button class="filter-btn active" data-category="">All</button>
-          <button class="filter-btn" data-category="hockey">Hockey</button>
-          <button class="filter-btn" data-category="curling">Curling</button>
-          <button class="filter-btn" data-category="ice_skating">Ice Skating</button>
-        </div>
-      </section>
-
-      <section class="product-grid">
-        {% if gears %}
-          {% for gear in gears %}
-          <article class="product-card">
-            <div class="card-image">
-              {% if gear.image %}
-                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:6px;" />
-              {% else %} Image {% endif %}
-            </div>
-            <div class="card-body">
-              <h3>{{ gear.name }}</h3>
-              <div class="price">Rp{{ gear.price_per_day }}</div>
-              <p class="muted">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <a class="card-btn" href="{% url 'gear_detail' gear.id %}">Detail</a>
-                <form method="post" action="{% url 'add_to_cart' gear.id %}">{% csrf_token %}<button class="card-btn" type="submit">Add</button></form>
-              </div>
-            </div>
-          </article>
-          {% endfor %}
-        {% else %}
-          <p>No products available.</p>
-        {% endif %}
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="footer-inner">
-        <div class="logo">BR</div>
-        <div class="links">
+        <div class="p-5 flex flex-col justify-between flex-grow">
           <div>
-            Use cases
-            <ul>
-              <li>UI design</li>
-              <li>UX design</li>
-            </ul>
+            <h3 class="text-xl font-semibold text-sky-900 mb-1 line-clamp-4 min-h-[4.8em] leading-snug">{{ gear.name }}</h3>
+            <p class="text-sky-700 text-sm mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
+            <div class="text-sky-900 font-bold mb-3">${{ gear.price_per_day }} / day</div>
+          </div>
+          <div class="mt-auto">
+            <div class="grid grid-cols-2 gap-2">
+              <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="flex items-center justify-center h-10 bg-sky-600 hover:bg-sky-700 text-white px-4 rounded-lg text-sm transition duration-300 shadow-sm">Details</a>
+              <form class="ajax-add-to-cart h-10" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="days" value="1">
+                <button type="submit" class="w-full h-full bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 px-4 rounded-lg text-sm transition duration-300 shadow-sm">Add To Cart</button>
+              </form>
+            </div>
+            {% if user.is_superuser %}
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <a href="{% url 'rental_gear:update_gear' gear.id %}" class="flex items-center justify-center h-10 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg text-sm transition duration-300">Edit</a>
+              <a href="{% url 'rental_gear:delete_gear' gear.id %}" class="flex items-center justify-center h-10 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition duration-300">Delete</a>
+            </div>
+            {% endif %}
           </div>
         </div>
-      </div>
-    </footer>
+      </article>
+      {% endfor %}
+    {% else %}
+      <p class="col-span-full text-center text-sky-700 italic">No products available.</p>
+    {% endif %}
+  </div>
+</section>
 
-    <div id="toast"></div>
-  </body>
+<!-- Toast -->
+<div id="toast" class="hidden fixed bottom-6 right-6 bg-sky-900/90 text-white px-5 py-3 rounded-lg shadow-lg text-sm"></div>
+{% endblock content %}
 
-  <script>
-    // Filter functionality
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        const category = this.dataset.category;
-        fetch(`{% url 'filter_gear' %}?category=${category}`)
-          .then(r => r.text())
-          .then(html => {
-            document.querySelector('.product-grid').innerHTML = html;
-          });
+{% block extra_js %}
+<style>
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-out; }
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+
+<script>
+// === Filter Functionality ===
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+
+    const category = this.dataset.category;
+    fetch(`{% url 'rental_gear:filter_gear' %}?category=${category}`)
+      .then(r => r.text())
+      .then(html => {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = html;
+        grid.querySelectorAll('article').forEach((el, i) => {
+          el.style.animationDelay = `${i * 0.05}s`;
+          el.classList.add('animate-fadeInUp');
+        });
+      });
+  });
+});
+
+// === Search Functionality ===
+document.getElementById('search-bar').addEventListener('input', function() {
+  const query = this.value.trim();
+  fetch(`{% url 'rental_gear:filter_gear' %}?search=${query}`)
+    .then(r => r.text())
+    .then(html => {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = html;
+      grid.querySelectorAll('article').forEach((el, i) => {
+        el.style.animationDelay = `${i * 0.05}s`;
+        el.classList.add('animate-fadeInUp');
       });
     });
+});
 
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
+// === Toast & Cart ===
+function getCookie(name) {
+  const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+  return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
+}
+
+function showToast(message, timeout=3000){
+  const t = document.getElementById('toast');
+  t.innerHTML = message;
+  t.classList.remove('hidden');
+  setTimeout(()=> t.classList.add('hidden'), timeout);
+}
+
+document.querySelectorAll('.ajax-add-to-cart').forEach(f=>{
+  f.addEventListener('submit', e=>{
+    e.preventDefault();
+    const action = f.getAttribute('action');
+    fetch(action.replace('/cart/add/','/cart/add-ajax/'), {
+      method:'POST',
+      headers:{'X-CSRFToken':getCookie('csrftoken')}
+    }).then(async r=>{
+      const j = await r.json().catch(()=>null);
+      if(!j){ showToast('Response error'); return; }
+      if(j.login_required){
+        showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>', 6000);
+        return;
       }
-      return cookieValue;
-    }
+      showToast(j.message || 'Added to cart!');
+    });
+  });
+});
 
-    function showToast(message, timeout=3000){
-      const t = document.getElementById('toast');
-      t.innerHTML = message;
-      t.style.display = 'block';
-      setTimeout(()=> t.style.display='none', timeout);
-    }
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById('search-bar');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.trim();
+      fetch(`{% url 'rental_gear:filter_gear' %}?search=${query}`)
+        .then(r => r.text())
+        .then(html => {
+          const grid = document.getElementById('product-grid');
+          grid.innerHTML = html;
+          grid.querySelectorAll('article').forEach((el, i) => {
+            el.style.animationDelay = `${i * 0.05}s`;
+            el.classList.add('animate-fadeInUp');
+          });
+        });
+    });
+  }
+});
 
-    document.querySelectorAll('.product-card form').forEach(f=>{
-      f.addEventListener('submit', function(e){
-        e.preventDefault();
-        const action = f.getAttribute('action');
-        fetch(action.replace('/cart/add/','/cart/add-ajax/'), {method:'POST', headers:{'X-CSRFToken':getCookie('csrftoken')}})
-        .then(async r=>{
-          const j = await r.json().catch(()=>null);
-          if(!j){ showToast('Response error'); return; }
-          if(j.login_required){
-            showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>', 6000);
-            return;
-          }
-          if(j.success){
-            showToast(j.message);
-          } else {
-            showToast(j.message || 'Error');
-          }
-        })
-      })
-    })
-  </script>
-</html>
+</script>
+{% endblock extra_js %}

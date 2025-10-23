@@ -18,12 +18,17 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
+    path('', views.main_page, name='main'),
     path('admin/', admin.site.urls),
     path('rental/', include('rental_gear.urls')),
+    path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
+    path('events/', include('events.urls'))
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
