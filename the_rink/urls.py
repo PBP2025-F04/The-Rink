@@ -26,8 +26,9 @@ urlpatterns = [
     path('rental/', include('rental_gear.urls')),
     path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
-    path('events', include('events.urls'))
+    path('events/', include('events.urls'))
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
