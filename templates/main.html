@@ -4,16 +4,47 @@
 {% block meta %}
 <title>The Rink - Ice Sports Center</title>
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
+<style>
+  @keyframes fadeUp {
+    0% {opacity: 0; transform: translateY(40px);}
+    100% {opacity: 1; transform: translateY(0);}
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+
+  /* Optional delay untuk grid berurutan */
+  .delay-1 { transition-delay: 0.1s; }
+  .delay-2 { transition-delay: 0.3s; }
+  .delay-3 { transition-delay: 0.5s; }
+  .delay-4 { transition-delay: 0.7s; }
+  .delay-5 { transition-delay: 0.9s; }
+</style>
 {% endblock meta %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-gradient-to-b from-blue-50 to-blue-100 py-20 text-center">
-  <div class="container mx-auto">
-    <h1 class="text-5xl font-extrabold text-blue-900 mb-4">Welcome to The Rink</h1>
-    <p class="text-lg text-blue-800 mb-8">Your Premier Ice Sports Destination</p>
+<section class="relative h-[90vh] flex items-center justify-center text-center text-white overflow-hidden">
+  <img 
+    src="{% static 'images/ice-skating-bg.jpg' %}" 
+    alt="Ice Skating" 
+    class="absolute inset-0 w-full h-full object-cover brightness-50" />
+  <div class="relative z-10 fade-up delay-1">
+    <h1 class="text-6xl font-extrabold drop-shadow-md mb-4">
+      Welcome to <span class="text-blue-200">The Rink</span>
+    </h1>
+    <p class="text-lg mb-8">Your Premier Ice Sports Destination ⛸️</p>
     <a href="{% url 'rental_gear:catalog' %}"
-       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-md transition duration-300">
+       class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-full font-semibold shadow-lg transition duration-300">
        Explore Gear
     </a>
   </div>
@@ -22,36 +53,98 @@
 <!-- Features Section -->
 <section class="py-16 bg-white">
   <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-    <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-md transition">
-      <div class="text-4xl mb-4">🎯</div>
-      <h3 class="text-xl font-semibold text-blue-900 mb-2">Book Arena</h3>
-      <p class="text-blue-700">Reserve your ice time for practice or events</p>
+    <a href="/booking/" class="fade-up delay-1">
+      <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 duration-300">
+        <div class="text-4xl mb-4">🎯</div>
+        <h3 class="text-xl font-semibold text-blue-900 mb-2">Book Arena</h3>
+        <p class="text-blue-700">Reserve your ice time for practice or events</p>
+      </div>
+    </a>
+    <a href="{% url 'rental_gear:catalog' %}" class="fade-up delay-2">
+      <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 duration-300">
+        <div class="text-4xl mb-4">⛸️</div>
+        <h3 class="text-xl font-semibold text-blue-900 mb-2">Rent Equipment</h3>
+        <p class="text-blue-700">Quality gear for all skill levels</p>
+      </div>
+    </a>
+    <div class="fade-up delay-3">
+      <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 duration-300">
+        <div class="text-4xl mb-4">🏆</div>
+        <h3 class="text-xl font-semibold text-blue-900 mb-2">Join Events</h3>
+        <p class="text-blue-700">Participate in competitions and workshops</p>
+      </div>
     </div>
-    <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-md transition">
-      <div class="text-4xl mb-4">⛸️</div>
-      <h3 class="text-xl font-semibold text-blue-900 mb-2">Rent Equipment</h3>
-      <p class="text-blue-700">Quality gear for all skill levels</p>
+  </div>
+</section>
+
+<!-- Featured Gear Section -->
+<section class="py-20 bg-gradient-to-b from-blue-50 to-blue-100">
+  <div class="container mx-auto text-center mb-12 fade-up delay-1">
+    <h2 class="text-3xl font-bold text-blue-900 mb-4">Featured Gear</h2>
+    <p class="text-blue-700">Top picks from our premium collection</p>
+  </div>
+
+  <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+    {% for gear in gears %}
+    <div class="fade-up" style="transition-delay: {{ forloop.counter|add:"0.1"|floatformat:1 }}s;">
+      <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300">
+        <div class="h-56 overflow-hidden">
+          {% if gear.image %}
+            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+          {% else %}
+            <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
+          {% endif %}
+        </div>
+        <div class="p-6 text-left">
+          <h3 class="text-lg font-semibold text-blue-900">{{ gear.name }}</h3>
+          <p class="text-blue-700 mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
+          <div class="font-bold text-blue-800 mb-4">Rp{{ gear.price_per_day }}</div>
+          <div class="flex gap-3">
+            <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
+            <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">{% csrf_token %}
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="days" value="1">
+              <button type="submit" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200">Add</button>
+            </form>
+          </div>
+        </div>
+      </article>
     </div>
-    <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-md transition">
-      <div class="text-4xl mb-4">🏆</div>
-      <h3 class="text-xl font-semibold text-blue-900 mb-2">Join Events</h3>
-      <p class="text-blue-700">Participate in competitions and workshops</p>
-    </div>
+    {% empty %}
+      <p class="text-blue-800">No featured items available.</p>
+    {% endfor %}
   </div>
 </section>
 
 <!-- Testimonials Section -->
 <section class="py-16 bg-gradient-to-b from-blue-100 to-blue-50 text-center">
-  <h2 class="text-3xl font-bold text-blue-900 mb-8">What Our Members Say</h2>
+  <h2 class="text-3xl font-bold text-blue-900 mb-8 fade-up delay-1">What Our Members Say</h2>
   <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-    <div class="bg-white p-8 rounded-2xl shadow-md border border-blue-100">
+    <div class="bg-white p-8 rounded-2xl shadow-md border border-blue-100 fade-up delay-2">
       <p class="text-blue-800 italic mb-4">"The best ice rink facility I've ever been to. Professional staff and excellent equipment!"</p>
       <h4 class="text-blue-900 font-semibold">- Abid Jamsuyy</h4>
     </div>
-    <div class="bg-white p-8 rounded-2xl shadow-md border border-blue-100">
+    <div class="bg-white p-8 rounded-2xl shadow-md border border-blue-100 fade-up delay-3">
       <p class="text-blue-800 italic mb-4">"Perfect place for both beginners and professionals. Great learning environment!"</p>
       <h4 class="text-blue-900 font-semibold">- Izzuy</h4>
     </div>
   </div>
 </section>
+
+<!-- Fade-up Scroll Animation Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  });
+</script>
+
 {% endblock content %}

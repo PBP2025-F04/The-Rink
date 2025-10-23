@@ -26,7 +26,8 @@
     <div class="space-x-6 font-medium flex items-center">
       <a href="{% url 'rental_gear:catalog' %}" 
          class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Products</a>
-      <a href="#" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Events</a>
+      <a href="{% url 'events:list' %}" 
+         class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Events</a>
       <a href="#" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Community</a>
       <a href="#" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Contact</a>
 
@@ -87,5 +88,30 @@
     <!-- JS global -->
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock extra_js %}
+
+    <div id="main-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-60 overflow-y-auto"
+     onclick="this.classList.add('hidden')">
+  
+  <div id="modal-content" class="relative w-full max-w-lg"
+       onclick="event.stopPropagation()">
+      <div class="text-center p-8">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        <p class="text-white mt-4">Loading...</p>
+      </div>
+  </div>
+</div>
+
+<script>
+  // Listener untuk custom event 'closeModal' yang kita kirim dari view
+  document.body.addEventListener('closeModal', function(evt) {
+    document.getElementById('main-modal').classList.add('hidden');
+    // Optional: Bersihkan konten modal setelah ditutup
+    setTimeout(() => {
+        document.getElementById('modal-content').innerHTML = '';
+    }, 300); // 300ms delay
+  });
+</script>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </body>
 </html>

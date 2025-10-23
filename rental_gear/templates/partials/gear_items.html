@@ -1,26 +1,50 @@
 {% for gear in gears %}
-<article class="product-card">
-  <div class="card-image">
-    {% if gear.image %}
-      <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:6px;" />
-    {% else %}
-      Image
-    {% endif %}
-  </div>
-  <div class="card-body">
-    <h3>{{ gear.name }}</h3>
-    <div class="price">Rp{{ gear.price_per_day }}</div>
-    <p class="muted">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-  <div style="display:flex;gap:8px;margin-top:8px">
-    <a class="card-btn btn btn-primary" href="{% url 'rental_gear:gear_detail' gear.id %}">Detail</a>
-    <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">{% csrf_token %}
-      <input type="hidden" name="quantity" value="1" />
-      <input type="hidden" name="days" value="1" />
-      <button class="card-btn btn btn-primary" type="submit">Add</button>
-    </form>
-  </div>
+<article class="product-card relative border border-sky-100 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-md flex flex-col justify-between">
+  {% if gear.image %}
+          <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-48 object-cover">
+  {% else %}
+            <div class="w-full h-48 bg-blue-50 flex items-center justify-center text-blue-300 italic">No Image</div>
+  {% endif %}
+
+    <div class="p-5 text-left flex flex-col min-h-[200px]">
+    <div>
+          <h3 class="text-lg font-semibold text-blue-900 mb-2 line-clamp-3 hover:line-clamp-none hover:text-blue-700 transition-colors duration-200">{{ gear.name }}</h3>
+      <p class="text-sky-700 text-sm mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
+          <div class="text-blue-900 font-bold text-lg mb-4">${{ gear.price_per_day }} / day</div>
+    </div>
+
+    <div class="mt-auto">
+      <div class="grid grid-cols-2 gap-2">
+        <a href="{% url 'rental_gear:gear_detail' gear.id %}" 
+           class="flex items-center justify-center h-10 bg-sky-600 hover:bg-sky-700 text-white px-4 rounded-lg text-sm transition duration-300 shadow-sm">
+          Details
+        </a>
+        <form class="ajax-add-to-cart h-10" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="days" value="1">
+          <button type="submit"
+                  class="w-full h-full bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 px-4 rounded-lg text-sm transition duration-300 shadow-sm">
+            Add
+          </button>
+        </form>
+      </div>
+
+      {% if user.is_superuser %}
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <a href="{% url 'rental_gear:update_gear' gear.id %}" 
+           class="flex items-center justify-center h-10 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg text-sm transition duration-300">
+          Edit
+        </a>
+        <a href="{% url 'rental_gear:delete_gear' gear.id %}" 
+           class="flex items-center justify-center h-10 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition duration-300">
+          Delete
+        </a>
+      </div>
+      {% endif %}
+    </div>
   </div>
 </article>
 {% empty %}
-<p>No items found.</p>
+<p class="col-span-full text-center text-sky-700 italic">No items found.</p>
 {% endfor %}

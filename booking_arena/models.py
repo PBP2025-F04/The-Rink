@@ -1,31 +1,53 @@
 from django.db import models
-from django.conf import settings
 
+# Create your models here.
+from django.conf import settings
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
 
 class Arena(models.Model):
-	name = models.CharField(max_length=150)
-	location = models.CharField(max_length=200, blank=True)
-	capacity = models.PositiveIntegerField(default=0)
-	description = models.TextField(blank=True)
-	image = models.ImageField(upload_to='arenas/', blank=True, null=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    capacity = models.IntegerField()
+    location = models.CharField(max_length=200)
+    img = models.ImageField(upload_to='arena_images/', null=True, blank=True)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
+    
+class TimeSlot(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    DAY_CHOICES = (
+        (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'),
+        (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')
+    )
+    arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='time_slot')
+    day = models.IntegerField(choices=DAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_avalaible = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f"{self.arena.name} - {self.day} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
 
 class Booking(models.Model):
-	STATUS_CHOICES = (
-		('pending', 'Pending'),
-		('confirmed', 'Confirmed'),
-		('cancelled', 'Cancelled'),
-	)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-	arena = models.ForeignKey(Arena, on_delete=models.CASCADE)
-	date = models.DateField()
-	start_time = models.TimeField()
-	end_time = models.TimeField()
-	created_at = models.DateTimeField(auto_now_add=True)
-	status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    STATUS_CHOICES = (
+        ('Booked', 'Booked'),
+        ('Cancelled', 'Cancelled'),
+        ('Completed', 'Completed'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
+    time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True)
+    date = models.DateField()
+    booked_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Booked')
 
-	def __str__(self):
-		return f"{self.arena.name} - {self.user.username} on {self.date} {self.start_time}" 
+    class Meta:
+        # Mencegah double book untuk slot & tanggal yang sama
+        unique_together = ('time_slot', 'date')
+
+    def __str__(self):
+        return f"{self.user.username} @ {self.time_slot} on {self.date}"

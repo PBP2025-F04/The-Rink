@@ -6,6 +6,18 @@
   --accent:#0b3ecf;
   --text:#0f172a;
 }
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(6px);
+  transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
 *{box-sizing:border-box}
 body{font-family:Inter, 'Segoe UI', Arial, sans-serif;margin:0;background:var(--bg);color:var(--text)}
 .container{max-width:1100px;margin:0 auto;padding:0 20px}
