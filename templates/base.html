@@ -5,33 +5,79 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}The Rink{% endblock %}</title>
-
+    {% block meta %}
+    {% endblock meta %}
     <!-- Link CSS global -->
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <form style="display:none;">
   {% csrf_token %}
 </form>
 
 <body>
-    {% block content %} 
+<!-- Navbar (Winter Theme) -->
+<nav class="backdrop-blur-md bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 text-white shadow-lg p-4 border-b border-blue-200">
+    <div class="container mx-auto flex justify-between items-center">
+        <!-- Logo -->
+        <a href="{% url 'main' %}" class="text-3xl font-bold tracking-widest drop-shadow-md text-white hover:text-cyan-100 transition duration-300">
+            ❄️ The Rink
+        </a>
 
-    {% endblock content %}
-
-    {% include 'toast.html' %}
-    {% include 'modal.html' %}
-     <!-- Navbar -->
+        <!-- Menu -->
+        <div class="space-x-6 text-lg font-medium">
+            <a href="{% url 'rental_gear:catalog' %}" class="hover:text-cyan-100 transition duration-300 hover:drop-shadow-[0_0_8px_#aee4ff]">Rental Gear</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'authentication:profile' %}" class="hover:text-cyan-100 transition duration-300 hover:drop-shadow-[0_0_8px_#aee4ff]">Profile</a>
+                <a href="{% url 'authentication:logout' %}" class="hover:text-cyan-100 transition duration-300 hover:drop-shadow-[0_0_8px_#aee4ff]">Logout</a>
+            {% else %}
+                <a href="{% url 'authentication:login' %}" class="hover:text-cyan-100 transition duration-300 hover:drop-shadow-[0_0_8px_#aee4ff]">Login</a>
+                <a href="{% url 'authentication:register' %}" class="hover:text-cyan-100 transition duration-300 hover:drop-shadow-[0_0_8px_#aee4ff]">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
 
     <!-- Main content -->
     <main>
         {% block content %}
-        <!-- Konten spesifik app bakal muncul di sini -->
+        <!-- Content will be inserted here -->
         {% endblock %}
     </main>
-    
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">The Rink</h3>
+                    <p>Your premier destination for ice sports and entertainment.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'rental_gear:catalog' %}" class="hover:text-blue-300">Rental Gear</a></li>
+                        <li><a href="#" class="hover:text-blue-300">Book Arena</a></li>
+                        <li><a href="#" class="hover:text-blue-300">Events</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="hover:text-blue-300"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="hover:text-blue-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-blue-300"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-4 border-t border-blue-800 text-center">
+                <p>&copy; 2025 The Rink. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
     <!-- JS global -->
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

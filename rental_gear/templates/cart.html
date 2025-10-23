@@ -38,7 +38,7 @@
       document.getElementById('cart-items').addEventListener('click', function(e){
         if(e.target.matches('button.remove-ajax')){
           const id = e.target.dataset.id;
-          fetch("{% url 'remove_from_cart_ajax' 0 %}".replace('0', id), {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
+          fetch("{% url 'rental_gear:remove_from_cart_ajax' 0 %}".replace('0', id), {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
             const data = await r.json().catch(()=>null);
             if(!data){ showToast('Response error'); return; }
             if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
@@ -49,7 +49,7 @@
       })
 
       document.getElementById('checkout-ajax').addEventListener('click', function(){
-        fetch("{% url 'checkout_ajax' %}", {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
+  fetch("{% url 'rental_gear:checkout_ajax' %}", {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
           const data = await r.json().catch(()=>null);
           if(!data){ showToast('Response error'); return; }
           if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
