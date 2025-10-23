@@ -11,7 +11,7 @@ def show_arena(request):
     context = {
         'arenas': arenas,
     }
-    return render(request, 'booking_arena/show_arena.html', context)
+    return render(request, 'show_arena.html', context)
 
 def arena_detail(request, arena_id):
     arena = get_object_or_404(Arena, pk=arena_id)
