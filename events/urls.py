@@ -14,7 +14,7 @@ urlpatterns = [
 
     # --- Event ---
     # e.g., /events/
-    path('events/', views.event_list_view, name='event_list'),
+    path('', views.event_list_view, name='event_list'),
     
     # e.g., /events/12/
     path('events/<int:event_id>/', views.event_detail_view, name='event_detail'),
