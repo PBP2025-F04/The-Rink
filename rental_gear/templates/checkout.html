@@ -1,8 +1,22 @@
+{% extends 'base.html' %}
 {% load static %}
+
+{% block meta %}
+<title>Checkout — The Rink</title>
+<link rel="stylesheet" href="{% static 'rental_gear/checkout.css' %}">
+{% endblock meta %}
+
+{% block content %}
 <div class="checkout-page">
   <h2>Checkout</h2>
-  <div>
+
+  <div class="checkout-items">
     {% include 'partials/cart_items.html' %}
   </div>
-  <form method="post">{% csrf_token %}<button type="submit">Confirm</button></form>
+
+  <form method="post" class="checkout-form">
+    {% csrf_token %}
+    <button type="submit" class="confirm-btn">Confirm</button>
+  </form>
 </div>
+{% endblock content %}

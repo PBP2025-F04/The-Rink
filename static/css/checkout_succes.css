@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(180deg, #d9f3ff 0%, #eaf8ff 50%, #f7fbff 100%);
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.checkout-success {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.success-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 90, 150, 0.2);
+  padding: 40px 60px;
+  max-width: 400px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.success-card h2 {
+  color: #006ea1;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.success-card .total {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #009bcf;
+  margin: 10px 0;
+}
+
+.success-card p {
+  color: #35566d;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  display: inline-block;
+  text-decoration: none;
+  background: linear-gradient(135deg, #00b7ff, #0077ff);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, #009de6, #005cd1);
+  transform: scale(1.05);
+}
+
+/* animasi kecil */
+.snowflake {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
