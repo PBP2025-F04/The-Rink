@@ -202,7 +202,7 @@
       <nav class="top-nav">
         <a>Products</a>
         <a>Solutions</a>
-        <a>Community</a>
+        <a href="{% url 'forum:show_forum' %}">Community</a>
         <a>Contact</a>
         {% if user.is_authenticated %}
           <a href="{% url 'rental_gear:view_cart' %}">Cart</a>

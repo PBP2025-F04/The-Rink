@@ -5,6 +5,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=200)
     content = models.TextField()
+    thumbnail_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -12,7 +13,7 @@ class Post(models.Model):
         return self.upvotes.count()
     
     def total_downvotes(self):
-        return self.votes.filter(is_upvote=False).count()
+        return self.upvotes.filter(is_upvote=False).count()
 
     def __str__(self):
         return self.title
@@ -27,7 +28,7 @@ class Reply(models.Model):
         return self.upvotes.count()
     
     def total_downvotes(self):
-        return self.votes.filter(is_upvote=False).count()
+        return self.upvotes.filter(is_upvote=False).count()
 
     def __str__(self):
         return f"Reply by {self.author.username} on {self.post.title}"
@@ -37,7 +38,7 @@ class UpVote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='upvotes', null=True, blank=True)
     reply = models.ForeignKey(Reply, on_delete=models.CASCADE, related_name='upvotes', null=True, blank=True)
-
+    is_upvote = models.BooleanField(default=True)  # ⬅️ tambahkan ini
     class Meta:
         unique_together = ('user', 'post', 'reply')  # biar user cuma bisa upvote sekali
 

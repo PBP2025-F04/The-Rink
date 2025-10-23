@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between p-4 border-b">
       <div>
-        <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Create New Product</h3>
+        <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Create New Post</h3>
         <p id="modalSubtitle" class="text-sm text-gray-600 mt-1">
           Share your post with the community
         </p>
@@ -24,7 +24,7 @@
 
     <!-- Body -->
     <div class="px-6 py-4 space-y-6 form-style">
-      <form id="productForm">
+      <form id="postForm">
         {% csrf_token %}
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700">Title</label>
@@ -54,7 +54,7 @@
         class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors text-center">
         Cancel
       </button>
-      <button type="submit" id="submitProduct" form="productForm"
+      <button type="submit" id="submitPost" form="postForm"
         class="order-1 sm:order-2 flex-1 bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
         Create post
       </button>
@@ -82,11 +82,11 @@
     const modalDesc = document.getElementById('crudModaldescription');
     const title = document.getElementById('modalTitle');
     const subtitle = document.getElementById('modalSubtitle');
-    const submitBtn = document.getElementById('submitProduct');
+    const submitBtn = document.getElementById('submitPost');
 
     modal.dataset.mode = "create";
     modal.dataset.editId = "";
-    document.getElementById("productForm").reset();
+    document.getElementById("postForm").reset();
 
     title.textContent = "Create New Post";
     subtitle.textContent = "Share your post with the community";
@@ -100,68 +100,98 @@
   }
 
   function showEditModal(post) {
-    const modal = document.getElementById('crudModal');
-    const modalDesc = document.getElementById('crudModaldescription');
-    const title = document.getElementById('modalTitle');
-    const subtitle = document.getElementById('modalSubtitle');
-    const submitBtn = document.getElementById('submitProduct');
+  const modal = document.getElementById('crudModal');
+  const modalDesc = document.getElementById('crudModaldescription');
+  const title = document.getElementById('modalTitle');
+  const subtitle = document.getElementById('modalSubtitle');
+  const submitBtn = document.getElementById('submitPost');
 
-    modal.dataset.mode = "edit";
-    modal.dataset.editId = post.id;
+  // 🔹 Reset dulu biar gak nyisa data lama
+  document.getElementById("postForm").reset();
 
-    title.textContent = "Edit Post";
-    subtitle.textContent = "Update your post details";
-    submitBtn.textContent = "Save Changes";
+  // 🔹 Set mode edit
+  modal.dataset.mode = "edit";
+  modal.dataset.editId = post.id;
 
-    document.getElementById("title").value = post.title;
-    document.getElementById("content").value = post.content;
-    document.getElementById("thumbnail").value = post.thumbnail || "";
+  // 🔹 Isi data dari post yang dipilih
+  document.getElementById("title").value = post.title || "";
+  document.getElementById("content").value = post.content || "";
+  document.getElementById("thumbnail").value = post.thumbnail || "";
 
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-      modalDesc.classList.remove('opacity-0', 'scale-95');
-      modalDesc.classList.add('opacity-100', 'scale-100');
-    }, 50);
-  }
+  // 🔹 Update tampilan modal
+  title.textContent = "Edit Post";
+  subtitle.textContent = "Update your post details";
+  submitBtn.textContent = "Save Changes";
+
+  // 🔹 Tampilkan modal dengan animasi
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modalDesc.classList.remove('opacity-0', 'scale-95');
+    modalDesc.classList.add('opacity-100', 'scale-100');
+  }, 50);
+}
+
 
   function hideModal() {
-    const modal = document.getElementById('crudModal');
-    const modalDesc = document.getElementById('crudModaldescription');
-    modalDesc.classList.remove('opacity-100', 'scale-100');
-    modalDesc.classList.add('opacity-0', 'scale-95');
-    setTimeout(() => modal.classList.add('hidden'), 150);
+  const modal = document.getElementById('crudModal');
+  const modalDesc = document.getElementById('crudModaldescription');
+
+  modalDesc.classList.remove('opacity-100', 'scale-100');
+  modalDesc.classList.add('opacity-0', 'scale-95');
+
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    // 🔹 Reset form setelah modal tertutup supaya form bersih
+    document.getElementById("postForm").reset();
+    modal.dataset.mode = "create";
+    modal.dataset.editId = "";
+  }, 150);
+}
+
+
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const modal = document.getElementById('crudModal');
+  const mode = modal.dataset.mode;
+  const formData = new FormData(e.target);
+
+  const title = formData.get("title");
+  const content = formData.get("content");
+  const thumbnail = formData.get("thumbnail");
+
+  const data = { title, content, thumbnail };
+
+  let url = "";
+  let successMsg = "";
+
+  if (mode === "create") {
+  url = "{% url 'forum:add_post' %}";
+  successMsg = "Post Created successfully!";
+  } else {
+    const editId = modal.dataset.editId;
+    url = "{% url 'forum:edit_post' 0 %}".replace("0", editId);
+    successMsg = "Post updated successfully!";
   }
 
-  document.getElementById("postForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const modal = document.getElementById('crudModal');
-    const mode = modal.dataset.mode;
-    const formData = new FormData(e.target);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+    },
+    body: JSON.stringify(data),
+  });
 
-    let url = "";
-    let successMsg = "";
-
-    if (mode === "create") {
-      url = "{% url 'forum:add_post_via_ajax' %}";
-      successMsg = "Post Created successfully!";
-    } else {
-      const editId = modal.dataset.editId;
-      url = `/ajax-edit-product/${editId}/`;
-      successMsg = "Post updated successfully!";
-    }
-
-    await fetch(url, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-      },
-    });
-
+  if (response.ok) {
     hideModal();
     showToast(successMsg, '', 'success');
     document.dispatchEvent(new CustomEvent('postAdded'));
-  });
+  } else {
+    showToast("Failed to submit post 😢", '', 'error');
+  }
+});
+
 
   let postToDelete = null;
   function openDeleteModal(id) {
@@ -175,17 +205,36 @@
   }
 
   document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-    if (!postToDelete) return;
+  if (!postToDelete) return;
 
-    await fetch(`/ajax-delete-product/${postToDelete}/`, {
-      method: "DELETE",
-      headers: {
-        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-      },
-    });
+  const postCard = document.querySelector(`[data-post-id="${postToDelete}"]`);
 
-    hideDeleteModal();
-    showToast("Post deleted successfully!", '', 'success');
-    document.dispatchEvent(new CustomEvent('postAdded'));
+  const response = await fetch(`/forum/delete-post/${postToDelete}/`, {
+    method: "DELETE",
+    headers: {
+      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+    },
   });
+
+  if (response.ok) {
+      // ✅ Hapus langsung dari array tanpa refresh server
+    allPostData = allPostData.filter(p => p.id !== Number(postToDelete));
+  if (postCard) {
+    postCard.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => postCard.remove(), 300);
+  }
+  hideDeleteModal();
+  showToast("Post deleted successfully!", '', 'success');
+
+  // ✅ Render ulang sesuai filter aktif
+  if (activeFilter === 'my') {
+    filterPosts(); // tetap di My Post
+  } else {
+    fetchPostFromServer(); // kalau lagi di All Post, refresh semua
+  }
+} else {
+  showToast("Failed to delete post 😢", '', 'error');
+}
+});
+
 </script>

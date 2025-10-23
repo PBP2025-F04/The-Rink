@@ -2,114 +2,108 @@
 {% load static %}
 
 {% block content %}
-{% include 'navbar.html' %}
-{% include 'modal.html' %}
-
 <section class="max-w-2xl mx-auto px-4 py-10 mt-20">
   <!-- Header -->
-  <h1 class="text-3xl font-bold text-purple-700 mb-6">Forum Community</h1>
+  <h1 class="text-3xl font-bold text-cyan-700 mb-6 text-center">Forum Community</h1>
 
-  <!-- Input "Apa yang kamu pikirkan?" (expandable) -->
-  <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-8 transition-all duration-300">
+  <!-- Post Box -->
+  <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
     <!-- Input utama -->
-    <input
+    <div  class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
+      <input
       id="postInput"
       type="text"
-      placeholder="Apa yang kamu pikirkan?"
-      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 cursor-pointer"
+      placeholder="What do you think?"
+      class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
       readonly
-      onclick="expandPostBox()"
-    />
+      onclick="toggleExpandBox()" 
+      />
 
-    <!-- Box tambahan (disembunyikan dulu) -->
-    <div id="expandedBox" class="hidden mt-4">
-      <textarea
-        id="postContent"
-        rows="4"
-        placeholder="Tulis sesuatu..."
-        class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
-      ></textarea>
+      <!-- Expanded Box -->
+      <div id="expandedBox"
+        class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
 
-      <div class="flex justify-between items-center mt-3">
-        <div class="flex items-center gap-3 text-gray-500">
-          <button class="hover:text-purple-500 transition"><i class="fa-regular fa-image"></i></button>
-          <button class="hover:text-purple-500 transition"><i class="fa-regular fa-face-smile"></i></button>
+        <!-- Title input -->
+        <input
+        id="postTitle"
+        type="text"
+        placeholder="Enter post title..."
+        class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
+        />
+
+        <!-- Thumbnail preview -->
+<div id="thumbnailPreview" class="hidden p-4 flex justify-center">
+  <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
+</div>
+
+        <!-- Content -->
+        <textarea
+          id="postContent"
+          rows="4"
+          placeholder="Insert a Content in here..."
+          class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem] focus:text-[1.05rem]"
+        ></textarea>
+
+        <!-- Toolbar -->
+        <div id="toolbar"
+          class="flex justify-between items-center px-4 pb-3 text-gray-500 opacity-0 translate-y-2 transition-all duration-500 ease-out hover:scale-[1.02]">
+          
+          <!-- Kiri: input URL gambar -->
+          <div class="flex items-center gap-2 w-full mr-3">
+            <i class="fa-regular fa-image text-cyan-500"></i>
+            <input
+              id="thumbnailUrl"
+              type="url"
+              placeholder="Paste image URL here (optional)"
+              class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
+              oninput="previewImageUrl()"
+            />
+          </div>
+
+          <!-- Tombol Post -->
+          <button
+            id="postBtn"
+            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+            Post
+          </button>
         </div>
-
-        <button 
-          onclick="submitPost()"
-          class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition">
-          Posting
-        </button>
       </div>
     </div>
-  </div>
+  </div> 
+
+  <!-- Filter Buttons -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
+  <button id="filter-all"
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    All Post
+  </button>
+
+  <button id="filter-my"
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    My Post
+  </button>
+
+   <!-- 🔄 Refresh Button -->
+  <button onclick="refreshPost()" 
+  class="bg-white border border-black text-black font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 hover:bg-gray-100">
+  🔄 Refresh
+</button>
+
+</div>
 
   <!-- Post List -->
-  <div id="grid" class="flex flex-col gap-6">
-    {% for post in posts %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
-      <!-- Header user -->
-      <div class="flex items-center mb-3">
-        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-bold mr-3">
-          {{ post.author.username|slice:":1"|upper }}
-        </div>
-        <div>
-          <p class="font-semibold text-gray-800">{{ post.author.username }}</p>
-          <p class="text-sm text-gray-500">{{ post.created_at|timesince }} yang lalu</p>
-        </div>
-      </div>
-
-      <!-- Konten post -->
-      <h2 class="text-lg font-semibold text-gray-900 mb-1">{{ post.title }}</h2>
-      <p class="text-gray-700 leading-relaxed mb-4">{{ post.content }}</p>
-
-      <!-- Footer (vote + reply) -->
-      <div class="flex items-center justify-between text-gray-500 text-sm font-medium">
-        <div class="flex items-center gap-5">
-          <button id="upvote-btn-{{ post.id }}" onclick="toggleVote('{{ post.id }}', 'post', true)"
-            class="text-gray-400 hover:text-orange-500 transition duration-200">
-            ⬆️
-          </button>
-          <span id="vote-count-{{ post.id }}" class="text-sm font-semibold">
-            {{ post.total_upvotes|add:"-"|add:post.total_downvotes }}
-          </span>
-          <button id="downvote-btn-{{ post.id }}" onclick="toggleVote('{{ post.id }}', 'post', false)"
-            class="text-gray-400 hover:text-blue-500 transition duration-200">
-            ⬇️
-          </button>
-          <button onclick="openPostModal('{{ post.id }}')" class="text-gray-500 hover:text-purple-600 transition">
-            💬 {{ post.replies.count }}
-          </button>
-        </div>
-        <span class="text-gray-400">❤️ {{ post.upvotes.count }}</span>
-      </div>
-
-      {% if post.replies.all|length > 0 %}
-      <div class="mt-4 ml-10 bg-gray-50 rounded-xl p-3 border border-gray-100">
-        <p class="text-sm text-gray-700">
-          <span class="font-semibold">{{ post.replies.first.author.username }}</span>:
-          {{ post.replies.first.content }}
-        </p>
-        <p class="text-xs text-gray-400 mt-1">{{ post.replies.first.created_at|timesince }} yang lalu</p>
-      </div>
-      {% endif %}
-    </div>
-    {% empty %}
-    <p class="text-center text-gray-500">Belum ada post di forum ini.</p>
-    {% endfor %}
-  </div>
+  <div id="grid" class="flex flex-col gap-6"></div>
 </section>
 
 <!-- Loading State -->
 <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
   <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
-    viewBox="0 0 24 24">
-    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-    <path class="opacity-75" fill="currentColor"
-      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-  </svg>
-  <p class="text-gray-600 mt-3">Loading replies...</p>
+  viewBox="0 0 24 24">
+  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+  <path class="opacity-75" fill="currentColor"
+  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+</svg>
+<p class="text-gray-600 mt-3">Loading replies...</p>
 </div>
 
 <div id="error" class="hidden"></div>
@@ -118,68 +112,318 @@
   <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
 </div>
 
-<footer class="bg-gray-900 text-gray-300 py-6 text-center text-sm mt-10">
-  <p>&copy; 2025 The Rink Forum — Dibangun dengan ❤️ oleh komunitas.</p>
-</footer>
+<!-- MODAL DETAIL POST -->
+<div id="postDetailModal"
+  class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow-xl w-11/12 max-w-2xl p-6 relative">
+    <button onclick="closePostModal()"
+      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">
+      ×
+    </button>
+    <div id="postDetailContent" class="mt-2">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading...</h2>
+      <p class="text-gray-600 text-sm mb-4">Please wait...</p>
+    </div>
+  </div>
+</div>
 
-<!-- === SCRIPT ORIGINAL KAMU (DIBIARKAN TIDAK DIUBAH) === -->
 <script>
-  const post_API_ENDPOINT = "{% url 'forum:show_json' %}";
+  
+  // Configuration
+  const POST_API_ENDPOINT = "{% url 'forum:show_json' %}";
   const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+  
+  // DOM Elements
   const loadingSpinner = document.getElementById('loading');
   const errorMessage = document.getElementById('error');
   const emptyStateDisplay = document.getElementById('empty');
   const postGridContainer = document.getElementById('grid');
+  const showAllPostButton = document.getElementById('filter-all');
+  const showMyPostButton = document.getElementById('filter-my');
+
+  let activeFilter = 'all';
+  let allPostData = [];
+
+  function updateFilterButtonsAppearance() {
+  const activeClass = "bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105"
+  const inactiveClass = "bg-white text-gray-700 border border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-gray-200";
+
+
+  if (activeFilter === 'all') {
+    showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
+    showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
+  } 
+  else {
+    showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
+    showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
+    }
+  }
 
   function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
     loadingSpinner.classList.toggle('hidden', !showLoading);
     errorMessage.classList.toggle('hidden', !showError);
     emptyStateDisplay.classList.toggle('hidden', !showEmpty);
     postGridContainer.classList.toggle('hidden', !showGrid);
+
+    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
   }
 
   async function fetchPostFromServer() {
-    try {
-      displayPageSection({ showLoading: true });
-      const res = await fetch(post_API_ENDPOINT);
-      if (!res.ok) throw new Error();
-      const posts = await res.json();
-      displayPageSection({ showGrid: true });
-      renderPosts(posts);
-    } catch {
-      displayPageSection({ showError: true });
+  try {
+    displayPageSection({ showLoading: true });
+
+    const response = await fetch(POST_API_ENDPOINT, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch post data from server');
     }
+
+    const postData = await response.json();
+    allPostData = postData || [];
+
+    if (allPostData.length === 0) {
+      displayPageSection({ showEmpty: true });
+    } else {
+      displayPageSection({ showGrid: true });
+      filterPosts();
+    }
+  } catch (error) {
+    console.error('Error loading post:', error);
+    displayPageSection({ showError: true });
   }
+}
+
 
   document.addEventListener('click', e => {
     const modal = document.getElementById('postDetailModal');
     if (modal && !modal.classList.contains('hidden') && e.target === modal) {
-      closepostModal();
+      closePostModal();
     }
   });
+function buildPost(postItem) {
+  const postElement = document.createElement('div');
+  postElement.dataset.postId = postItem.id; // 🔹 Tambah ini
+  postElement.className =
+    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg flex flex-row items-start gap-5 p-5 w-full cursor-pointer';
+  const editDeleteHtml =
+  CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
+    ? `<div class='flex space-x-4 text-sm'>
+         <button onclick='showEditModal(${JSON.stringify(postItem)})' 
+           class='flex items-center gap-1 text-gray-600 hover:text-blue-600 transition'>
+           ✏️ <span>Edit</span>
+         </button>
+         <button onclick='openDeleteModal("${postItem.id}")' 
+           class='flex items-center gap-1 text-red-600 hover:text-red-700 transition'>
+           🗑️ <span>Delete</span>
+         </button>
+       </div>`
+    : '';
 
-  fetchPostFromServer();
+  const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 
-  // === Fungsi interaksi baru ===
-  function expandPostBox() {
-    const box = document.getElementById("expandedBox");
-    const input = document.getElementById("postInput");
-    box.classList.remove("hidden");
-    input.classList.remove("cursor-pointer");
-    setTimeout(() => document.getElementById("postContent").focus(), 150);
+  const thumbnailHtml = postItem.thumbnail_url
+    ? `<img src='${postItem.thumbnail_url}' alt='${postItem.title}' class='w-32 h-32 object-cover rounded-lg border'>`
+    : `<div class='w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border'>No Image</div>`;
+
+  postElement.innerHTML = `
+    ${thumbnailHtml}
+    <div class="flex-1 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+          <time>${formattedDate}</time>
+          ${editDeleteHtml}
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
+        <p class="text-gray-700 text-sm leading-relaxed mb-3">${postItem.content || ''}</p>
+      </div>
+     <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+  <button onclick='openPostModal("${postItem.id}")' 
+    class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+    💬 <span>Reply</span>
+  </button>
+  <span>❤️ ${postItem.upvotes_count || 0}</span>
+</div>
+
+    </div>
+  `;
+
+  return postElement;
+}
+
+function filterPosts() {
+  updateFilterButtonsAppearance();
+  const filtered = activeFilter === 'all'
+    ? allPostData
+    : allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+  if (!filtered.length) displayPageSection({ showEmpty: true });
+  else { renderPosts(filtered); displayPageSection({ showGrid: true }); }
+}
+
+  async function openPostModal(id) {
+  const modal = document.getElementById('postDetailModal');
+  const content = document.getElementById('postDetailContent');
+
+  // Tampilkan modal
+  modal.classList.remove('hidden');
+  content.innerHTML = `
+    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading...</h2>
+    <p class="text-gray-600 text-sm mb-4">Fetching post details...</p>
+  `;
+
+  try {
+    const res = await fetch(`/forum/json/${id}/`);
+    if (!res.ok) throw new Error('Failed to fetch post');
+    const post = await res.json();
+
+    // Tampilkan konten post
+    content.innerHTML = `
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">${post.title}</h2>
+      <p class="text-gray-700 leading-relaxed mb-4">${post.content}</p>
+      <p class="text-sm text-gray-500">By <span class="font-medium">${post.author}</span> • ${new Date(post.created_at).toLocaleString()}</p>
+    `;
+  } catch (error) {
+    console.error(error);
+    content.innerHTML = `<p class="text-red-500">Failed to load post details.</p>`;
+  }
+}
+
+function closePostModal() {
+  document.getElementById('postDetailModal').classList.add('hidden');
+}
+  // Render post
+  function renderPosts(postItems) {
+    postGridContainer.innerHTML = '';
+    postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
   }
 
-  function submitPost() {
-    const content = document.getElementById("postContent").value.trim();
-    if (!content) {
-      alert("Tulis sesuatu dulu ya 😊");
-      return;
+  // Refresh post
+  function refreshPost() {
+    showToast("Refreshing", "Showing latest posts...");
+    fetchPostFromServer();
+  }
+
+  function toggleExpandBox() {
+  const box = document.getElementById("expandedBox");
+  const toolbar = document.getElementById("toolbar");
+  const input = document.getElementById("postInput");
+
+  const isOpen = box.classList.contains("open");
+
+  if (isOpen) {
+    box.style.maxHeight = "0px";
+    box.style.opacity = "0";
+    toolbar.style.opacity = "0";
+    toolbar.style.transform = "translateY(8px)";
+    box.classList.remove("open");
+    input.classList.remove("ring-2", "ring-cyan-300");
+  } 
+  else {
+    box.style.maxHeight = box.scrollHeight + 100 + "px";
+    box.style.opacity = "1";
+    box.classList.add("open");
+    input.classList.add("ring-2", "ring-cyan-300");
+
+    setTimeout(() => {
+      toolbar.style.opacity = "1";
+      toolbar.style.transform = "translateY(0)";
+      }, 250);
     }
-    console.log("Posting:", content);
-    document.getElementById("postContent").value = "";
-    document.getElementById("expandedBox").classList.add("hidden");
-    document.getElementById("postInput").classList.add("cursor-pointer");
-    showToast("Sukses!", "Post kamu berhasil dikirim 🎉");
   }
+
+  function adjustExpandedHeight() {
+  const box = document.getElementById("expandedBox");
+  if (box.classList.contains("open")) {
+    // update tinggi sesuai konten terbaru
+    box.style.maxHeight = box.scrollHeight + 100 + "px";
+  }
+}
+
+// Handle POST submission
+document.getElementById("postBtn").addEventListener("click", async () => {
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const imageUrl = document.getElementById("thumbnailUrl").value.trim();
+  const postBtn = document.getElementById("postBtn");
+
+  if (!title || !content) {
+    showToast("Empty", "Please fill in both title and content!", "empty");
+    return;
+  }
+
+  postBtn.disabled = true;
+  postBtn.textContent = "Posting...";
+
+  try {
+    const response = await fetch("{% url 'forum:add_post' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify({ title, content, thumbnail_url: imageUrl }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      showToast("Post Created", "Your post has been added successfully!", "success");
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+      document.getElementById("thumbnailUrl").value = "";
+      document.getElementById("thumbnailPreview").classList.add("hidden");
+
+      toggleExpandBox();
+      allPostData.unshift(data);
+      // ✅ Render ulang sesuai filter aktif
+      if (activeFilter === "my") {
+        filterPosts(); // tampilkan hanya post user
+      } else {
+        renderPosts(allPostData); // tampilkan semua
+      }
+    } else {
+      showToast("Failed to Post", "Please try again later.", "error");
+    }
+  } catch (err) {
+    console.error("Error posting:", err);
+    showToast("Failed to Post", "Please try again later.", "error");
+  } finally {
+    postBtn.disabled = false;
+    postBtn.textContent = "Post";
+  }
+});
+
+
+
+  // Refresh post list when post added, edited, or deleted
+  document.addEventListener('postAdded', fetchPostFromServer);
+  // ==== FILTER BUTTON EVENT LISTENERS ====
+  showAllPostButton.addEventListener('click', e => {
+    e.preventDefault();
+    activeFilter = 'all';
+    localStorage.setItem('activeFilter', 'all'); // 🔹 simpan preferensi
+    filterPosts();
+  });
+
+  showMyPostButton.addEventListener('click', e => {
+    e.preventDefault();
+    activeFilter = 'my';
+     localStorage.setItem('activeFilter', 'my'); // ✅ simpan preferensi
+    filterPosts();
+  });
+  // ✅ Ambil preferensi terakhir dari localStorage
+  const savedFilter = localStorage.getItem('activeFilter');
+  if (savedFilter) {
+    activeFilter = savedFilter;
+  }
+  // Load Post
+  updateFilterButtonsAppearance(); // ✅ Tambahkan ini supaya "All Post" aktif dari awal
+  fetchPostFromServer();
 </script>
-{% endblock %}
+{% include 'modal.html' %}
+{% endblock content%}
