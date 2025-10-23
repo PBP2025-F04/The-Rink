@@ -1,0 +1,14 @@
+{% for item in cart_items %}
+<div class="cart-item" data-id="{{ item.id }}">
+  <div class="item-name">{{ item.gear.name }}</div>
+  <div class="item-details">
+    <div>Qty: {{ item.quantity }}</div>
+    <div>Days: {{ item.days }}</div>
+    <div>Price/day: Rp{{ item.gear.price_per_day }}</div>
+  </div>
+  <div class="item-total">Total: Rp{{ item.get_total_price }}</div>
+  <button class="remove-ajax btn" data-id="{{ item.id }}" data-href="{% url 'rental_gear:remove_from_cart_ajax' item.id %}" style="background:transparent;border:1px solid rgba(0,0,0,0.06);padding:6px 10px;border-radius:6px;">Remove</button>
+</div>
+{% empty %}
+<p>Keranjang kosong.</p>
+{% endfor %}
