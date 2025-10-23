@@ -1,12 +1,12 @@
 from django.urls import path
-from . import views
+from booking_arena.views import *
 
-app_name = 'booking_arena'
-
+app = 'booking_arena'
 urlpatterns = [
-    path('', views.arena_list, name='arena_list'),
-    path('arena/<int:pk>/', views.arena_detail, name='arena_detail'),
-    path('my-bookings/', views.my_bookings, name='my_bookings'),
-    path('arena/<int:pk>/book-ajax/', views.ajax_book_arena, name='ajax_book_arena'),
-    path('booking/<int:pk>/cancel-ajax/', views.ajax_cancel_booking, name='ajax_cancel_booking'),
+    path('', show_arena, name='show_arena'),
+    path('<uuid:arena_id>/', arena_detail, name="arena_detail"),
+    path('<uuid:arena_id>/get-slots/', get_available_slots, name='get_available_slots'),
+    path('book/<uuid:slot_id>/', create_booking, name='create_booking'),
+    path('my-bookings/', user_booking_list, name='user_booking_list'),
+    path('cancel/<uuid:booking_id>/', cancel_booking, name='cancel_booking'),
 ]

@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import Arena, Booking
 
+# Register your models here.
+from django.contrib import admin
+from booking_arena.models import Arena, TimeSlot, Booking
 
 @admin.register(Arena)
 class ArenaAdmin(admin.ModelAdmin):
@@ -10,6 +12,8 @@ class ArenaAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-	list_display = ('arena', 'user', 'date', 'start_time', 'end_time', 'status')
-	list_filter = ('status', 'date')
+	list_display = ('user', 'date', 'time_slot', 'booked_at', 'status')
+	list_filter = ('user', 'status', 'date')
 	search_fields = ('arena__name', 'user__username')
+
+admin.site.register(TimeSlot)

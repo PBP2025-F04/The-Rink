@@ -1,26 +1,70 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 from .models import Gear, CartItem, Rental, RentalItem
+from .forms import GearForm, AddToCartForm, CheckoutForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
 
+# Create
+@user_passes_test(lambda u: u.is_superuser)
+def create_gear(request):
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Equipment berhasil ditambahkan!')
+            return redirect('rental_gear:catalog')
+    else:
+        form = GearForm()
+    return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Add'})
+
+# Read (existing catalog view)
 def catalog(request):
     gears = Gear.objects.all()
     return render(request, 'catalog.html', {'gears': gears})
 
+# Update
+@user_passes_test(lambda u: u.is_superuser)
+def update_gear(request, id):
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES, instance=gear)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Equipment berhasil diupdate!')
+            return redirect('rental_gear:catalog')
+    else:
+        form = GearForm(instance=gear)
+    return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Edit'})
+
+# Delete
+@user_passes_test(lambda u: u.is_superuser)
+def delete_gear(request, id):
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        gear.delete()
+        messages.success(request, 'Equipment berhasil dihapus!')
+        return redirect('rental_gear:catalog')
+    return render(request, 'rental_gear/gear_confirm_delete.html', {'gear': gear})
+
 def filter_gear(request):
     category = request.GET.get('category')
+    search = request.GET.get('search')
+    gears = Gear.objects.all()
+
     if category:
-        gears = Gear.objects.filter(category=category).order_by('name')
-    else:
-        gears = Gear.objects.all().order_by('name')
+        gears = gears.filter(category=category)
+    if search:
+        gears = gears.filter(name__icontains=search)
+
     return render(request, 'partials/gear_items.html', {'gears': gears})
+
 
 def gear_detail(request, id):
     gear = get_object_or_404(Gear, id=id)
