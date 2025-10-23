@@ -26,7 +26,7 @@ urlpatterns = [
     path('rental/', include('rental_gear.urls')),
     path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
-    path('events', include('events.urls'))
+    path('events/', include('events.urls'))
 ]
 
 if settings.DEBUG:
