@@ -7,7 +7,7 @@
     <title>Catalog — The Rink</title>
     <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
     <style>
-      /* ===== Ice & Winter Theme ===== */
+      /* ===== Winter Elegance Theme ===== */
       body {
         font-family: "Poppins", sans-serif;
         margin: 0;
@@ -15,135 +15,169 @@
         color: #0e2b47;
       }
 
+      /* Frosted Navbar */
       .site-header {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(6px);
-        border-bottom: 1px solid rgba(200, 230, 255, 0.6);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(180, 220, 255, 0.5);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 10px rgba(0, 50, 100, 0.1);
+        padding: 1rem 2.5rem;
+        box-shadow: 0 4px 16px rgba(100, 160, 200, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+      .brand {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0e3a68;
+        letter-spacing: 0.5px;
+        text-decoration: none; /* Hapus underline */
+        transition: color 0.25s, text-shadow 0.25s;
       }
 
-      .brand {
-        font-size: 1.5rem;
-        font-weight: 600;
+      .brand:hover {
         color: #1b4d8a;
+        text-shadow: 0 0 8px rgba(180, 230, 255, 0.8);
+        text-decoration: none; /* Tetap tanpa underline saat hover */
       }
+
+
 
       .top-nav a, .top-nav button.sign {
         text-decoration: none;
-        margin-left: 1rem;
+        margin-left: 1.2rem;
         color: #0e2b47;
         background: none;
         border: none;
         font-weight: 500;
         cursor: pointer;
-        transition: 0.2s;
+        transition: 0.25s;
       }
 
       .top-nav a:hover, .top-nav button.sign:hover {
         color: #1b4d8a;
-        text-shadow: 0 0 4px rgba(150, 210, 255, 0.8);
+        text-shadow: 0 0 6px rgba(180, 230, 255, 0.9);
       }
 
       .top-nav .sign {
-        padding: 6px 12px;
+        padding: 6px 14px;
         background: linear-gradient(135deg, #b6e3ff, #9ad6f9);
-        border-radius: 6px;
+        border-radius: 8px;
         color: #083a63;
         font-weight: 600;
+        box-shadow: 0 2px 6px rgba(140, 210, 255, 0.4);
+        transition: 0.2s;
       }
 
+      .top-nav .sign:hover {
+        background: linear-gradient(135deg, #a0dbff, #c3ecff);
+        transform: scale(1.05);
+      }
+
+      /* Hero Section */
       .catalog-hero {
         text-align: center;
-        padding: 3rem 1rem 2rem;
+        padding: 4rem 1rem 3rem;
       }
 
       .catalog-hero h1 {
-        font-size: 2.5rem;
-        color: #083a63;
-        margin-bottom: 0.5rem;
+        font-size: 3rem;
+        color: #0b3c61;
+        margin-bottom: 0.6rem;
+        text-shadow: 0 2px 8px rgba(150, 200, 255, 0.3);
       }
 
       .catalog-hero .lead {
         color: #406b8e;
+        font-size: 1.2rem;
       }
 
+      /* Filter Bar */
       .filter-bar {
-        margin-top: 1.5rem;
+        margin-top: 2rem;
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 0.8rem;
+        gap: 1rem;
       }
 
       .filter-btn {
         border: 1px solid #b3dfff;
         background: rgba(255, 255, 255, 0.8);
         color: #0e2b47;
-        padding: 8px 18px;
-        border-radius: 20px;
+        padding: 10px 20px;
+        border-radius: 25px;
         cursor: pointer;
         font-weight: 500;
         transition: all 0.25s ease;
+        box-shadow: 0 3px 10px rgba(140, 200, 255, 0.15);
       }
 
       .filter-btn:hover {
         background: #d5f1ff;
         border-color: #88cfff;
+        transform: translateY(-2px);
       }
 
       .filter-btn.active {
         background: linear-gradient(135deg, #8ed0ff, #b7e4ff);
         color: #083a63;
         font-weight: 600;
-        box-shadow: 0 0 8px rgba(150, 220, 255, 0.6);
+        box-shadow: 0 0 10px rgba(150, 220, 255, 0.6);
       }
 
+      /* Product Cards */
       .product-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        padding: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.8rem;
+        padding: 3rem 2rem;
         max-width: 1200px;
         margin: 0 auto;
       }
 
       .product-card {
         background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(200, 230, 255, 0.7);
-        border-radius: 12px;
-        box-shadow: 0 6px 14px rgba(100, 160, 200, 0.15);
+        border: 1px solid rgba(200, 230, 255, 0.6);
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(100, 160, 200, 0.15);
         overflow: hidden;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
       }
 
       .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(120, 190, 255, 0.3);
+        transform: translateY(-6px);
+        box-shadow: 0 10px 24px rgba(120, 190, 255, 0.25);
       }
 
       .card-image {
-        height: 200px;
+        height: 220px;
         background: linear-gradient(135deg, #d0edff, #bde4ff);
       }
 
+      .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
       .card-body {
-        padding: 1rem 1.2rem 1.5rem;
+        padding: 1.4rem 1.5rem 1.8rem;
       }
 
       .card-body h3 {
-        margin: 0;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         color: #0b3c61;
+        margin: 0 0 0.4rem 0;
       }
 
       .price {
         font-weight: 700;
         color: #1b4d8a;
-        margin: 6px 0;
+        margin: 8px 0;
       }
 
       .muted {
@@ -155,11 +189,11 @@
         background: linear-gradient(135deg, #a8dcff, #c7ecff);
         border: none;
         border-radius: 8px;
-        padding: 6px 12px;
+        padding: 8px 14px;
         cursor: pointer;
         font-weight: 600;
         color: #083a63;
-        transition: 0.2s;
+        transition: 0.25s;
       }
 
       .card-btn:hover {
@@ -167,11 +201,12 @@
         transform: scale(1.05);
       }
 
+      /* Footer */
       .site-footer {
         background: #f4fbff;
         border-top: 1px solid #cde9ff;
-        padding: 2rem 1rem;
-        margin-top: 3rem;
+        padding: 3rem 1rem;
+        margin-top: 4rem;
       }
 
       .footer-inner {
@@ -190,20 +225,27 @@
       }
 
       #toast {
-        background: rgba(0, 40, 80, 0.8);
+        background: rgba(0, 40, 80, 0.85);
         border: 1px solid #bde4ff;
         color: #eaf7ff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
       }
     </style>
   </head>
   <body>
     <header class="site-header">
-      <div class="brand">The Rink</div>
+      <a href="{% url 'main' %}" class="brand">The Rink</a>
       <nav class="top-nav">
-        <a>Products</a>
-        <a>Solutions</a>
-        <a>Community</a>
-        <a>Contact</a>
+        <a href="#">Products</a>
+        <a href="#">Solutions</a>
+        <a href="#">Community</a>
+        <a href="#">Contact</a>
         {% if user.is_authenticated %}
           <a href="{% url 'rental_gear:view_cart' %}">Cart</a>
           <form method="post" action="{% url 'authentication:logout' %}" style="display:inline">
@@ -216,10 +258,11 @@
       </nav>
     </header>
 
+
     <main class="catalog-page">
       <section class="catalog-hero">
-        <h1>Products</h1>
-        <p class="lead">Browse and rent the gear you need for the rink.</p>
+        <h1>Our Gear Catalog</h1>
+        <p class="lead">Explore top-quality equipment for every ice adventure ❄️</p>
         <div class="filter-bar">
           <button class="filter-btn active" data-category="">All</button>
           <button class="filter-btn" data-category="hockey">Hockey</button>
@@ -234,35 +277,41 @@
           <article class="product-card">
             <div class="card-image">
               {% if gear.image %}
-                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:6px;" />
+                <img src="{{ gear.image.url }}" alt="{{ gear.name }}">
               {% else %} Image {% endif %}
             </div>
             <div class="card-body">
               <h3>{{ gear.name }}</h3>
               <div class="price">Rp{{ gear.price_per_day }}</div>
               <p class="muted">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <a class="card-btn btn btn-primary" href="{% url 'rental_gear:gear_detail' gear.id %}">Detail</a>
-                <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">{% csrf_token %}<button class="card-btn btn btn-primary" type="submit">Add</button></form>
+              <div style="display:flex;gap:10px;margin-top:10px">
+                <a class="card-btn" href="{% url 'rental_gear:gear_detail' gear.id %}">Detail</a>
+                <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="days" value="1">
+                  <button class="card-btn" type="submit">Add</button>
+                </form>
               </div>
             </div>
           </article>
           {% endfor %}
         {% else %}
-          <p>No products available.</p>
+          <p class="text-center text-blue-700">No products available.</p>
         {% endif %}
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="footer-inner">
-        <div class="logo">BR</div>
+        <div class="logo">The Rink</div>
         <div class="links">
           <div>
             Use cases
             <ul>
-              <li>UI design</li>
-              <li>UX design</li>
+              <li>Hockey</li>
+              <li>Ice Skating</li>
+              <li>Curling</li>
             </ul>
           </div>
         </div>
@@ -273,33 +322,20 @@
   </body>
 
   <script>
-    // Filter functionality
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         const category = this.dataset.category;
-  fetch(`{% url 'rental_gear:filter_gear' %}?category=${category}`)
+        fetch(`{% url 'rental_gear:filter_gear' %}?category=${category}`)
           .then(r => r.text())
-          .then(html => {
-            document.querySelector('.product-grid').innerHTML = html;
-          });
+          .then(html => document.querySelector('.product-grid').innerHTML = html);
       });
     });
 
     function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
+      const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+      return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
     }
 
     function showToast(message, timeout=3000){
@@ -310,24 +346,22 @@
     }
 
     document.querySelectorAll('.product-card form').forEach(f=>{
-      f.addEventListener('submit', function(e){
+      f.addEventListener('submit', e=>{
         e.preventDefault();
         const action = f.getAttribute('action');
-        fetch(action.replace('/cart/add/','/cart/add-ajax/'), {method:'POST', headers:{'X-CSRFToken':getCookie('csrftoken')}})
-        .then(async r=>{
+        fetch(action.replace('/cart/add/','/cart/add-ajax/'), {
+          method:'POST',
+          headers:{'X-CSRFToken':getCookie('csrftoken')}
+        }).then(async r=>{
           const j = await r.json().catch(()=>null);
           if(!j){ showToast('Response error'); return; }
           if(j.login_required){
             showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>', 6000);
             return;
           }
-          if(j.success){
-            showToast(j.message);
-          } else {
-            showToast(j.message || 'Error');
-          }
-        })
-      })
-    })
+          showToast(j.message || 'Added to cart!');
+        });
+      });
+    });
   </script>
 </html>

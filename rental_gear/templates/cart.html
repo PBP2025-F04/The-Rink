@@ -1,62 +1,19 @@
+{% extends 'base.html' %}
 {% load static %}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Cart</title>
-    <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
-  </head>
-  <body>
-    <div class="cart-page">
-      <h2>Your cart</h2>
-      <div id="cart-items">
-        {% include 'partials/cart_items.html' %}
-      </div>
-      <button id="checkout-ajax">Checkout</button>
-      <div id="checkout-msg" style="margin-top:8px;color:green;display:none"></div>
-    </div>
 
-    <div id="toast" style="position:fixed;right:20px;bottom:20px;min-width:200px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:9999"></div>
+{% block meta %}
+<title>Cart — The Rink</title>
+<link rel="stylesheet" href="{% static 'rental_gear/cart.css' %}">
+{% endblock meta %}
 
-    <script>
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
+{% block content %}
+<div class="cart-page container">
+  <h2>Your cart</h2>
+  <div id="cart-items">
+    {% include 'partials/cart_items.html' %}
+  </div>
+  <button class="checkout-ajax btn" data-href="{% url 'rental_gear:checkout_ajax' %}">Checkout</button>
+  <div id="checkout-msg" style="margin-top:8px;color:green;display:none"></div>
+</div>
+{% endblock content %}
 
-      // delegate remove buttons
-      document.getElementById('cart-items').addEventListener('click', function(e){
-        if(e.target.matches('button.remove-ajax')){
-          const id = e.target.dataset.id;
-          fetch("{% url 'rental_gear:remove_from_cart_ajax' 0 %}".replace('0', id), {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
-            const data = await r.json().catch(()=>null);
-            if(!data){ showToast('Response error'); return; }
-            if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
-            if(data.success){ e.target.closest('.cart-item').remove(); showToast(data.message); }
-            else{ showToast(data.message||'Error'); }
-          })
-        }
-      })
-
-      document.getElementById('checkout-ajax').addEventListener('click', function(){
-  fetch("{% url 'rental_gear:checkout_ajax' %}", {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
-          const data = await r.json().catch(()=>null);
-          if(!data){ showToast('Response error'); return; }
-          if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
-          if(data.success){ showToast(data.message||'Checkout success'); }
-          else{ showToast(data.message||'Error during checkout'); }
-        })
-      })
-    </script>
-  </body>
-</html>

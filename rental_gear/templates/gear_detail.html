@@ -1,187 +1,69 @@
+{% extends 'base.html' %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Gear — The Rink</title>
-    <link rel="stylesheet" href="{% static 'rental_gear/gear.css' %}" />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="brand">The Rink</div>
-      <nav class="top-nav">
-        <a>Products</a>
-        <a>Solutions</a>
-        <a>Community</a>
-        <a>Contact</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'rental_gear:view_cart' %}">Cart</a>
-          <form method="post" action="{% url 'authentication:logout' %}" style="display:inline">
-            {% csrf_token %}
-            <button class="sign">Logout</button>
-          </form>
-        {% else %}
-          <a href="{% url 'authentication:login' %}?next={{ request.path }}" class="sign">Sign in</a>
-        {% endif %}
-      </nav>
-    </header>
 
-    <main class="product-page">
-      <section class="product-hero">
-        <div class="image-col">
-          <div class="fav">♥</div>
-          <div class="image-placeholder">
-            {% if gear.image %}
-              <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:8px;" />
-            {% else %}
-              Image
-            {% endif %}
-          </div>
-        </div>
+{% block meta %}
+<title>{{ gear.name }} — The Rink</title>
+<link rel="stylesheet" href="{% static 'rental_gear/gear.css' %}">
+{% endblock meta %}
 
-        <aside class="info-col">
-          <h1 class="product-title">{{ gear.name }}</h1>
-          <div class="tag">{{ gear.get_category_display }}</div>
-          <div class="price">Rp{{ gear.price_per_day }}</div>
-          <p class="short-desc">Size: {{ gear.size }} • Stock: {{ gear.stock }}</p>
-
-          <div class="options">
-            <label>Qty
-              <input id="qty" type="number" value="1" min="1" max="{{ gear.stock }}" />
-            </label>
-            <label>Days to rent
-              <input id="days" type="number" value="1" min="1" max="30" />
-            </label>
-          </div>
-
-          <div class="total-cost">
-            Total: Rp<span id="total">{{ gear.price_per_day }}</span>
-          </div>
-
-          <button id="add-ajax" class="cta" data-id="{{ gear.id }}">Add to cart</button>
-          <div id="add-msg" style="margin-top:8px;color:green;display:none"></div>
-
-          <div class="accordion">
-            <div class="acc-title">Title</div>
-            <div class="acc-body">Answer the frequently asked question in a simple sentence, a longish paragraph, or even in a list.</div>
-          </div>
-        </aside>
-      </section>
-
-      <section class="reviews">
-        <h2>Latest reviews</h2>
-        <div class="review-grid">
-          <article class="review-card">
-            <div class="stars">☆☆☆☆☆</div>
-            <h3>Review title</h3>
-            <p class="review-body">Review body</p>
-            <div class="review-meta">
-              <div class="avatar">👤</div>
-              <div class="meta-text">Reviewer name<br/><small>Date</small></div>
-            </div>
-          </article>
-
-          <article class="review-card">
-            <div class="stars">☆☆☆☆☆</div>
-            <h3>Review title</h3>
-            <p class="review-body">Review body</p>
-            <div class="review-meta">
-              <div class="avatar">👤</div>
-              <div class="meta-text">Reviewer name<br/><small>Date</small></div>
-            </div>
-          </article>
-
-          <article class="review-card">
-            <div class="stars">☆☆☆☆☆</div>
-            <h3>Review title</h3>
-            <p class="review-body">Review body</p>
-            <div class="review-meta">
-              <div class="avatar">👤</div>
-              <div class="meta-text">Reviewer name<br/><small>Date</small></div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="newsletter">
-        <h3>Follow the latest trends</h3>
-        <p>With our daily newsletter</p>
-        <form class="newsletter-form">
-          <input type="email" placeholder="you@example.com" />
-          <button>Submit</button>
-        </form>
-      </section>
-
-    </main>
-
-    <div id="toast" style="position:fixed;right:20px;bottom:20px;min-width:200px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:9999"></div>
-
-    <script>
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
-
-      function showToast(message, timeout=3000){
-        const t = document.getElementById('toast');
-        t.innerHTML = message;
-        t.style.display = 'block';
-        setTimeout(()=> t.style.display='none', timeout);
-      }
-
-      function updateTotal() {
-        const qty = parseInt(document.getElementById('qty').value) || 1;
-        const days = parseInt(document.getElementById('days').value) || 1;
-        const pricePerDay = {{ gear.price_per_day }};
-        document.getElementById('total').textContent = (qty * days * pricePerDay).toFixed(2);
-      }
-
-      document.getElementById('qty').addEventListener('input', updateTotal);
-      document.getElementById('days').addEventListener('input', updateTotal);
-
-      document.getElementById('add-ajax')?.addEventListener('click', function(e){
-        const gearId = this.dataset.id;
-        const qty = document.getElementById('qty').value || 1;
-  fetch("{% url 'rental_gear:add_to_cart_ajax' 0 %}".replace('0', gearId), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-          },
-          body: JSON.stringify({quantity: qty})
-        }).then(async r=>{
-          const data = await r.json().catch(()=>null);
-          if(!data){ showToast('Response error'); return; }
-          if(data.login_required){
-            showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000);
-            return;
-          }
-          if(data.success){ showToast(data.message); }
-          else{ showToast(data.message||'Error'); }
-        }).catch(err=>{ console.error(err); showToast('Network error'); });
-      })
-    </script>
-
-    <footer class="site-footer">
-      <div class="footer-inner">
-        <div class="logo">BR</div>
-        <div class="links">
-          <div>Use cases<ul><li>UI design</li><li>UX design</li></ul></div>
-          <div>Explore<ul><li>Design</li><li>Prototyping</li></ul></div>
-          <div>Resources<ul><li>Blog</li><li>Support</li></ul></div>
-        </div>
+{% block content %}
+<main class="product-page container">
+  <section class="product-hero card">
+    <div class="image-col">
+      <div class="fav">♥</div>
+      <div class="image-placeholder">
+        {% if gear.image %}
+          <img src="{{ gear.image.url }}" alt="{{ gear.name }}" style="max-width:100%;height:100%;object-fit:cover;border-radius:8px;" />
+        {% else %} Image {% endif %}
       </div>
-    </footer>
-  </body>
-</html>
+    </div>
+
+    <aside class="info-col">
+      <h1 class="product-title">{{ gear.name }}</h1>
+      <div class="tag">{{ gear.get_category_display }}</div>
+      <div class="price">Rp{{ gear.price_per_day }}</div>
+      <p class="short-desc">Size: {{ gear.size }} • Stock: {{ gear.stock }}</p>
+
+      <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="quantity" id="qty" value="1">
+        <input type="hidden" name="days" id="days" value="1">
+        <div class="options">
+          <label>Qty
+            <input id="qty_input" type="number" value="1" min="1" max="{{ gear.stock }}" />
+          </label>
+          <label>Days to rent
+            <input id="days_input" type="number" value="1" min="1" max="30" />
+          </label>
+        </div>
+
+        <div class="total-cost">Total: Rp<span id="total">{{ gear.price_per_day }}</span></div>
+        <button class="btn" type="submit">Add to cart</button>
+      </form>
+
+    </aside>
+  </section>
+  </main>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  (function(){
+    const price = {{ gear.price_per_day }};
+    const qtyInput = document.getElementById('qty_input');
+    const daysInput = document.getElementById('days_input');
+    const totalEl = document.getElementById('total');
+
+    function update(){
+      const q = parseInt(qtyInput.value)||1;
+      const d = parseInt(daysInput.value)||1;
+      totalEl.textContent = (q*d*price).toFixed(2);
+      document.getElementById('qty').value = q;
+      document.getElementById('days').value = d;
+    }
+    qtyInput.addEventListener('input', update);
+    daysInput.addEventListener('input', update);
+    update();
+  })();
+</script>
+{% endblock extra_js %}
