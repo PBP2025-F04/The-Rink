@@ -12,7 +12,7 @@ class ArenaAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-	list_display = ('arena', 'user', 'date', 'time_slot', 'booked_at', 'status')
+	list_display = ('user', 'date', 'time_slot', 'booked_at', 'status')
 	list_filter = ('user', 'status', 'date')
 	search_fields = ('arena__name', 'user__username')
 
