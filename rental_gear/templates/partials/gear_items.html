@@ -11,7 +11,14 @@
     <h3>{{ gear.name }}</h3>
     <div class="price">Rp{{ gear.price_per_day }}</div>
     <p class="muted">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-    <a class="card-btn" href="{% url 'gear_detail' gear.id %}">Detail</a>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <a class="card-btn btn btn-primary" href="{% url 'rental_gear:gear_detail' gear.id %}">Detail</a>
+    <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">{% csrf_token %}
+      <input type="hidden" name="quantity" value="1" />
+      <input type="hidden" name="days" value="1" />
+      <button class="card-btn btn btn-primary" type="submit">Add</button>
+    </form>
+  </div>
   </div>
 </article>
 {% empty %}

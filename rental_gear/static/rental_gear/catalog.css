@@ -1,28 +1,81 @@
-:root{--mint:#dff7f6;--card:#e9fff9;--muted:#7a7a7a;--accent:#111}
+:root{
+	--mint:#dff7f6;
+	--card:#e9fff9;
+	--muted:#7a7a7a;
+	--accent:#083a63;
+	--nav-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+	--cta-gradient: linear-gradient(135deg, #b6e3ff, #9ad6f9);
+}
+
 *{box-sizing:border-box}
+
 body{font-family:Inter, 'Segoe UI', Arial, sans-serif;margin:0;background:var(--mint);color:var(--accent)}
-.site-header{display:flex;align-items:center;justify-content:space-between;padding:20px 60px}
-.brand{font-weight:700}
-.top-nav a{margin:0 8px;color:var(--muted)}
-.top-nav .sign{background:#fff;border:1px solid #ddd;padding:6px 10px;border-radius:6px}
+
+/* Navbar styled to match main theme */
+.site-header{
+	display:flex;align-items:center;justify-content:space-between;padding:18px 40px;
+	background: var(--nav-gradient);
+	color: #fff;
+	box-shadow: 0 4px 12px rgba(0,30,60,0.12);
+}
+.brand{font-weight:700;color:#fff}
+.top-nav a{margin:0 8px;color:rgba(255,255,255,0.95);text-decoration:none}
+.top-nav a:hover{opacity:0.95;text-decoration:underline}
+.top-nav .sign{
+	background: var(--cta-gradient);
+	border: none;
+	color: #083a63;
+	padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer
+}
 
 .catalog-page{max-width:1100px;margin:30px auto;padding:0 20px}
 .catalog-hero{margin-bottom:18px}
-.catalog-hero h1{margin:0}
+.catalog-hero h1{margin:0;color:var(--accent)}
 .lead{color:var(--muted)}
 
 .filter-bar{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.filter-btn{background:transparent;border:1px solid #ddd;padding:6px 12px;border-radius:6px;cursor:pointer}
+.filter-btn{
+	background:transparent;border:1px solid rgba(0,0,0,0.08);padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--accent)
+}
 .filter-btn:hover{background:rgba(0,0,0,0.03)}
-.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filter-btn.active{background:var(--cta-gradient);color:#083a63;border-color:transparent;box-shadow:0 6px 14px rgba(100,170,220,0.12)}
 
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.product-card{background:var(--card);border-radius:8px;padding:12px;border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:stretch}
-.card-image{height:160px;background:linear-gradient(180deg,#f0f0f0,#e8e8e8);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#999}
+.product-card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:stretch}
+.card-image{height:160px;background:linear-gradient(180deg,#f0f0f0,#e8e8e8);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999}
 .card-body{padding:10px 0;display:flex;flex-direction:column;gap:8px}
 .card-body h3{margin:0}
 .price{font-weight:700}
 .muted{color:var(--muted);font-size:14px}
-.card-btn{margin-top:auto;background:var(--accent);color:#fff;border:none;padding:8px;border-radius:6px}
 
-@media (max-width:900px){.product-grid{grid-template-columns:1fr}.site-header{padding:16px}.catalog-page{padding:0 12px}}
+/* Primary button style used site-wide in catalog */
+.card-btn{
+	margin-top:auto;
+	background: var(--cta-gradient);
+	color: #083a63;
+	border: none;
+	padding: 10px 14px;
+	border-radius: 10px;
+	font-weight:700;
+	cursor:pointer;
+	transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card-btn:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(60,110,160,0.12)}
+
+/* Responsive buttons: shrink padding and font on small screens */
+@media (max-width:900px){
+	.product-grid{grid-template-columns:1fr}
+	.site-header{padding:14px}
+	.catalog-page{padding:0 12px}
+	.filter-btn{padding:7px 10px;font-size:14px}
+	.card-btn{padding:8px 10px;font-size:14px}
+}
+
+@media (max-width:480px){
+	.site-header{padding:12px}
+	.brand{font-size:1rem}
+	.top-nav a{margin:0 6px;font-size:13px}
+	.filter-btn{padding:6px 10px;font-size:13px}
+	.card-btn{padding:8px;font-size:13px}
+	.card-image{height:140px}
+}

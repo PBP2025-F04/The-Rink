@@ -1,62 +1,202 @@
+{% extends 'base.html' %}
 {% load static %}
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Cart</title>
-    <link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
-  </head>
-  <body>
-    <div class="cart-page">
-      <h2>Your cart</h2>
-      <div id="cart-items">
-        {% include 'partials/cart_items.html' %}
-      </div>
-      <button id="checkout-ajax">Checkout</button>
-      <div id="checkout-msg" style="margin-top:8px;color:green;display:none"></div>
-    </div>
 
-    <div id="toast" style="position:fixed;right:20px;bottom:20px;min-width:200px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:9999"></div>
+{% block meta %}
+<title>Cart — The Rink</title>
+<style>
+  body {
+    background: linear-gradient(180deg, #eaf7ff 0%, #d5ecfa 100%);
+    font-family: "Poppins", sans-serif;
+    color: #0e2b47;
+  }
 
-    <script>
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
+  .cart-page {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2rem;
+  }
 
-      // delegate remove buttons
-      document.getElementById('cart-items').addEventListener('click', function(e){
-        if(e.target.matches('button.remove-ajax')){
-          const id = e.target.dataset.id;
-          fetch("{% url 'remove_from_cart_ajax' 0 %}".replace('0', id), {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
-            const data = await r.json().catch(()=>null);
-            if(!data){ showToast('Response error'); return; }
-            if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
-            if(data.success){ e.target.closest('.cart-item').remove(); showToast(data.message); }
-            else{ showToast(data.message||'Error'); }
-          })
-        }
-      })
+  .cart-page h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #0b3c61;
+    font-weight: 700;
+    text-shadow: 0 2px 6px rgba(150, 200, 255, 0.3);
+    margin-bottom: 2rem;
+  }
 
-      document.getElementById('checkout-ajax').addEventListener('click', function(){
-        fetch("{% url 'checkout_ajax' %}", {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}}).then(async r=>{
-          const data = await r.json().catch(()=>null);
-          if(!data){ showToast('Response error'); return; }
-          if(data.login_required){ showToast('Login required — <a style="color:#ffd" href="/accounts/login/?next='+location.pathname+'">Login</a>',6000); return; }
-          if(data.success){ showToast(data.message||'Checkout success'); }
-          else{ showToast(data.message||'Error during checkout'); }
+  #cart-items {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 230, 255, 0.7);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(120, 180, 255, 0.25);
+    padding: 1.5rem 2rem;
+  }
+
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(180, 220, 255, 0.5);
+    padding: 1rem 0;
+    transition: background 0.25s ease;
+  }
+
+  .cart-item:hover {
+    background: rgba(210, 240, 255, 0.4);
+    border-radius: 8px;
+  }
+
+  .cart-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-right: 1rem;
+  }
+
+  .item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #0b3c61;
+  }
+
+  .item-meta {
+    font-size: 0.9rem;
+    color: #446b8c;
+  }
+
+  .item-price {
+    font-weight: 600;
+    color: #1b4d8a;
+    margin-top: 0.2rem;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: #ff6b81;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .remove-btn:hover {
+    color: #ff4a63;
+  }
+
+  .cart-summary {
+    text-align: right;
+    font-weight: 600;
+    color: #0e3a68;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    margin: 2rem auto 0;
+    background: linear-gradient(135deg, #69b8ff, #9bdcff);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    box-shadow: 0 6px 18px rgba(100, 180, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn:hover {
+    background: linear-gradient(135deg, #57aaff, #8cd3ff);
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(80, 160, 255, 0.4);
+  }
+
+  #checkout-msg {
+    text-align: center;
+    color: #0b7a2a;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 700px) {
+    .cart-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .item-info {
+      margin-top: 0.5rem;
+    }
+
+    .cart-item img {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 0.5rem;
+      object-fit: cover;
+    }
+  }
+</style>
+{% endblock meta %}
+
+{% block content %}
+<div class="cart-page">
+  <h2>Your Cart</h2>
+
+  <div id="cart-items">
+    {% include 'partials/cart_items.html' %}
+  </div>
+
+  <div class="cart-summary">
+    <span>Total Items: {{ total_items|default:"0" }}</span><br>
+    <span>Total Price: Rp{{ total_price|default:"0" }}</span>
+  </div>
+
+  <button class="checkout-ajax btn" data-href="{% url 'rental_gear:checkout_ajax' %}">
+    Proceed to Checkout
+  </button>
+
+  <div id="checkout-msg"></div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    const checkoutBtn = document.querySelector(".checkout-ajax");
+    const msg = document.getElementById("checkout-msg");
+
+    checkoutBtn.addEventListener("click", function(){
+      fetch(this.dataset.href, {method: "POST", headers: {"X-CSRFToken": getCookie("csrftoken")}})
+        .then(r => r.json())
+        .then(data => {
+          msg.textContent = data.message || "Checkout complete!";
+          msg.style.display = "block";
+          msg.style.color = data.success ? "#0b7a2a" : "red";
+          if(data.success) setTimeout(()=>location.reload(), 2000);
         })
-      })
-    </script>
-  </body>
-</html>
+        .catch(()=> {
+          msg.textContent = "An error occurred.";
+          msg.style.display = "block";
+          msg.style.color = "red";
+        });
+    });
+
+    function getCookie(name) {
+      const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+      return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
+    }
+  });
+</script>
+{% endblock extra_js %}

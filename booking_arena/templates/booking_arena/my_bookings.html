@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>My Bookings — The Rink</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="container">
+  <h1 class="mt-8 mb-4">My Bookings</h1>
+  <div style="display:grid;gap:12px;max-width:800px">
+    {% for b in bookings %}
+      <div class="card">
+        <div class="flex justify-between">
+          <div>
+            <h3>{{ b.arena.name }} — {{ b.date }} ({{ b.start_time }} - {{ b.end_time }})</h3>
+            <div class="muted">Status: {{ b.get_status_display }}</div>
+          </div>
+          <div class="center">
+            {% if b.status != 'cancelled' %}
+              <button class="btn remove-ajax" data-href="{% url 'booking_arena:ajax_cancel_booking' b.pk %}" data-id="{{ b.pk }}">Cancel</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>You have no bookings yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}
