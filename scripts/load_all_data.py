@@ -17,14 +17,27 @@ from rental_gear.models import Gear
 
 
 def clean_price(price_str):
-    """Cleans price string and converts to Decimal"""
-    if not price_str or str(price_str).strip().lower() == 'n/a':
+    """Cleans price string and converts to Decimal safely"""
+    if not price_str or str(price_str).strip().lower() in ('n/a', '-', ''):
         return Decimal('0.00')
 
-    # Remove currency symbols and other non-numeric chars except dots
-    s = re.sub(r'[^\\d.]', '', str(price_str))
-    if not s:
-        return Decimal('0.00')
+    s = str(price_str).strip()
+
+    # Hapus simbol mata uang dan huruf
+    s = re.sub(r'[^\d,.\s]', '', s)
+
+    # Ganti koma menjadi titik kalau format desimal pakai koma
+    if ',' in s and '.' not in s:
+        s = s.replace(',', '.')
+
+    # Hapus semua spasi
+    s = s.replace(' ', '')
+
+    # Kalau masih ada lebih dari satu titik, hapus yang bukan desimal terakhir
+    if s.count('.') > 1:
+        parts = s.split('.')
+        s = ''.join(parts[:-1]) + '.' + parts[-1]
+
     try:
         return Decimal(s)
     except Exception:
