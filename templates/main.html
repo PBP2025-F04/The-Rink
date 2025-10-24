@@ -86,7 +86,7 @@
 
   <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
     {% for gear in gears %}
-    <div class="fade-up" style="transition-delay: {{ forloop.counter|add:"0.1"|floatformat:1 }}s;">
+    <div class="fade-up delay-item-{{ forloop.counter }}">
       <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300">
         <div class="h-56 overflow-hidden">
           {% if gear.image %}

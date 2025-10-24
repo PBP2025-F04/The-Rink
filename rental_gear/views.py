@@ -11,13 +11,31 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 
+def gear_json(request, id):
+    gear = get_object_or_404(Gear, id=id, seller=request.user)
+    data = {
+        'id': gear.id,
+        'name': gear.name,
+        'category': gear.category,
+        'price_per_day': str(gear.price_per_day),
+        'stock': gear.stock,
+        'description': gear.description,
+        'image_url': gear.image.url if gear.image else gear.image_url,
+        'image': gear.image.url if gear.image else gear.image_url,
+    }
+    return JsonResponse(data)
+
+
 # Create
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
 def create_gear(request):
     if request.method == 'POST':
         form = GearForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            gear = form.save(commit=False)
+            gear.seller = request.user
+            gear.save()
             messages.success(request, 'Equipment berhasil ditambahkan!')
             return redirect('rental_gear:catalog')
     else:
@@ -30,27 +48,38 @@ def catalog(request):
     return render(request, 'catalog.html', {'gears': gears})
 
 # Update
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
 def update_gear(request, id):
-    gear = get_object_or_404(Gear, id=id)
+    gear = get_object_or_404(Gear, id=id, seller=request.user)
     if request.method == 'POST':
         form = GearForm(request.POST, request.FILES, instance=gear)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Equipment berhasil diupdate!')
-            return redirect('rental_gear:catalog')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+            else:
+                messages.success(request, 'Equipment berhasil diupdate!')
+                return redirect('rental_gear:catalog')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = GearForm(instance=gear)
     return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Edit'})
 
 # Delete
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
 def delete_gear(request, id):
-    gear = get_object_or_404(Gear, id=id)
+    gear = get_object_or_404(Gear, id=id, seller=request.user)
     if request.method == 'POST':
         gear.delete()
-        messages.success(request, 'Equipment berhasil dihapus!')
-        return redirect('rental_gear:catalog')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        else:
+            messages.success(request, 'Equipment berhasil dihapus!')
+            return redirect('rental_gear:catalog')
     return render(request, 'rental_gear/gear_confirm_delete.html', {'gear': gear})
 
 def filter_gear(request):
@@ -68,6 +97,16 @@ def filter_gear(request):
 
 def gear_detail(request, id):
     gear = get_object_or_404(Gear, id=id)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'id': gear.id,
+            'name': gear.name,
+            'category': gear.category,
+            'price_per_day': str(gear.price_per_day),
+            'stock': gear.stock,
+            'image_url': gear.image_url,
+            'description': gear.description,
+        })
     return render(request, 'gear_detail.html', {'gear': gear})
 
 
@@ -88,26 +127,26 @@ def add_to_cart(request, gear_id):
         qty = days = 1
 
     item, created = CartItem.objects.get_or_create(user=request.user, gear=gear)
-    
+
     if created:
         item.quantity = qty
         item.days = days
     else:
         item.quantity += qty
-    
+
     item.save()
-    
+
     cart_items = CartItem.objects.filter(user=request.user)
     return render(request, 'partials/cart_items.html', {
         'cart_items': cart_items
     })
 
 @login_required
-@require_POST 
+@require_POST
 def remove_from_cart(request, item_id):
-    item = get_object_or_404(CartItem, id=item_id, user=request.user) 
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
-    
+
     cart_items = CartItem.objects.filter(user=request.user)
     return render(request, 'partials/cart_items.html', {'cart_items': cart_items})
 
@@ -115,32 +154,21 @@ def remove_from_cart(request, item_id):
 @transaction.atomic
 def checkout(request):
     cart_items = CartItem.objects.filter(user=request.user)
-    
+
     if not cart_items.exists():
         messages.warning(request, "Keranjang kamu masih kosong!")
-        return redirect('cart') 
+        return redirect('cart')
 
     total = sum(item.get_total_price() for item in cart_items)
 
     if request.method == "POST":
-        
-        for item in cart_items:
-            if item.gear.stock < item.quantity:
-                messages.error(request, f"Stok untuk '{item.gear.name}' tidak mencukupi (tersisa {item.gear.stock}).")
-                return render(request, 'checkout.html', {
-                    'cart_items': cart_items,
-                    'total': total
-                })
 
         for item in cart_items:
-            gear = item.gear
-            gear.stock -= item.quantity
-            gear.save()
-            item.delete() 
+            item.delete()
 
         messages.success(request, f"Checkout berhasil! Total pembayaran: Rp{total}")
         return render(request, 'checkout_success.html', {'total': total})
-    
+
     return render(request, 'checkout.html', {
         'cart_items': cart_items,
         'total': total
@@ -165,12 +193,6 @@ def add_to_cart_ajax(request, gear_id):
         days = int(body.get('days', 1))
     except Exception:
         qty = days = 1
-
-    if gear.stock < qty:
-        return JsonResponse({
-            'success': False,
-            'message': f"Stok tidak mencukupi (tersisa {gear.stock})."
-        }, status=400)
 
     if days < 1 or days > 30:
         return JsonResponse({
@@ -240,14 +262,6 @@ def checkout_ajax(request):
 
     total = sum(item.get_total_price() for item in cart_items)
 
-    # Cek stok terlebih dahulu
-    for item in cart_items:
-        if item.gear.stock < item.quantity:
-            return JsonResponse({
-                'success': False,
-                'message': f"Stok '{item.gear.name}' tidak mencukupi (tersisa {item.gear.stock})."
-            })
-
     # Buat rental baru
     from django.utils import timezone
     rental = Rental.objects.create(
@@ -266,10 +280,6 @@ def checkout_ajax(request):
             price_per_day_at_checkout=item.gear.price_per_day
         )
 
-        # Update stok
-        gear = item.gear
-        gear.stock -= item.quantity
-        gear.save()
         item.delete()
 
     return JsonResponse({

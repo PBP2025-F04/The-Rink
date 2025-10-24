@@ -1,0 +1,1009 @@
+{% extends 'base.html' %} {% load static indodate %} {% block title %} Profil Penjual - The Rink {% endblock %} {% block content %}
+<div
+  class="container-fluid py-5"
+  style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+  "
+>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+          <!-- Header -->
+          <div class="card-header bg-white border-0 py-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <div class="bg-primary bg-gradient rounded-circle p-3 me-3">
+                  <i class="fas fa-store text-white fa-lg"></i>
+                </div>
+                <div>
+                  <h2 class="mb-0 fw-bold text-dark">
+                    👋 Halo, {{ user.first_name|default:user.username }}!
+                  </h2>
+                  <p class="text-muted mb-0 small">
+                    Kelola profil penjual Anda dan produk yang dijual
+                  </p>
+                </div>
+              </div>
+              <!-- Add Edit Button -->
+              <button
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#editProfileModal"
+                class="btn btn-primary rounded-pill px-4 py-2"
+              >
+                <i class="fas fa-edit me-2"></i>Edit Profil
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body p-4 p-md-5">
+            <!-- View Mode - Always shown -->
+            <div id="viewMode">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-store text-primary me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >NAMA TOKO</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewBusinessName">
+                      {{ profile.business_name|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-phone text-success me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >NOMOR TELEPON</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
+                      {{ profile.phone_number|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-envelope text-info me-2"></i>
+                      <span class="fw-semibold text-muted small">EMAIL</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
+                      {{ profile.email|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >ALAMAT TOKO</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewBusinessAddress">
+                      {{ profile.business_address|default:"Belum diisi"|linebreaks }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section for displaying products -->
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 py-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <div class="bg-success bg-gradient rounded-circle p-3 me-3">
+                <i class="fas fa-box text-white fa-lg"></i>
+              </div>
+              <div>
+                <h3 class="mb-0 fw-bold text-dark">Produk Saya</h3>
+                <p class="text-muted mb-0 small">
+                  Kelola produk yang Anda jual
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-success rounded-pill px-4 py-2"
+              data-bs-toggle="modal"
+              data-bs-target="#createProductModal"
+            >
+              <i class="fas fa-plus me-2"></i>Tambah Produk
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-4 p-md-5">
+          {% if user_products %}
+          <div class="row g-4">
+            {% for product in user_products %}
+            <div class="col-md-6 col-lg-4" id="productCard{{ product.id }}">
+              <div class="card h-100 border-0 shadow-sm product-card">
+                {% if product.image %}
+                <img
+                  src="{{ product.image.url }}"
+                  class="card-img-top"
+                  alt="{{ product.name }}"
+                  style="height: 200px; object-fit: cover;"
+                />
+                {% else %}
+                <div
+                  class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                  style="height: 200px;"
+                >
+                  <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title fw-bold text-dark">{{ product.name }}</h5>
+                  <p class="card-text text-muted small mb-2">
+                    <i class="fas fa-tag me-1"></i>{{ product.category|title }}
+                  </p>
+
+                  <p class="card-text fw-bold text-primary mb-2">
+                    <i class="fas fa-money-bill-wave me-1"></i>Rp{{ product.price_per_day }}/hari
+                  </p>
+                  <p class="card-text text-muted small mb-3">
+                    <i class="fas fa-boxes me-1"></i>Stok: {{ product.stock }}
+                  </p>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm flex-fill"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editProductModal"
+                            data-id="{{ product.id }}"
+                            data-name="{{ product.name }}"
+                            data-price="{{ product.price_per_day }}"
+                            data-stock="{{ product.stock }}"
+                            data-description="{{ product.description }}"
+                            data-category="{{ product.category }}"
+                            data-id="{{ product.id }}">
+                      <i class="fas fa-edit me-1"></i>Edit
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm deleteProductBtn" data-id="{{ product.id }}">
+                      <i class="fas fa-trash me-1"></i>Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">Belum ada produk</h5>
+            <p class="text-muted">
+              Anda belum memiliki produk. Klik tombol "Tambah Produk" untuk
+              menambah produk pertama Anda.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Product Modal -->
+<div
+  class="modal fade"
+  id="deleteProductModal"
+  tabindex="-1"
+  aria-labelledby="deleteProductModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-danger text-white">
+        <h5 class="modal-title fw-bold" id="deleteProductModalLabel">
+          <i class="fas fa-trash me-2"></i>Hapus Produk
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="text-center">
+          <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+          <h5 class="fw-bold text-dark">Apakah Anda yakin?</h5>
+          <p class="text-muted mb-0">
+            Produk <strong id="deleteProductName"></strong> akan dihapus secara permanen dan tidak dapat dikembalikan.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button
+          type="button"
+          class="btn btn-outline-secondary rounded-pill px-4"
+          data-bs-dismiss="modal"
+        >
+          <i class="fas fa-times me-2"></i>Batal
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger rounded-pill px-5"
+          id="confirmDeleteBtn"
+        >
+          <i class="fas fa-trash me-2"></i>Hapus Produk
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div
+  class="modal fade"
+  id="editProductModal"
+  tabindex="-1"
+  aria-labelledby="editProductModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-primary text-white">
+        <h5 class="modal-title fw-bold" id="editProductModalLabel">
+          <i class="fas fa-edit me-2"></i>Edit Produk
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="editProductForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'rental_gear:update_gear' 0 %}"
+      >
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="edit_name" class="form-label fw-bold text-dark">
+                <i class="fas fa-tag text-primary me-2"></i>Nama Produk
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_name"
+                name="name"
+                placeholder="Masukkan nama produk"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="edit_price_per_day" class="form-label fw-bold text-dark">
+                <i class="fas fa-money-bill-wave text-success me-2"></i>Harga per Hari
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_price_per_day"
+                name="price_per_day"
+                placeholder="Masukkan harga"
+                style="background: rgba(255, 255, 255, 0.8)"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="edit_stock" class="form-label fw-bold text-dark">
+                <i class="fas fa-boxes text-warning me-2"></i>Stok
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_stock"
+                name="stock"
+                placeholder="Masukkan jumlah stok"
+                style="background: rgba(255, 255, 255, 255, 0.8)"
+                min="1"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="edit_image_url" class="form-label fw-bold text-dark">
+                <i class="fas fa-image text-info me-2"></i>URL Gambar
+              </label>
+              <input
+                type="url"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_image_url"
+                name="image_url"
+                placeholder="Masukkan URL gambar"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="edit_category" class="form-label fw-bold text-dark">
+                <i class="fas fa-list text-warning me-2"></i>Kategori
+              </label>
+              <select
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_category"
+                name="category"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              >
+                <option value="">Pilih kategori</option>
+                <option value="hockey">Hockey</option>
+                <option value="curling">Curling</option>
+                <option value="ice_skating">Ice Skating</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="edit_description" class="form-label fw-bold text-dark">
+                <i class="fas fa-align-left text-danger me-2"></i>Deskripsi
+              </label>
+              <textarea
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="edit_description"
+                name="description"
+                rows="3"
+                placeholder="Deskripsikan produk Anda"
+                style="background: rgba(255, 255, 255, 0.8)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary rounded-pill px-4"
+            data-bs-dismiss="modal"
+          >
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary rounded-pill px-5"
+            id="editSubmitBtn"
+          >
+            <i class="fas fa-save me-2"></i>Update Produk
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Edit Profile Modal -->
+<div
+  class="modal fade"
+  id="editProfileModal"
+  tabindex="-1"
+  aria-labelledby="editProfileModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-primary text-white">
+        <h5 class="modal-title fw-bold" id="editProfileModalLabel">
+          <i class="fas fa-edit me-2"></i>Edit Profil Penjual
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="modalProfileForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'authentication:seller_profile' %}"
+      >
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="modal_business_name" class="form-label fw-bold text-dark">
+                <i class="fas fa-store text-primary me-2"></i>Nama Toko
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_business_name"
+                name="business_name"
+                value="{{ profile.business_name }}"
+                placeholder="Masukkan nama toko"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label
+                for="modal_phone_number"
+                class="form-label fw-bold text-dark"
+              >
+                <i class="fas fa-phone text-success me-2"></i>Nomor Telepon
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_phone_number"
+                name="phone_number"
+                value="{{ profile.phone_number }}"
+                placeholder="Masukkan nomor telepon"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="modal_email" class="form-label fw-bold text-dark">
+                <i class="fas fa-envelope text-info me-2"></i>Email
+              </label>
+              <input
+                type="email"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_email"
+                name="email"
+                value="{{ profile.email }}"
+                placeholder="Masukkan email"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label
+                for="modal_business_address"
+                class="form-label fw-bold text-dark"
+              >
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>Alamat Toko
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_business_address"
+                name="business_address"
+                value="{{ profile.business_address }}"
+                placeholder="Masukkan alamat toko"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary rounded-pill px-4"
+            data-bs-dismiss="modal"
+          >
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary rounded-pill px-5"
+            id="modalSaveBtn"
+          >
+            <i class="fas fa-save me-2"></i>Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for creating product -->
+<div
+  class="modal fade"
+  id="createProductModal"
+  tabindex="-1"
+  aria-labelledby="createProductModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-success text-white">
+        <h5 class="modal-title fw-bold" id="createProductModalLabel">
+          <i class="fas fa-plus me-2"></i>Tambah Produk Baru
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="createProductForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'rental_gear:create_gear' %}"
+      >
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="id_name" class="form-label fw-bold text-dark">
+                <i class="fas fa-tag text-primary me-2"></i>Nama Produk
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_name"
+                name="name"
+                placeholder="Masukkan nama produk"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_price_per_day" class="form-label fw-bold text-dark">
+                <i class="fas fa-money-bill-wave text-success me-2"></i>Harga per Hari
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_price_per_day"
+                name="price_per_day"
+                placeholder="Masukkan harga"
+                style="background: rgba(255, 255, 255, 0.8)"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_stock" class="form-label fw-bold text-dark">
+                <i class="fas fa-boxes text-warning me-2"></i>Stok
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_stock"
+                name="stock"
+                placeholder="Masukkan jumlah stok"
+                style="background: rgba(255, 255, 255, 0.8)"
+                min="1"
+                value="1"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_image_url" class="form-label fw-bold text-dark">
+                <i class="fas fa-image text-info me-2"></i>URL Gambar
+              </label>
+              <input
+                type="url"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_image_url"
+                name="image_url"
+                placeholder="Masukkan URL gambar"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_category" class="form-label fw-bold text-dark">
+                <i class="fas fa-list text-warning me-2"></i>Kategori
+              </label>
+              <select
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_category"
+                name="category"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              >
+                <option value="">Pilih kategori</option>
+                <option value="hockey">Hockey</option>
+                <option value="curling">Curling</option>
+                <option value="ice_skating">Ice Skating</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="id_description" class="form-label fw-bold text-dark">
+                <i class="fas fa-align-left text-danger me-2"></i>Deskripsi
+              </label>
+              <textarea
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_description"
+                name="description"
+                rows="3"
+                placeholder="Deskripsikan produk Anda"
+                style="background: rgba(255, 255, 255, 0.8)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary rounded-pill px-4"
+            data-bs-dismiss="modal"
+          >
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button
+            type="submit"
+            class="btn btn-success rounded-pill px-5"
+            id="submitProduct"
+          >
+            <i class="fas fa-save me-2"></i>Simpan Produk
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .profile-picture-container {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    transition: transform 0.3s ease;
+  }
+
+  .profile-picture-container:hover {
+    transform: scale(1.05);
+  }
+
+  .info-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea !important;
+  }
+
+  .info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
+  }
+
+  .btn-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(45deg, #28a745, #20c997) !important;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .product-card {
+    transition: all 0.3s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  @media (max-width: 768px) {
+    .info-card {
+      padding: 1rem !important;
+    }
+
+    .fs-5 {
+      font-size: 1.1rem !important;
+    }
+  }
+</style>
+
+<script>
+  $(document).ready(function () {
+    // Initialize Modal
+    const profileModal = new bootstrap.Modal(
+      document.getElementById("editProfileModal")
+    );
+    const productModal = new bootstrap.Modal(
+      document.getElementById("createProductModal")
+    );
+
+    // Modal profile form submission
+    $("#modalProfileForm").on("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+
+      // Show loading state
+      var submitBtn = $("#modalSaveBtn");
+      var originalText = submitBtn.html();
+      submitBtn
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .prop("disabled", true);
+
+      $.ajax({
+        url: window.location.pathname,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        success: function (response) {
+          if (response.success) {
+            // Update view mode data
+            $("#viewBusinessName").text(
+              $("#modal_business_name").val() || "Belum diisi"
+            );
+            $("#viewPhone").text(
+              $("#modal_phone_number").val() || "Belum diisi"
+            );
+            $("#viewEmail").text($("#modal_email").val() || "Belum diisi");
+            $("#viewBusinessAddress").html(
+              ($("#modal_business_address").val() || "Belum diisi").replace(
+                /\n/g,
+                "<br>"
+              )
+            );
+
+            // Show success state
+            submitBtn
+              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .removeClass("btn-primary")
+              .addClass("btn-success");
+
+            // Close modal and reset after delay
+            setTimeout(function () {
+              $("#editProfileModal").modal("hide");
+              submitBtn
+                .html(originalText)
+                .removeClass("btn-success")
+                .addClass("btn-primary")
+                .prop("disabled", false);
+            }, 1500);
+          } else {
+            submitBtn.html(originalText).prop("disabled", false);
+            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+          }
+        },
+        error: function () {
+          submitBtn.html(originalText).prop("disabled", false);
+          alert("Terjadi kesalahan saat menyimpan data.");
+        },
+      });
+    });
+
+    // Product form submission
+    $("#createProductForm").on("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+
+      // Show loading state
+      var submitBtn = $("#submitProduct");
+      var originalText = submitBtn.html();
+      submitBtn
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .prop("disabled", true);
+
+      $.ajax({
+        url: "{% url 'rental_gear:create_gear' %}",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        success: function (response) {
+          if (response.success) {
+            // Show success state
+            submitBtn
+              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .removeClass("btn-success")
+              .addClass("btn-success");
+
+            // Close modal and reset after delay
+            setTimeout(function () {
+              $("#createProductModal").modal("hide");
+              submitBtn
+                .html(originalText)
+                .removeClass("btn-success")
+                .addClass("btn-success")
+                .prop("disabled", false);
+              location.reload();
+            }, 1500);
+          } else {
+            submitBtn.html(originalText).prop("disabled", false);
+            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+          }
+        },
+        error: function () {
+          submitBtn.html(originalText).prop("disabled", false);
+          alert("Terjadi kesalahan saat menyimpan produk.");
+        },
+      });
+    });
+
+    // Edit product modal handler
+    async function populateEditForm(productId) {
+      try {
+        const response = await fetch(`/rental_gear/gear/${productId}/json/`);
+        const product = await response.json();
+
+        $('#edit_name').val(product.name);
+        $('#edit_price_per_day').val(product.price_per_day);
+        $('#edit_stock').val(product.stock);
+        $('#edit_description').val(product.description);
+        $('#edit_category').val(product.category);
+        $('#edit_image_url').val(product.image_url || product.image);
+        $('#editProductForm').attr('action', `/rental_gear/gear/${productId}/edit/`);
+
+        console.log('Edit Modal Data:', product);
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    }
+
+    $('#editProductModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget);
+      var productId = button.data('id');
+      populateEditForm(productId);
+    });
+
+    // Delete product modal handler
+    $('.deleteProductBtn').on('click', function() {
+      const productId = $(this).data('id');
+      const productName = $(this).closest('.card-body').find('.card-title').text().trim();
+
+      // Set product name in modal
+      $('#deleteProductName').text(productName);
+
+      // Store product ID for deletion
+      $('#confirmDeleteBtn').data('product-id', productId);
+
+      // Show modal
+      $('#deleteProductModal').modal('show');
+    });
+
+    // Confirm delete button handler
+    $('#confirmDeleteBtn').on('click', function() {
+      const productId = $(this).data('product-id');
+      const deleteBtn = $(this);
+
+      deleteBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Menghapus...');
+
+      $.ajax({
+        url: `/rental_gear/gear/${productId}/delete/`,
+        method: "POST",
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+          // Hide modal
+          $('#deleteProductModal').modal('hide');
+
+          // Remove product card without reload
+          $(`#productCard${productId}`).fadeOut(500, function() {
+            $(this).remove();
+          });
+        },
+        error: function(xhr) {
+          alert("Gagal menghapus produk!");
+          deleteBtn.prop('disabled', false).html('<i class="fas fa-trash me-2"></i>Hapus Produk');
+        }
+      });
+    });
+
+    // Edit product form submission
+    $("#editProductForm").on("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+
+      // Show loading state
+      var submitBtn = $("#editSubmitBtn");
+      var originalText = submitBtn.html();
+      submitBtn
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .prop("disabled", true);
+
+      $.ajax({
+        url: $(this).attr('action'),
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        success: function (response) {
+          if (response.success) {
+            // Show success state
+            submitBtn
+              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .removeClass("btn-primary")
+              .addClass("btn-success");
+
+            // Close modal and reset after delay
+            setTimeout(function () {
+              $("#editProductModal").modal("hide");
+              submitBtn
+                .html(originalText)
+                .removeClass("btn-success")
+                .addClass("btn-primary")
+                .prop("disabled", false);
+              location.reload();
+            }, 1500);
+          } else {
+            submitBtn.html(originalText).prop("disabled", false);
+            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+          }
+        },
+        error: function () {
+          submitBtn.html(originalText).prop("disabled", false);
+          alert("Terjadi kesalahan saat menyimpan produk.");
+        },
+      });
+    });
+
+    // Reset modal when closed
+    $("#editProfileModal").on("hidden.bs.modal", function () {
+      $("#modalProfileForm")[0].reset();
+      $("#modalSaveBtn")
+        .html('<i class="fas fa-save me-2"></i>Simpan Perubahan')
+        .prop("disabled", false)
+        .removeClass("btn-success")
+        .addClass("btn-primary");
+    });
+
+    $("#createProductModal").on("hidden.bs.modal", function () {
+      $("#createProductForm")[0].reset();
+      $("#submitProduct")
+        .html('<i class="fas fa-save me-2"></i>Simpan Produk')
+        .prop("disabled", false)
+        .removeClass("btn-success")
+        .addClass("btn-success");
+    });
+
+    $("#editProductModal").on("hidden.bs.modal", function () {
+      $("#editProductForm")[0].reset();
+      $("#editSubmitBtn")
+        .html('<i class="fas fa-save me-2"></i>Update Produk')
+        .prop("disabled", false)
+        .removeClass("btn-success")
+        .addClass("btn-primary");
+    });
+  });
+</script>
+{% endblock %}

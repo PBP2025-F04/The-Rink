@@ -1,0 +1,490 @@
+{% extends 'base.html' %} {% load static indodate %} {% block title %} Profil
+Pengguna - The Rink {% endblock %} {% block content %}
+<div
+  class="container-fluid py-5"
+  style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+  "
+>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+          <!-- Header -->
+          <div class="card-header bg-white border-0 py-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <div class="bg-primary bg-gradient rounded-circle p-3 me-3">
+                  <i class="fas fa-user text-white fa-lg"></i>
+                </div>
+                <div>
+                  <h2 class="mb-0 fw-bold text-dark">
+                    👋 Halo, {{ user.first_name|default:user.username }}!
+                  </h2>
+                  <p class="text-muted mb-0 small">
+                    Kelola profil Anda dan jadikan pengalaman skating lebih
+                    personal
+                  </p>
+                </div>
+              </div>
+              <!-- Add Edit Button -->
+              <button
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#editProfileModal"
+                class="btn btn-primary rounded-pill px-4 py-2"
+              >
+                <i class="fas fa-edit me-2"></i>Edit Profil
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body p-4 p-md-5">
+            <!-- View Mode - Always shown -->
+            <div id="viewMode">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-user text-primary me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >NAMA LENGKAP</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
+                      {{ profile.full_name|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-phone text-success me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >NOMOR TELEPON</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
+                      {{ profile.phone_number|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-envelope text-info me-2"></i>
+                      <span class="fw-semibold text-muted small">EMAIL</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
+                      {{ profile.email|default:"Belum diisi" }}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-calendar text-warning me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >TANGGAL LAHIR</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
+                      {% if profile.date_of_birth %}
+                        {{ profile.date_of_birth|indodate }}
+                      {% else %}
+                        Belum diisi
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                      <span class="fw-semibold text-muted small">ALAMAT</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewAddress">
+                      {{ profile.address|default:"Belum diisi"|linebreaks }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div
+  class="modal fade"
+  id="editProfileModal"
+  tabindex="-1"
+  aria-labelledby="editProfileModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-primary text-white">
+        <h5 class="modal-title fw-bold" id="editProfileModalLabel">
+          <i class="fas fa-edit me-2"></i>Edit Profil Pengguna
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="modalProfileForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'authentication:profile' %}"
+      >
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <!-- Profile Picture in Modal -->
+          <div class="text-center mb-4">
+            <div class="position-relative d-inline-block">
+              <div
+                class="profile-picture-container rounded-circle overflow-hidden shadow-lg border-4 border-white"
+                style="width: 120px; height: 120px"
+              >
+                <img
+                  id="modalProfileImage"
+                  src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'images/default-profile.svg' %}{% endif %}"
+                  alt="Foto Profil"
+                  class="w-100 h-100 object-fit-cover"
+                />
+              </div>
+              <div
+                class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-lg border-3 border-white"
+                style="cursor: pointer"
+              >
+                <i class="fas fa-camera fa-xs"></i>
+                <input
+                  type="file"
+                  id="modal_profile_picture"
+                  name="profile_picture"
+                  accept="image/*"
+                  class="d-none"
+                />
+              </div>
+            </div>
+            <p class="text-muted small mt-2">
+              Klik ikon kamera untuk mengubah foto profil
+            </p>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="modal_full_name" class="form-label fw-bold text-dark">
+                <i class="fas fa-user text-primary me-2"></i>Nama Lengkap
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_full_name"
+                name="full_name"
+                value="{{ profile.full_name }}"
+                placeholder="Masukkan nama lengkap"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label
+                for="modal_phone_number"
+                class="form-label fw-bold text-dark"
+              >
+                <i class="fas fa-phone text-success me-2"></i>Nomor Telepon
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_phone_number"
+                name="phone_number"
+                value="{{ profile.phone_number }}"
+                placeholder="Masukkan nomor telepon"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="modal_email" class="form-label fw-bold text-dark">
+                <i class="fas fa-envelope text-info me-2"></i>Email
+              </label>
+              <input
+                type="email"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_email"
+                name="email"
+                value="{{ profile.email }}"
+                placeholder="Masukkan email"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label
+                for="modal_date_of_birth"
+                class="form-label fw-bold text-dark"
+              >
+                <i class="fas fa-calendar text-warning me-2"></i>Tanggal Lahir
+              </label>
+              <input
+                type="date"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_date_of_birth"
+                name="date_of_birth"
+                value="{{ profile.date_of_birth|date:'Y-m-d' }}"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-12">
+              <label for="modal_address" class="form-label fw-bold text-dark">
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>Alamat
+              </label>
+              <textarea
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="modal_address"
+                name="address"
+                rows="3"
+                placeholder="Masukkan alamat lengkap"
+                style="background: rgba(255, 255, 255, 0.8)"
+              >
+{{ profile.address }}</textarea
+              >
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary rounded-pill px-4"
+            data-bs-dismiss="modal"
+          >
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary rounded-pill px-5"
+            id="modalSaveBtn"
+          >
+            <i class="fas fa-save me-2"></i>Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .profile-picture-container {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    transition: transform 0.3s ease;
+  }
+
+  .profile-picture-container:hover {
+    transform: scale(1.05);
+  }
+
+  .info-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea !important;
+  }
+
+  .info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
+  }
+
+  .btn-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-picture-container {
+      width: 120px !important;
+      height: 120px !important;
+    }
+
+    .info-card {
+      padding: 1rem !important;
+    }
+
+    .fs-5 {
+      font-size: 1.1rem !important;
+    }
+  }
+</style>
+
+<script>
+  $(document).ready(function () {
+    // Initialize Modal
+    const profileModal = new bootstrap.Modal(
+      document.getElementById("editProfileModal")
+    );
+
+    // Open modal when edit button is clicked
+    $("#openEditModal").click(function () {
+      profileModal.show();
+    });
+
+    // Fungsi untuk format tanggal ke bahasa Indonesia
+    function formatDateIndo(dateStr) {
+      const date = new Date(dateStr);
+      const months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    // Modal form submission
+    $("#modalProfileForm").on("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+
+      // Show loading state
+      var submitBtn = $("#modalSaveBtn");
+      var originalText = submitBtn.html();
+      submitBtn
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .prop("disabled", true);
+
+      $.ajax({
+        url: window.location.pathname,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        success: function (response) {
+          if (response.success) {
+            // Update view mode data
+            $("#viewFullName").text(
+              $("#modal_full_name").val() || "Belum diisi"
+            );
+            $("#viewPhone").text(
+              $("#modal_phone_number").val() || "Belum diisi"
+            );
+            $("#viewEmail").text($("#modal_email").val() || "Belum diisi");
+
+            const birthDate = $("#modal_date_of_birth").val();
+            if (birthDate) {
+              $("#viewBirthDate").text(formatDateIndo(birthDate));
+            } else {
+              $("#viewBirthDate").text("Belum diisi");
+            }
+
+            $("#viewAddress").html(
+              ($("#modal_address").val() || "Belum diisi").replace(
+                /\n/g,
+                "<br>"
+              )
+            );
+
+            // Show success state
+            submitBtn
+              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .removeClass("btn-primary")
+              .addClass("btn-success");
+
+            // Close modal and reset after delay
+            setTimeout(function () {
+              $("#editProfileModal").modal("hide");
+              submitBtn
+                .html(originalText)
+                .removeClass("btn-success")
+                .addClass("btn-primary")
+                .prop("disabled", false);
+            }, 1500);
+          } else {
+            submitBtn.html(originalText).prop("disabled", false);
+            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+          }
+        },
+        error: function () {
+          submitBtn.html(originalText).prop("disabled", false);
+          alert("Terjadi kesalahan saat menyimpan data.");
+        },
+      });
+    });
+
+    // Image preview for modal
+    $("#modal_profile_picture").on("change", function () {
+      var file = this.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          $("#modalProfileImage").addClass("fade-in");
+          $("#modalProfileImage").attr("src", e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Click on camera icon in modal to trigger file input
+    $("#editProfileModal .fa-camera")
+      .parent()
+      .click(function () {
+        $("#modal_profile_picture").click();
+      });
+
+    // Reset modal when closed
+    $("#editProfileModal").on("hidden.bs.modal", function () {
+      $("#modalProfileForm")[0].reset();
+      $("#modalSaveBtn")
+        .html('<i class="fas fa-save me-2"></i>Simpan Perubahan')
+        .prop("disabled", false)
+        .removeClass("btn-success")
+        .addClass("btn-primary");
+    });
+  });
+</script>
+{% endblock %}
