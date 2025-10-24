@@ -17,6 +17,7 @@ class Gear(models.Model):
     description = models.TextField(blank=True)
     stock = models.PositiveIntegerField(default=1)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gears')
+    is_featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

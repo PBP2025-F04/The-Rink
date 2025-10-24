@@ -20,11 +20,10 @@ def gear_json(request, id):
         'price_per_day': str(gear.price_per_day),
         'stock': gear.stock,
         'description': gear.description,
-        'image_url': gear.image.url if gear.image else gear.image_url,
-        'image': gear.image.url if gear.image else gear.image_url,
+        'image_url': gear.image.url,
+        'image': gear.image.url,
     }
     return JsonResponse(data)
-
 
 # Create
 @login_required
