@@ -53,7 +53,7 @@
 <!-- Features Section -->
 <section class="py-16 bg-white">
   <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-    <a href="/booking/" class="fade-up delay-1">
+    <a href="{% url 'booking_arena:show_arena' %}" class="fade-up delay-1">
       <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 duration-300">
         <div class="text-4xl mb-4">🎯</div>
         <h3 class="text-xl font-semibold text-blue-900 mb-2">Book Arena</h3>
@@ -85,48 +85,16 @@
     <p class="text-blue-700">Top picks from our premium collection</p>
   </div>
 
-  <!-- Scrollable Gear Carousel -->
-  <div class="relative container mx-auto px-6">
-    <!-- Left arrow -->
-    <button id="scrollLeft" 
-      class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
-      ❮
-    </button>
-
-    <!-- Right arrow -->
-    <button id="scrollRight" 
-      class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
-      ❯
-    </button>
-
-    <!-- Scroll container with gradient edges -->
-    <div id="gearScroll" 
-         class="overflow-x-auto scroll-smooth relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-8 before:bg-gradient-to-r before:from-blue-50 before:to-transparent after:content-[''] after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-l after:from-blue-50 after:to-transparent">
-      <div class="flex gap-8 snap-x snap-mandatory pb-4">
-        {% for gear in gears %}
-        <div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
-          <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300 w-full">
-            <div class="h-56 overflow-hidden">
-              {% if gear.image %}
-                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
-              {% else %}
-                <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
-              {% endif %}
-            </div>
-            <div class="p-6 text-left">
-              <h3 class="text-lg font-semibold text-blue-900">{{ gear.name }}</h3>
-              <p class="text-blue-700 mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-              <div class="font-bold text-blue-800 mb-4">Rp{{ gear.price_per_day }}</div>
-              <div class="flex gap-3">
-                <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
-                <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">{% csrf_token %}
-                  <input type="hidden" name="quantity" value="1">
-                  <input type="hidden" name="days" value="1">
-                  <button type="submit" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200">Add</button>
-                </form>
-              </div>
-            </div>
-          </article>
+  <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+    {% for gear in gears %}
+    <div class="fade-up delay-item-{{ forloop.counter }}">
+      <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300">
+        <div class="h-56 overflow-hidden">
+          {% if gear.image %}
+            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+          {% else %}
+            <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
+          {% endif %}
         </div>
         {% empty %}
           <p class="text-blue-800 text-center mx-auto">No featured items available.</p>

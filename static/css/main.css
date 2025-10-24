@@ -34,3 +34,13 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;margin:0;background:var(--
 .center{display:flex;align-items:center}
 /* Toast */
 #toast{position:fixed;right:20px;bottom:20px;min-width:220px;padding:12px;border-radius:8px;background:rgba(15,23,42,0.85);color:#fff;display:none;z-index:9999}
+
+.delay-item-1 { transition-delay: 0.1s; }
+.delay-item-2 { transition-delay: 0.2s; }
+.delay-item-3 { transition-delay: 0.3s; }
+.delay-item-4 { transition-delay: 0.4s; }
+.delay-item-5 { transition-delay: 0.5s; }
+.delay-item-6 { transition-delay: 0.6s; }
+.delay-item-7 { transition-delay: 0.7s; }
+.delay-item-8 { transition-delay: 0.8s; }
+.delay-item-9 { transition-delay: 0.9s; }

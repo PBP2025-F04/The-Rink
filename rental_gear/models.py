@@ -1,8 +1,5 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 
 class Gear(models.Model):
     CATEGORY_CHOICES = [
@@ -15,11 +12,11 @@ class Gear(models.Model):
     ]
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    size = models.CharField(max_length=10)
     price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
-    stock = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to='gears/', blank=True, null=True)
-    is_featured = models.BooleanField(default=False)
+    image_url = models.URLField(blank=True)
+    description = models.TextField(blank=True)
+    stock = models.PositiveIntegerField(default=1)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gears')
 
     def __str__(self):
         return self.name
@@ -36,14 +33,14 @@ class CartItem(models.Model):
 
 class Rental(models.Model):
     customer_name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True) 
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     rental_date = models.DateTimeField(auto_now_add=True)
     return_date = models.DateField()
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class RentalItem(models.Model): #Buat simpan detail gear yang di rental
-    rental = models.ForeignKey(Rental, related_name='items', on_delete=models.CASCADE) 
-    gear_name = models.CharField(max_length=100) 
+    rental = models.ForeignKey(Rental, related_name='items', on_delete=models.CASCADE)
+    gear_name = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField(default=1)
     price_per_day_at_checkout = models.DecimalField(max_digits=8, decimal_places=2)
 
