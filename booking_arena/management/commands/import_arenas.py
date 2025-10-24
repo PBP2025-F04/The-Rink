@@ -36,7 +36,9 @@ class Command(BaseCommand):
                     'location': item.get('lokasi', ''),
                     'description': item.get('deskripsi', ''),
                     'capacity': item.get('kapasitas') if item.get('kapasitas') is not None else 0,
-                    'img_url': item.get('url_gambar') 
+                    'img_url': item.get('url_gambar'), 
+                    'opening_hours_text': item.get('opt hours'),
+                    'google_maps_url': item.get('map url'),
                 }
             )
 
