@@ -11,9 +11,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options['json_file']
 
-        # Hapus semua data Arena lama klo mau
-        # self.stdout.write(self.style.WARNING('Deleting existing Arena data...'))
-        # Arena.objects.all().delete()
+        self.stdout.write(self.style.WARNING('Deleting existing Arena data...'))
+        Arena.objects.all().delete()
 
         self.stdout.write(f"Loading data from {file_path}")
 
