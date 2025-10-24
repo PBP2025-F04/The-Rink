@@ -12,7 +12,7 @@ class Arena(models.Model):
     description = models.TextField()
     capacity = models.IntegerField()
     location = models.CharField(max_length=200)
-    img = models.ImageField(upload_to='arena_images/', null=True, blank=True)
+    img_url = models.URLField(max_length=500, null=True, blank=True)
 
     def __str__(self):
         return self.name
