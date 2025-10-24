@@ -16,8 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from django.conf import settings
 from django.conf.urls.static import static
+from django.conf import settings
 from . import views
 
 urlpatterns = [
@@ -26,6 +26,7 @@ urlpatterns = [
     path('rental/', include('rental_gear.urls')),
     path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
+    path('forum/', include('forum.urls')),  
     path('events/', include('events.urls'))
 ]
 

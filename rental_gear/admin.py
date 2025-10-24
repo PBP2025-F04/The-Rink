@@ -3,7 +3,7 @@ from .models import Gear, CartItem, Rental, RentalItem
 
 @admin.register(Gear)
 class GearAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'size', 'price_per_day', 'stock')
+    list_display = ('name', 'category', 'price_per_day', 'image_url', 'description')
     list_filter = ('category',)
     search_fields = ('name',)
 

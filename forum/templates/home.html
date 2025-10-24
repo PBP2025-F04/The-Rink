@@ -1,0 +1,825 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto px-4 py-10 mt-20">
+  <!-- Header -->
+  <h1 class="text-3xl font-bold text-cyan-700 mb-6 text-center">Forum Community</h1>
+
+  <!-- Post Box -->
+  <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
+    <!-- Input utama -->
+    <div  class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
+      <input
+      id="postInput"
+      type="text"
+      placeholder="What do you think?"
+      class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
+      readonly
+      onclick="toggleExpandBox()" 
+      />
+
+      <!-- Expanded Box -->
+      <div id="expandedBox"
+        class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
+
+        <!-- Title input -->
+        <input
+        id="postTitle"
+        type="text"
+        placeholder="Enter post title..."
+        class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
+        />
+
+        <!-- Thumbnail preview -->
+<div id="thumbnailPreview" class="hidden p-4 flex justify-center">
+  <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
+</div>
+
+        <!-- Content -->
+        <textarea
+          id="postContent"
+          rows="4"
+          placeholder="Insert a Content in here..."
+          class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem] focus:text-[1.05rem]"
+        ></textarea>
+
+        <!-- Toolbar -->
+        <div id="toolbar"
+          class="flex justify-between items-center px-4 pb-3 text-gray-500 opacity-0 translate-y-2 transition-all duration-500 ease-out hover:scale-[1.02]">
+          
+          <!-- Kiri: input URL gambar -->
+          <div class="flex items-center gap-2 w-full mr-3">
+            <i class="fa-regular fa-image text-cyan-500"></i>
+            <input
+              id="thumbnailUrl"
+              type="url"
+              placeholder="Paste image URL here (optional)"
+              class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
+              oninput="previewImageUrl()"
+            />
+          </div>
+
+          <!-- Tombol Post -->
+          <button
+            id="postBtn"
+            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+            Post
+          </button>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <!-- Filter Buttons -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
+  <button id="filter-all"
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    All Post
+  </button>
+
+  <button id="filter-my"
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    My Post
+  </button>
+
+   <!-- 🔄 Refresh Button -->
+  <button onclick="refreshPost()" 
+  class="bg-white border border-black text-black font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 hover:bg-gray-100">
+  🔄 Refresh
+</button>
+
+</div>
+
+  <!-- Post List -->
+  <div id="grid" class="flex flex-col gap-6"></div>
+</section>
+
+<!-- Loading State -->
+<div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+  <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+  viewBox="0 0 24 24">
+  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+  <path class="opacity-75" fill="currentColor"
+  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+</svg>
+<p class="text-gray-600 mt-3">Loading replies...</p>
+</div>
+
+<div id="error" class="hidden"></div>
+<div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+  <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
+  <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
+</div>
+
+<!-- MODAL DETAIL POST -->
+<div id="postDetailModal"
+  class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow-xl w-11/12 max-w-2xl p-6 relative">
+    <button onclick="closePostModal()"
+      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">
+      ×
+    </button>
+    <div id="postDetailContent" class="mt-2">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading...</h2>
+      <p class="text-gray-600 text-sm mb-4">Please wait...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  
+  // Configuration
+  const POST_API_ENDPOINT = "{% url 'forum:show_json' %}";
+  const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+  
+  // DOM Elements
+  const loadingSpinner = document.getElementById('loading');
+  const errorMessage = document.getElementById('error');
+  const emptyStateDisplay = document.getElementById('empty');
+  const postGridContainer = document.getElementById('grid');
+  const showAllPostButton = document.getElementById('filter-all');
+  const showMyPostButton = document.getElementById('filter-my');
+
+  let activeFilter = 'all';
+  let allPostData = [];
+
+  function updateFilterButtonsAppearance() {
+  const activeClass = "bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105"
+  const inactiveClass = "bg-white text-gray-700 border border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-gray-200";
+
+
+  if (activeFilter === 'all') {
+    showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
+    showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
+  } 
+  else {
+    showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
+    showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
+    }
+  }
+
+  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+    loadingSpinner.classList.toggle('hidden', !showLoading);
+    errorMessage.classList.toggle('hidden', !showError);
+    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+    postGridContainer.classList.toggle('hidden', !showGrid);
+
+    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
+  }
+
+  async function fetchPostFromServer() {
+  try {
+    displayPageSection({ showLoading: true });
+
+    const response = await fetch(POST_API_ENDPOINT, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch post data from server');
+    }
+
+    const postData = await response.json();
+    allPostData = postData || [];
+
+    if (allPostData.length === 0) {
+      displayPageSection({ showEmpty: true });
+    } else {
+      displayPageSection({ showGrid: true });
+      filterPosts();
+    }
+  } catch (error) {
+    console.error('Error loading post:', error);
+    displayPageSection({ showError: true });
+  }
+}
+
+
+  document.addEventListener('click', e => {
+    const modal = document.getElementById('postDetailModal');
+    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+      closePostModal();
+    }
+  });
+function buildPost(postItem) {
+  const postElement = document.createElement('div');
+  postElement.dataset.postId = postItem.id;
+  postElement.className =
+    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
+
+  const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric'
+  });
+
+  const thumbnailHtml = postItem.thumbnail_url
+    ? `<img src="${postItem.thumbnail_url}" alt="${postItem.title}" class="w-36 h-36 object-cover rounded-lg border border-gray-200">`
+    : `<div class="w-36 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border">No Image</div>`;
+
+  postElement.innerHTML = `
+    <div class="flex flex-row gap-5 items-start">
+      ${thumbnailHtml}
+      <div class="flex flex-col justify-between flex-1">
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <time>${formattedDate}</time>
+            ${
+              CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
+                ? `<div class="flex gap-3">
+                    <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
+                    <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
+                   </div>`
+                : ''
+            }
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
+          <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
+        </div>
+
+        <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+          <button onclick="toggleReplyBox(${postItem.id})" 
+            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+            💬 Reply
+          </button>
+          <div class="flex items-center gap-3">
+            <button onclick="votePost(${postItem.id}, true)" 
+              class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+            </button>
+
+            <button onclick="votePost(${postItem.id}, false)" 
+              class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reply Section -->
+    <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3">
+      <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+      <div class="flex gap-2">
+        <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
+          class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+        <button onclick="sendReply(${postItem.id})" 
+          class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">Send</button>
+      </div>
+    </div>
+  `;
+
+  return postElement;
+}
+
+
+function toggleReplyBox(postId) {
+  const box = document.getElementById(`replyBox-${postId}`);
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    loadReplies(postId);
+  } else {
+    box.classList.add('hidden');
+  }
+}
+
+// 🕒 Helper: hitung waktu relatif yang akurat
+function getTimeAgo(createdAtStr) {
+  const createdAt = new Date(createdAtStr);
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+  if (diff < 60) return `${diff}s yang lalu`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m yang lalu`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`;
+  return `${Math.floor(diff / 86400)} hari yang lalu`;
+}
+
+async function loadReplies(postId) {
+  const container = document.getElementById(`replies-${postId}`);
+  container.innerHTML = `<p class="text-gray-400 text-sm">Loading...</p>`;
+
+  try {
+    const res = await fetch(`/forum/get-replies/${postId}/`);
+    const replies = await res.json();
+
+    if (replies.length === 0) {
+      container.innerHTML = `<p class="text-gray-500 text-sm">No response yet.</p>`;
+      return;
+    }
+
+    container.innerHTML = replies.map(r => {
+      const initials = r.author ? r.author[0].toUpperCase() : "U";
+
+      return `
+<div id="reply-${r.id}" 
+     class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
+            shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
+  <div class="flex items-start gap-3">
+    <!-- Avatar -->
+    <div class="w-9 h-9 flex items-center justify-center rounded-full text-white font-bold 
+                bg-gradient-to-r from-cyan-400 to-blue-400 shadow-sm">
+      ${initials}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1">
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-semibold text-cyan-700">${r.author}</span>
+        <span class="text-xs text-gray-400" data-created-at="${r.created_at}">
+          ${getTimeAgo(r.created_at)}
+        </span>
+      </div>
+
+      <!-- Text reply -->
+      <p class="text-gray-800 text-sm mb-3 leading-relaxed" id="reply-content-${r.id}">
+        ${r.content}
+      </p>
+
+      <!-- Tombol Like / Dislike -->
+      <div class="flex items-center gap-3">
+        <button onclick="voteReply(${r.id}, true)" 
+                class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+          <i class="fa-regular fa-thumbs-up"></i> 
+          <span id="up-reply-${r.id}" class="font-medium">${r.upvotes_count || 0}</span>
+        </button>
+
+        <button onclick="voteReply(${r.id}, false)" 
+                class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+          <i class="fa-regular fa-thumbs-down"></i> 
+          <span id="down-reply-${r.id}" class="font-medium">${r.downvotes_count || 0}</span>
+        </button>
+      </div>
+
+      <!-- Tombol Edit/Delete hanya untuk author -->
+      ${Number(CURRENT_USER_ID) === Number(r.author_id) ? `
+        <div class="absolute bottom-2 right-3 flex gap-3 text-sm">
+          <button onclick="showEditReply(${r.id}, '${r.content.replace(/'/g, "\\'")}')" 
+            class="text-gray-600 hover:text-blue-600 font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-1">
+            ✏️ Edit
+          </button>
+         <button onclick="confirmDeleteReply(${r.id}, ${r.post_id})"
+            class="text-red-500 hover:text-red-600 font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-1">
+            🗑️ Delete
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  </div>
+</div>
+`;
+    }).join('');
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="text-red-500 text-sm">Gagal memuat balasan.</p>`;
+  }
+}
+
+
+function confirmDeleteReply(replyId, postId) {
+  // Buat elemen overlay
+  const overlay = document.createElement("div");
+  overlay.className = `
+    fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center
+    animate-fadeIn
+  `;
+
+  // Buat dialog box
+  overlay.innerHTML = `
+    <div class="bg-white rounded-xl shadow-xl w-80 p-5 text-center animate-scaleIn">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirm Delete</h3>
+      <p class="text-gray-600 text-sm mb-4">
+        Are you sure you want to delete this reply?
+      </p>
+      <div class="flex justify-center gap-3">
+        <button id="cancelDelete" 
+          class="px-4 py-2 rounded-md border text-gray-600 hover:bg-gray-100 transition">
+          Cancel
+        </button>
+        <button id="confirmDelete"
+          class="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition">
+          Delete
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Tambah ke body
+  document.body.appendChild(overlay);
+
+  // Event listeners
+  document.getElementById("cancelDelete").onclick = () => overlay.remove();
+  document.getElementById("confirmDelete").onclick = async () => {
+    overlay.remove();
+    await deleteReply(replyId, postId);
+  };
+}
+
+
+
+// 🕓 Auto-update label waktu tiap 1 menit
+setInterval(() => {
+  document.querySelectorAll("[data-created-at]").forEach(el => {
+    el.textContent = getTimeAgo(el.dataset.createdAt);
+  });
+}, 60000);
+
+
+
+async function sendReply(postId) {
+  if (!CURRENT_USER_ID) {
+    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+    return;
+  }
+
+  const input = document.getElementById(`replyInput-${postId}`);
+  const content = input.value.trim();
+  if (!content) return;
+
+  const response = await fetch(`/forum/add-reply/${postId}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+    },
+    body: JSON.stringify({ content }),
+  });
+
+  if (response.ok) {
+    const newReply = await response.json();
+    input.value = "";
+
+    const container = document.getElementById(`replies-${postId}`);
+    const initials = newReply.author ? newReply.author[0].toUpperCase() : "U";
+
+    // ✅ Cek apakah user login adalah author reply
+    const isAuthor = Number(CURRENT_USER_ID) === Number(newReply.author_id);
+
+    // 💬 Tambahkan reply baru lengkap dengan tombol edit/delete (kalau author)
+    container.insertAdjacentHTML("beforeend", `
+<div id="reply-${newReply.id}" 
+     class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
+            shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
+  <div class="flex items-start gap-3">
+    <!-- Avatar -->
+    <div class="w-9 h-9 flex items-center justify-center rounded-full text-white font-bold 
+                bg-gradient-to-r from-cyan-400 to-blue-400 shadow-sm">
+      ${initials}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1">
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-semibold text-cyan-700">${newReply.author}</span>
+        <span class="text-xs text-gray-400" data-created-at="${newReply.created_at}">baru saja</span>
+      </div>
+
+      <p class="text-gray-800 text-sm mb-3 leading-relaxed" id="reply-content-${newReply.id}">
+        ${newReply.content}
+      </p>
+
+      <div class="flex items-center gap-3">
+        <button onclick="voteReply(${newReply.id}, true)" 
+                class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+          <i class="fa-regular fa-thumbs-up"></i> 
+          <span id="up-reply-${newReply.id}" class="font-medium">0</span>
+        </button>
+
+        <button onclick="voteReply(${newReply.id}, false)" 
+                class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+          <i class="fa-regular fa-thumbs-down"></i> 
+          <span id="down-reply-${newReply.id}" class="font-medium">0</span>
+        </button>
+      </div>
+
+      ${
+        isAuthor
+          ? `
+        <div class="absolute bottom-2 right-3 flex gap-3 text-sm">
+          <button onclick="showEditReply(${newReply.id}, '${newReply.content.replace(/'/g, "\\'")}')" 
+            class="text-gray-600 hover:text-blue-600 font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-1">
+            ✏️ Edit
+          </button>
+         <button onclick="confirmDeleteReply(${newReply.id}, ${newReply.post_id})"
+            class="text-red-500 hover:text-red-600 font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-1">
+            🗑️ Delete
+          </button>
+        </div>
+        `
+          : ""
+      }
+    </div>
+  </div>
+</div>
+    `);
+
+    // Auto scroll ke bawah
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+
+    // Update waktu dinamis di label baru
+    const timeLabel = container.querySelector(`[data-created-at="${newReply.created_at}"]`);
+    if (timeLabel) timeLabel.textContent = "baru saja";
+
+  } else {
+    showToast("Failed", "Tidak bisa kirim reply", "error");
+  }
+}
+
+
+
+
+async function votePost(id, isUpvote) {
+  try {
+    const res = await fetch("{% url 'forum:toggle_vote' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
+    });
+
+    const data = await res.json();
+    document.getElementById(`up-${id}`).textContent = data.upvotes;
+    document.getElementById(`down-${id}`).textContent = data.downvotes;
+  } catch {
+    showToast("Error", "Gagal vote", "error");
+  }
+}
+
+async function voteReply(id, isUpvote) {
+  try {
+    const res = await fetch("{% url 'forum:toggle_vote' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify({ type: "reply", id, is_upvote: isUpvote }),
+    });
+
+    const data = await res.json();
+    document.getElementById(`up-reply-${id}`).textContent = data.upvotes;
+    document.getElementById(`down-reply-${id}`).textContent = data.downvotes;
+  } catch {
+    showToast("Error", "Gagal vote reply", "error");
+  }
+}
+
+async function deleteReply(replyId, postId) {
+  try {
+    const res = await fetch(`/forum/delete-reply/${replyId}/`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+    });
+
+    if (res.ok) {
+      // Hapus reply dari tampilan langsung dengan animasi
+      const replyEl = document.getElementById(`reply-${replyId}`);
+      if (replyEl) {
+        replyEl.classList.add("opacity-0", "scale-95", "transition", "duration-300");
+        setTimeout(() => replyEl.remove(), 300);
+      }
+      showToast("Deleted", "Reply successfully deleted", "success");
+    } else {
+      showToast("Error", "Failed to delete reply", "error");
+    }
+  } catch (error) {
+    console.error(error);
+    showToast("Error", "An error occurred while deleting the reply.", "error");
+  }
+}
+
+
+
+function showEditReply(replyId, currentContent) {
+  const contentEl = document.getElementById(`reply-content-${replyId}`);
+  const original = contentEl.innerText;
+  contentEl.innerHTML = `
+    <textarea id="edit-text-${replyId}" class="w-full border rounded-md p-2 text-sm">${currentContent}</textarea>
+    <div class="flex justify-end gap-2 mt-2">
+      <button onclick="cancelEdit(${replyId}, '${original.replace(/'/g, "\\'")}')" class="text-gray-500 text-sm">Cancel</button>
+      <button onclick="saveEditReply(${replyId})" class="text-blue-600 text-sm font-semibold">Save</button>
+    </div>
+  `;
+}
+
+function cancelEdit(replyId, originalText) {
+  const contentEl = document.getElementById(`reply-content-${replyId}`);
+  contentEl.textContent = originalText;
+}
+
+async function saveEditReply(replyId) {
+  const textarea = document.getElementById(`edit-text-${replyId}`);
+  const newContent = textarea.value.trim();
+  if (!newContent) return;
+
+  const res = await fetch(`/forum/edit-reply/${replyId}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+    },
+    body: JSON.stringify({ content: newContent }),
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    const contentEl = document.getElementById(`reply-content-${replyId}`);
+    contentEl.textContent = data.content;
+    showToast("Edited", "Reply updated successfully", "success");
+  } else {
+    showToast("Error", "Failed to edit reply", "error");
+  }
+}
+
+
+
+
+function filterPosts() {
+  updateFilterButtonsAppearance();
+  const filtered = activeFilter === 'all'
+    ? allPostData
+    : allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+  if (!filtered.length) displayPageSection({ showEmpty: true });
+  else { renderPosts(filtered); displayPageSection({ showGrid: true }); }
+}
+
+  async function openPostModal(id) {
+  const modal = document.getElementById('postDetailModal');
+  const content = document.getElementById('postDetailContent');
+
+  modal.classList.remove('hidden');
+  content.innerHTML = `<p>Loading...</p>`;
+
+  try {
+    const postRes = await fetch(`/forum/json/${id}/`);
+    const post = await postRes.json();
+
+    const replyRes = await fetch(`/forum/get-replies/${id}/`);
+    const replies = await replyRes.json();
+
+    let repliesHtml = replies.map(r => `
+      <div class="bg-gray-50 p-3 rounded-lg mb-2 border">
+        <p class="text-sm text-gray-700"><b>${r.author}</b> ${r.content}</p>
+        <p class="text-xs text-gray-500">${r.created_at}</p>
+      </div>
+    `).join('');
+
+    content.innerHTML = `
+      <h2 class="text-xl font-bold mb-2">${post.title}</h2>
+      <p class="text-gray-700 mb-4">${post.content}</p>
+
+      <div id="repliesSection" class="max-h-64 overflow-y-auto mb-4 p-2 bg-gray-100 rounded-lg">
+        ${repliesHtml || '<p class="text-sm text-gray-500 text-center">Belum ada balasan.</p>'}
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input id="replyInput" type="text" placeholder="Tulis balasan kamu..." class="w-full border rounded-lg px-3 py-2">
+        <button onclick="sendReply(${id})" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Kirim</button>
+      </div>
+    `;
+  } catch (err) {
+    console.error(err);
+    content.innerHTML = `<p class="text-red-500">Gagal memuat data.</p>`;
+  }
+}
+
+function closePostModal() {
+  document.getElementById('postDetailModal').classList.add('hidden');
+}
+  // Render post
+  function renderPosts(postItems) {
+    postGridContainer.innerHTML = '';
+    postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
+  }
+
+  // Refresh post
+  function refreshPost() {
+    showToast("Refreshing", "Showing latest posts...");
+    fetchPostFromServer();
+  }
+
+  function toggleExpandBox() {
+  if (!CURRENT_USER_ID) {
+    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+    return;
+  }
+  const box = document.getElementById("expandedBox");
+  const toolbar = document.getElementById("toolbar");
+  const input = document.getElementById("postInput");
+
+  const isOpen = box.classList.contains("open");
+
+  if (isOpen) {
+    box.style.maxHeight = "0px";
+    box.style.opacity = "0";
+    toolbar.style.opacity = "0";
+    toolbar.style.transform = "translateY(8px)";
+    box.classList.remove("open");
+    input.classList.remove("ring-2", "ring-cyan-300");
+  } else {
+    box.style.maxHeight = box.scrollHeight + 100 + "px";
+    box.style.opacity = "1";
+    box.classList.add("open");
+    input.classList.add("ring-2", "ring-cyan-300");
+
+    setTimeout(() => {
+      toolbar.style.opacity = "1";
+      toolbar.style.transform = "translateY(0)";
+    }, 250);
+  }
+}
+
+
+  function adjustExpandedHeight() {
+  const box = document.getElementById("expandedBox");
+  if (box.classList.contains("open")) {
+    box.style.maxHeight = box.scrollHeight + 100 + "px";
+  }
+}
+
+// Handle POST submission
+document.getElementById("postBtn").addEventListener("click", async () => {
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const imageUrl = document.getElementById("thumbnailUrl").value.trim();
+  const postBtn = document.getElementById("postBtn");
+
+  if (!title || !content) {
+    showToast("Empty", "Please fill in both title and content!", "empty");
+    return;
+  }
+
+  postBtn.disabled = true;
+  postBtn.textContent = "Posting...";
+
+  try {
+    const response = await fetch("{% url 'forum:add_post' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify({ title, content, thumbnail_url: imageUrl }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      showToast("Post Created", "Your post has been added successfully!", "success");
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+      document.getElementById("thumbnailUrl").value = "";
+      document.getElementById("thumbnailPreview").classList.add("hidden");
+
+      toggleExpandBox();
+      allPostData.unshift(data);
+      if (activeFilter === "my") {
+        filterPosts(); 
+      } else {
+        renderPosts(allPostData);
+      }
+    } else {
+      showToast("Failed to Post", "Please try again later.", "error");
+    }
+  } catch (err) {
+    console.error("Error posting:", err);
+    showToast("Failed to Post", "Please try again later.", "error");
+  } finally {
+    postBtn.disabled = false;
+    postBtn.textContent = "Post";
+  }
+});
+
+
+
+  // Refresh post list when post added, edited, or deleted
+  document.addEventListener('postAdded', fetchPostFromServer);
+
+  // ==== FILTER BUTTON EVENT LISTENERS ====
+  showAllPostButton.addEventListener('click', e => {
+    e.preventDefault();
+    activeFilter = 'all';
+    localStorage.setItem('activeFilter', 'all');
+    filterPosts();
+  });
+
+  showMyPostButton.addEventListener('click', e => {
+    e.preventDefault();
+    activeFilter = 'my';
+     localStorage.setItem('activeFilter', 'my'); 
+    filterPosts();
+  });
+
+  const savedFilter = localStorage.getItem('activeFilter');
+  if (savedFilter) {
+    activeFilter = savedFilter;
+  }
+  // Load Post
+  updateFilterButtonsAppearance();
+  fetchPostFromServer();
+</script>
+{% include 'modal.html' %}
+{% endblock content%}

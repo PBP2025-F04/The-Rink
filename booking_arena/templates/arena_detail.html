@@ -58,8 +58,8 @@
 
     {# Kolom Kiri: Info Arena #}
     <div class="lg:col-span-2 arena-info">
-      {% if arena.img %}
-        <img src="{{ arena.img.url }}" alt="{{ arena.name }}" class="w-full rounded-2xl mb-4">
+      {% if arena.img_url %}
+        <img src="{{ arena.img_url }}" alt="{{ arena.name }}" class="w-full rounded-2xl mb-4">
       {% else %}
         <div class="w-full h-96 bg-gray-200 rounded-2xl mb-4 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
       {% endif %}
