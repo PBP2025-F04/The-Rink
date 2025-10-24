@@ -45,7 +45,12 @@ def create_gear(request):
 # Read (existing catalog view)
 def catalog(request):
     gears = Gear.objects.all()
-    return render(request, 'catalog.html', {'gears': gears})
+    featured_gears = Gear.objects.filter(is_featured=True)  # 👈 ambil yang featured
+    return render(request, 'catalog.html', {
+        'gears': gears,
+        'featured_gears': featured_gears
+    })
+
 
 # Update
 @login_required
@@ -84,6 +89,7 @@ def delete_gear(request, id):
 
 def filter_gear(request):
     category = request.GET.get('category')
+    print("DEBUG CATEGORY:", category) 
     search = request.GET.get('search')
     gears = Gear.objects.all()
 

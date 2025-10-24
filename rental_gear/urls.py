@@ -1,4 +1,5 @@
 from django.urls import path
+from forum import views
 from rental_gear.views import (
     catalog, filter_gear, view_cart, add_to_cart, remove_from_cart,
     add_to_cart_ajax, remove_from_cart_ajax, checkout_ajax, gear_detail,
@@ -17,6 +18,7 @@ urlpatterns = [
     path('gear/<int:id>/delete/', delete_gear, name='delete_gear'),
     path('', catalog, name='catalog'),
     path('filter/', filter_gear, name='filter_gear'),
+    path('community/', views.show_forum, name='show_forum'),
     path('cart/', view_cart, name='view_cart'),
     path('cart/add/<int:gear_id>/', add_to_cart, name='add_to_cart'),
     path('cart/remove/<int:item_id>/', remove_from_cart, name='remove_from_cart'),

@@ -45,6 +45,38 @@
   </div>
 </section>
 
+<!-- 🌟 Featured Gear Section -->
+<section class="py-16 bg-gradient-to-b from-sky-50 via-blue-50 to-sky-100">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-sky-900 mb-10 text-center drop-shadow-sm">🌟 Featured Gear</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      {% if featured_gears %}
+        {% for gear in featured_gears %}
+        <article class="product-card relative border border-sky-100 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-md flex flex-col justify-between">
+          {% if gear.image %}
+            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-56 object-cover">
+          {% else %}
+            <div class="w-full h-56 bg-sky-50 flex items-center justify-center text-sky-300 italic">No Image</div>
+          {% endif %}
+          <div class="p-5 flex flex-col justify-between flex-grow">
+            <div>
+              <h3 class="text-xl font-semibold text-sky-900 mb-1 line-clamp-4 min-h-[4.8em] leading-snug">{{ gear.name }}</h3>
+              <p class="text-sky-700 text-sm mb-2">Category: {{ gear.get_category_display }}</p>
+              <div class="text-sky-900 font-bold mb-3">${{ gear.price_per_day }} / day</div>
+            </div>
+            <div class="mt-auto">
+              <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="block w-full text-center bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm transition duration-300 shadow-sm">Details</a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <p class="col-span-full text-center text-sky-700 italic">No featured items available.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
 <!-- Product Grid -->
 <section class="py-16 bg-gradient-to-b from-sky-100 via-blue-50 to-white">
   <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-6 transition-all" id="product-grid">
@@ -175,25 +207,5 @@ document.querySelectorAll('.ajax-add-to-cart').forEach(f=>{
     });
   });
 });
-
-document.addEventListener("DOMContentLoaded", function() {
-  const searchInput = document.getElementById('search-bar');
-  if (searchInput) {
-    searchInput.addEventListener('input', function() {
-      const query = this.value.trim();
-      fetch(`{% url 'rental_gear:filter_gear' %}?search=${query}`)
-        .then(r => r.text())
-        .then(html => {
-          const grid = document.getElementById('product-grid');
-          grid.innerHTML = html;
-          grid.querySelectorAll('article').forEach((el, i) => {
-            el.style.animationDelay = `${i * 0.05}s`;
-            el.classList.add('animate-fadeInUp');
-          });
-        });
-    });
-  }
-});
-
 </script>
 {% endblock extra_js %}
