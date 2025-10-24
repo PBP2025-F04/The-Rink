@@ -27,7 +27,12 @@ def create_gear(request):
 # Read (existing catalog view)
 def catalog(request):
     gears = Gear.objects.all()
-    return render(request, 'catalog.html', {'gears': gears})
+    featured_gears = Gear.objects.filter(is_featured=True)  # 👈 ambil yang featured
+    return render(request, 'catalog.html', {
+        'gears': gears,
+        'featured_gears': featured_gears
+    })
+
 
 # Update
 @user_passes_test(lambda u: u.is_superuser)

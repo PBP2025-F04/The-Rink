@@ -4,14 +4,15 @@ from .models import CartItem, Rental, Gear
 class GearForm(forms.ModelForm):
     class Meta:
         model = Gear
-        fields = ['name', 'category', 'size', 'price_per_day', 'stock', 'image']
+        fields = ['name', 'category', 'size', 'price_per_day', 'stock', 'image','is_featured']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'size': forms.TextInput(attrs={'class': 'form-control'}),
             'price_per_day': forms.NumberInput(attrs={'class': 'form-control'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
-            'image': forms.FileInput(attrs={'class': 'form-control'})
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+            'is_featured': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
 
 class AddToCartForm(forms.ModelForm):
