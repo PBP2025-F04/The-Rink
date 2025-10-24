@@ -183,3 +183,30 @@ body {
   .btn { padding: 0.55rem 0.9rem; font-size: 0.95rem }
   .cta-button, .btn-primary { padding: 0.55rem 1rem }
 }
+
+.filter-btn {
+  border: 1px solid #b3dfff;
+  background: rgba(240, 250, 255, 0.6);
+  color: #0e2b47;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(140, 200, 255, 0.15);
+}
+
+.filter-btn:hover {
+  background: #d5f1ff;
+  border-color: #88cfff;
+  transform: translateY(-2px);
+}
+
+/* Saat tombol aktif */
+.filter-btn.active {
+  background: linear-gradient(135deg, #4da6ff, #81cfff);
+  color: white;
+  font-weight: 600;
+  border: 1px solid #6bbcff;
+  box-shadow: 0 0 12px rgba(120, 200, 255, 0.6);
+}

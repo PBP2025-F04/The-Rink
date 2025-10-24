@@ -10,23 +10,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from forum.models import Reply, Post, UpVote
 from django.utils.timezone import localtime
 
-@login_required(login_url='/login')
 def show_forum(request):
     posts = Post.objects.all()
     context = {'posts': posts}
     return render(request, "home.html", context)
 
-# @login_required(login_url='/login')
-# def post_detail(request, id):
-#     post = get_object_or_404(Post, pk=id)
-#     replies = post.replies.all().order_by('created_at')  
-
-#     context = {
-#         'post': post,
-#         'replies': replies,  
-#     }
-
-#     return render(request, "post_detail.html", context)
 
 @csrf_exempt
 @require_POST

@@ -20,19 +20,21 @@ def register(request):
 
 @csrf_exempt
 def login_user(request):
-   if request.method == 'POST':
-      form = AuthenticationForm(data=request.POST)
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
 
-      if form.is_valid():
+        if form.is_valid():
             user = form.get_user()
             login(request, user)
-            
-            return redirect('/rental/')
 
-   else:
-      form = AuthenticationForm(request)
-   context = {'form': form}
-   return render(request, 'login.html', context)
+            next_url = request.GET.get('next') or request.POST.get('next') or '/rental/'
+            return redirect(next_url) 
+
+    else:
+        form = AuthenticationForm(request)
+
+    context = {'form': form}
+    return render(request, 'login.html', context)
 
 def logout_user(request):
     logout(request)

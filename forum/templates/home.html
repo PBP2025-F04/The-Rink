@@ -310,6 +310,10 @@ function closePostModal() {
   }
 
   function toggleExpandBox() {
+  if (!CURRENT_USER_ID) {
+    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+    return;
+  }
   const box = document.getElementById("expandedBox");
   const toolbar = document.getElementById("toolbar");
   const input = document.getElementById("postInput");
@@ -323,8 +327,7 @@ function closePostModal() {
     toolbar.style.transform = "translateY(8px)";
     box.classList.remove("open");
     input.classList.remove("ring-2", "ring-cyan-300");
-  } 
-  else {
+  } else {
     box.style.maxHeight = box.scrollHeight + 100 + "px";
     box.style.opacity = "1";
     box.classList.add("open");
@@ -333,9 +336,10 @@ function closePostModal() {
     setTimeout(() => {
       toolbar.style.opacity = "1";
       toolbar.style.transform = "translateY(0)";
-      }, 250);
-    }
+    }, 250);
   }
+}
+
 
   function adjustExpandedHeight() {
   const box = document.getElementById("expandedBox");

@@ -1,0 +1,40 @@
+{% load static %}
+
+{% if event.is_past %}
+  <button class="w-full bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-semibold cursor-not-allowed" disabled>
+    Event Has Passed
+  </button>
+{% elif event.is_full and not is_registered %}
+  <button class="w-full bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-semibold cursor-not-allowed" disabled>
+    Event is Full
+  </button>
+{% else %}
+  {% if user.is_authenticated %}
+    {% if is_registered %}
+      <form hx-post="{% url 'events:cancel' event.slug %}"
+            hx-target="#registration-button-container"
+            hx-swap="innerHTML"
+            hx-confirm="Are you sure you want to cancel your registration for {{ event.name }}?">
+        {% csrf_token %}
+        <button type="submit" class="w-full bg-red-100 text-red-700 px-6 py-3 rounded-lg font-semibold border border-red-300 hover:bg-red-200 transition duration-300">
+          Cancel Registration
+        </button>
+        <p class="text-green-700 text-sm text-center mt-2">✅ You are registered!</p>
+      </form>
+    {% else %}
+      <button 
+          hx-get="{% url 'events:get_modal' event.slug %}"
+          hx-target="#modal-content"
+          hx-trigger="click"
+          onclick="document.getElementById('main-modal').classList.remove('hidden')"
+          class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-lg transition duration-300">
+        Book Your Spot
+      </button>
+    {% endif %}
+  {% else %}
+    <a href="{% url 'login' %}?next={{ request.path }}" 
+        class="block w-full text-center bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-lg transition duration-300">
+      Login to Book
+    </a>
+  {% endif %}
+{% endif %}

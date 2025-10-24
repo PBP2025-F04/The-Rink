@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>{{ arena.name }} — The Rink</title>
+{% endblock meta %}
+
+{% block content %}
+<style>
+  /* Custom styles inspired by your CSS */
+  body {
+    background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .arena-card-detail {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  }
+  .arena-card-detail img {
+    height: 380px; /* Sesuaikan */
+    object-fit: cover;
+  }
+  .booking-card-aside {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 6px 20px rgba(0, 102, 153, 0.15);
+  }
+  .booking-card-aside input[type="date"] {
+      border: 1px solid #90e0ef;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.2s ease;
+  }
+  .booking-card-aside input[type="date"]:focus {
+      border-color: #00b4d8;
+      box-shadow: 0 0 6px rgba(0, 180, 216, 0.4);
+  }
+  #slot-list-container { max-height: 300px; overflow-y: auto; }
+  .slot-item { background: rgba(255, 255, 255, 0.9); border: 1px solid #caf0f8; }
+  .btn-book { background-color: #0096c7; transition: background-color 0.2s ease; }
+  .btn-book:hover { background-color: #023e8a; }
+  .btn-book:disabled { background-color: #adb5bd; cursor: not-allowed; }
+  .gradient-btn {
+      background: linear-gradient(90deg, #00b4d8, #0077b6);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .gradient-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 119, 182, 0.3);
+  }
+</style>
+
+{# Main Container #}
+<div class="flex justify-center mt-16 px-4 mb-16">
+  {# Arena Card #}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 rounded-3xl p-6 max-w-6xl w-full arena-card-detail">
+
+    {# Kolom Kiri: Info Arena #}
+    <div class="lg:col-span-2 arena-info">
+      {% if arena.img %}
+        <img src="{{ arena.img.url }}" alt="{{ arena.name }}" class="w-full rounded-2xl mb-4">
+      {% else %}
+        <div class="w-full h-96 bg-gray-200 rounded-2xl mb-4 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
+      {% endif %}
+      <h2 class="text-3xl font-bold text-sky-900 mt-4">{{ arena.name }}</h2>
+      <p class="text-gray-600">{{ arena.location }}</p>
+      <p class="text-gray-600 mb-2">Capacity: {{ arena.capacity }}</p>
+      <p class="text-gray-700 mt-4">{{ arena.description }}</p>
+    </div>
+
+    {# Kolom Kanan: Booking Card #}
+    <aside class="p-6 rounded-2xl text-center booking-card-aside">
+      <h3 class="text-xl font-semibold text-sky-800 mb-4">Check Availability</h3>
+
+      <label for="booking_date" class="block text-left font-semibold text-sky-700 mb-1">Select Date:</label>
+      <input type="date" id="booking_date" name="date" required
+             min="{{ timezone.now|date:'Y-m-d' }}"
+             hx-get="{% url 'booking_arena:get_available_slots' arena.id %}"
+             hx-target="#slot-list-container"
+             hx-trigger="change"
+             hx-indicator="#loading-indicator"
+             class="w-full p-2.5 rounded-lg outline-none mb-4">
+
+      <div id="loading-indicator" class="htmx-indicator text-sky-600 my-4">
+          <svg class="animate-spin h-5 w-5 text-sky-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"> <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle> <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path> </svg>
+          Loading slots...
+      </div>
+
+      <div id="slot-list-container" class="mt-4 text-left pr-2">
+        <p class="text-gray-500 text-sm">Please select a date to see available slots.</p>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+{# === MODAL KONFIRMASI BOOKING === #}
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-xl"> {# Custom rounding #}
+      <div class="modal-header border-b-0">
+        <h5 class="modal-title text-sky-800 font-semibold" id="bookingModalLabel">Confirm Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="confirm-booking-form" method="POST" hx-post="" hx-trigger="submit" hx-swap="none">
+        {% csrf_token %}
+        <div class="modal-body text-gray-700">
+          <p>You are about to book:</p>
+          <p><strong>Arena:</strong> <span id="modal-arena-name">{{ arena.name }}</span></p>
+          <p><strong>Date:</strong> <span id="modal-booking-date"></span></p>
+          <p><strong>Time:</strong> <span id="modal-slot-time"></span></p>
+          <input type="hidden" name="date" id="modal-hidden-date">
+        </div>
+        <div class="modal-footer border-t-0">
+          <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition duration-200" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 gradient-btn">Confirm & Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{# === JavaScript untuk modal tetap sama persis === #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const bookingModal = document.getElementById('bookingModal');
+  const confirmBookingForm = document.getElementById('confirm-booking-form');
+
+  bookingModal?.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    if (!button) return; // Exit if no button triggered the modal
+
+    const slotId = button.getAttribute('data-slot-id');
+    const selectedDate = button.getAttribute('data-date');
+    const slotTime = button.getAttribute('data-slot-time');
+
+    document.getElementById('modal-booking-date').textContent = selectedDate;
+    document.getElementById('modal-slot-time').textContent = slotTime;
+    document.getElementById('modal-hidden-date').value = selectedDate;
+
+    // Use hardcoded URL structure
+    const bookingUrl = `/arena/book/${slotId}/`;
+    confirmBookingForm.setAttribute('hx-post', bookingUrl);
+  });
+
+  document.body.addEventListener('htmx:afterRequest', function(event) {
+      if (event.detail.elt === confirmBookingForm) {
+          try {
+              const response = JSON.parse(event.detail.xhr.responseText);
+              const modalInstance = bootstrap.Modal.getInstance(bookingModal);
+              if (modalInstance) {
+                modalInstance.hide(); // Hide modal first
+              }
+
+              if (response.status === 'success') {
+                  showToast(response.message || 'Booking successful!', 'success');
+                  // Trigger HTMX refresh AFTER modal is hidden (optional delay)
+                  setTimeout(() => htmx.trigger('#booking_date', 'change'), 100);
+              } else {
+                  showToast(response.message || 'Booking failed.', 'danger');
+              }
+          } catch (e) {
+              showToast('An error occurred processing the booking.', 'danger');
+              console.error("Error parsing response:", e);
+              const modalInstance = bootstrap.Modal.getInstance(bookingModal);
+               if (modalInstance) {
+                 modalInstance.hide();
+               }
+          }
+      }
+  });
+
+   document.body.addEventListener('htmx:responseError', function(event) {
+       if (event.detail.elt === confirmBookingForm) {
+           showToast('Network error or server unavailable.', 'danger');
+           const modalInstance = bootstrap.Modal.getInstance(bookingModal);
+           if (modalInstance) {
+               modalInstance.hide();
+           }
+       }
+   });
+});
+</script>
+{% endblock extra_js %}
