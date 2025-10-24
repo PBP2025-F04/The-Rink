@@ -8,7 +8,10 @@ class Gear(models.Model):
     CATEGORY_CHOICES = [
         ('hockey', 'Hockey'),
         ('curling', 'Curling'),
-        ('ice_skating', 'Ice Skating'),
+        ('apparel', 'Apparel'),
+        ('accessories', 'Accessories'),
+        ('protective_gear', 'Protective Gear'),
+        ('other', 'Other'),
     ]
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
