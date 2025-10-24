@@ -51,52 +51,10 @@
 
 <section class="py-16 bg-gradient-to-b from-white to-blue-50">
   <div class="container mx-auto px-4">
-<div class="htmx-indicator text-center py-8 hidden"> <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-  <p class="text-blue-700 mt-4">Loading events...</p>
-</div>
-    
-    <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {% include 'events/partials/event_list_items.html' %}
-<!-- Filter Section -->
-<section class="bg-white py-8 border-b border-blue-100">
-  <div class="container mx-auto px-4">
-    <form 
-        hx-get="{% url 'events:list' %}"
-        hx-target="#events-container"
-        hx-swap="innerHTML"
-        hx-indicator=".htmx-indicator"
-        class="flex flex-col md:flex-row gap-6 justify-center items-center">
-
-        <div class="flex flex-wrap gap-3 justify-center items-center">
-          <span class="text-blue-900 font-semibold mr-2">Category:</span>
-          <select name="category" hx-trigger="change" hx-get="{% url 'events:list' %}" hx-include="[name='level']" hx-target="#events-container"
-                  class="px-4 py-2 rounded-full border-2 border-blue-300 text-blue-600 focus:ring-blue-500 focus:border-blue-500 transition duration-300">
-              <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Events</option>
-              {% for value, display in categories %}
-              <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ display }}</option>
-              {% endfor %}
-          </select>
-        </div>
-        
-        <div class="flex flex-wrap gap-3 justify-center items-center md:border-l border-blue-200 md:pl-6">
-          <span class="text-blue-900 font-semibold mr-2">Level:</span>
-          <select name="level" hx-trigger="change" hx-get="{% url 'events:list' %}" hx-include="[name='category']" hx-target="#events-container"
-                  class="px-4 py-2 rounded-full border-2 border-sky-300 text-sky-600 focus:ring-sky-500 focus:border-sky-500 transition duration-300">
-              <option value="all" {% if selected_level == 'all' %}selected{% endif %}>All Levels</option>
-              {% for value, display in levels %}
-              <option value="{{ value }}" {% if selected_level == value %}selected{% endif %}>{{ display }}</option>
-              {% endfor %}
-          </select>
-        </div>
-    </form>
-  </div>
-</section>
-
-<section class="py-16 bg-gradient-to-b from-white to-blue-50">
-  <div class="container mx-auto px-4">
-<div class="htmx-indicator text-center py-8 hidden"> <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-  <p class="text-blue-700 mt-4">Loading events...</p>
-</div>
+    <div class="htmx-indicator text-center py-8 hidden">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p class="text-blue-700 mt-4">Loading events...</p>
+    </div>
     
     <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {% include 'events/partials/event_list_items.html' %}

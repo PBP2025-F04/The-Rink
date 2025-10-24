@@ -45,34 +45,83 @@
   </div>
 </section>
 
-<!-- 🌟 Featured Gear Section -->
-<section class="py-16 bg-gradient-to-b from-sky-50 via-blue-50 to-sky-100">
-  <div class="container mx-auto px-6">
-    <h2 class="text-3xl font-bold text-sky-900 mb-10 text-center drop-shadow-sm">🌟 Featured Gear</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-      {% if featured_gears %}
-        {% for gear in featured_gears %}
-        <article class="product-card relative border border-sky-100 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gradient-to-b from-white/90 to-sky-50/90 backdrop-blur-md flex flex-col justify-between">
-          {% if gear.image %}
-            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-56 object-cover">
-          {% else %}
-            <div class="w-full h-56 bg-sky-50 flex items-center justify-center text-sky-300 italic">No Image</div>
-          {% endif %}
-          <div class="p-5 flex flex-col justify-between flex-grow">
-            <div>
-              <h3 class="text-xl font-semibold text-sky-900 mb-1 line-clamp-4 min-h-[4.8em] leading-snug">{{ gear.name }}</h3>
-              <p class="text-sky-700 text-sm mb-2">Category: {{ gear.get_category_display }}</p>
-              <div class="text-sky-900 font-bold mb-3">${{ gear.price_per_day }} / day</div>
-            </div>
-            <div class="mt-auto">
-              <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="block w-full text-center bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm transition duration-300 shadow-sm">Details</a>
-            </div>
-          </div>
-        </article>
-        {% endfor %}
+<!-- Featured Gear Section -->
+<section class="py-20 bg-gradient-to-b from-sky-50 to-sky-100">
+  <div class="container mx-auto text-center mb-12 fade-up delay-1">
+    <h2 class="text-3xl font-bold text-sky-900 mb-4">Featured Gear</h2>
+    <p class="text-sky-700">Top picks from our premium collection</p>
+  </div>
+
+  <div class="relative container mx-auto px-4 md:px-8 py-6 bg-white/70 backdrop-blur-lg rounded-3xl shadow-inner overflow-hidden">
+    <!-- Left arrow -->
+    <button id="scrollLeftCatalog"
+      class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10">
+      ❮
+    </button>
+
+    <!-- Right arrow -->
+    <button id="scrollRightCatalog"
+      class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10">
+      ❯
+    </button>
+
+    <!-- Scrollable container -->
+    <div id="gearScrollCatalog" class="relative overflow-x-auto scroll-smooth flex-nowrap px-2 md:px-6 py-4">
+      <div class="flex gap-6 snap-x snap-mandatory pb-6 items-stretch">
+{% for gear in featured_gears %}
+<div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
+  <article class="bg-white border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
+    <!-- Gambar -->
+    <div class="h-56 overflow-hidden flex-shrink-0">
+      {% if gear.image %}
+        <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
       {% else %}
-        <p class="col-span-full text-center text-sky-700 italic">No featured items available.</p>
+        <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
       {% endif %}
+    </div>
+
+    <!-- Konten teks -->
+    <div class="p-6 flex flex-col justify-between flex-grow text-left gear-card-content">
+      <div class="gear-info">
+        <!-- Nama -->
+        <h3 class="text-lg font-semibold text-sky-900 gear-name min-h-[3rem] leading-tight mb-1">
+          {{ gear.name }}
+        </h3>
+
+        <!-- Category dan harga (selalu sejajar) -->
+        <div class="gear-meta mt-auto">
+          <p class="text-sky-700 text-sm gear-category min-h-[1.5rem] mb-1">
+            Category: {{ gear.get_category_display }}
+          </p>
+          <div class="font-bold text-sky-800 gear-price min-h-[1.5rem]">
+            ${{ gear.price_per_day }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol -->
+      <div class="flex gap-3 mt-4">
+        <a href="{% url 'rental_gear:gear_detail' gear.id %}"
+           class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700">Detail</a>
+        <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="days" value="1">
+          <button type="submit"
+                  class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200">Add</button>
+        </form>
+      </div>
+    </div>
+  </article>
+</div>
+{% empty %}
+<div class="w-full flex justify-center items-center py-10">
+  <p class="text-sky-800 text-center">No featured items available.</p>
+</div>
+{% endfor %}
+
+
+      </div>
     </div>
   </div>
 </section>
@@ -138,9 +187,92 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Custom Scrollbar for Carousel */
+#gearScrollCatalog::-webkit-scrollbar {
+  height: 8px;
+}
+
+#gearScrollCatalog::-webkit-scrollbar-track {
+  background: rgba(14, 165, 233, 0.1); /* Light sky blue */
+  border-radius: 4px;
+}
+
+#gearScrollCatalog::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #0ea5e9, #3b82f6); /* Sky to blue gradient */
+  border-radius: 4px;
+}
+
+#gearScrollCatalog::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #0284c7, #2563eb); /* Darker on hover */
+}
 </style>
 
 <script>
+// === Fade-up Animation ===
+document.addEventListener("DOMContentLoaded", function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // === Featured Gear Carousel ===
+  const scrollContainer = document.getElementById("gearScrollCatalog");
+  const btnLeft = document.getElementById("scrollLeftCatalog");
+  const btnRight = document.getElementById("scrollRightCatalog");
+
+  const scrollAmount = 300;
+  let autoScrollInterval;
+
+  btnLeft.addEventListener("click", () => {
+    scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    resetAutoScroll();
+  });
+
+  btnRight.addEventListener("click", () => {
+    scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    resetAutoScroll();
+  });
+
+  const updateButtons = () => {
+    btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
+    btnRight.style.opacity =
+      scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
+        ? "1"
+        : "0.3";
+  };
+
+  scrollContainer.addEventListener("scroll", updateButtons);
+  updateButtons();
+
+  function startAutoScroll() {
+    autoScrollInterval = setInterval(() => {
+      const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+      if (scrollContainer.scrollLeft >= maxScroll - 5) {
+        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }, 3000);
+  }
+
+  function resetAutoScroll() {
+    clearInterval(autoScrollInterval);
+    startAutoScroll();
+  }
+
+  scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
+  scrollContainer.addEventListener("mouseleave", startAutoScroll);
+
+  startAutoScroll();
+});
+
 // === Filter Functionality ===
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', function() {

@@ -21,63 +21,76 @@
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    /* ❄️ Subtle winter sparkle animation */
+    @keyframes snowGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(147,197,253,0.6)); }
+      50% { filter: drop-shadow(0 0 8px rgba(191,219,254,0.9)); }
+    }
+
+    nav a:hover {
+      animation: snowGlow 1s ease-in-out;
+    }
+
   </style>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="relative z-30 bg-white/80 backdrop-blur-md border-b border-blue-100 text-blue-900 py-4 shadow-sm transition-all duration-300">
-    <div class="container mx-auto flex justify-between items-center px-4">
-      <!-- Brand -->
-      <a href="{% url 'main' %}" class="text-2xl font-extrabold text-blue-900 tracking-tight hover:text-blue-700 transition-all duration-300 ease-in-out">
-        The Rink
-      </a>
+ <!-- ❄️ Compact Winter Navbar -->
+<nav class="relative z-30 bg-gradient-to-r from-blue-50/70 via-white/60 to-sky-100/60 backdrop-blur-lg border-b border-sky-200 text-blue-900 py-2.5 shadow-sm transition-all duration-500">
+  <div class="container mx-auto flex justify-between items-center px-5">
+    <!-- Brand -->
+    <a href="{% url 'main' %}"
+       class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-600 to-cyan-500 tracking-tight hover:drop-shadow-sm transition-all duration-300 ease-in-out">
+       The Rink
+    </a>
 
-      <!-- Menu -->
-      <div class="space-x-6 font-medium flex items-center">
-        <a href="{% url 'booking_arena:show_arena' %}" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Reserve Arena</a>
-        <a href="{% url 'rental_gear:catalog' %}" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Products</a>
-        <a href="{% url 'events:list' %}" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Events</a>
-        <a href="{% url 'forum:show_forum' %}" class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out">Community</a>
+    <!-- Menu -->
+    <div class="space-x-6 font-medium flex items-center text-blue-800 text-[0.95rem]">
+      <a href="{% url 'booking_arena:show_arena' %}" class="hover:text-sky-600 hover:drop-shadow-[0_0_4px_rgba(125,211,252,0.6)] transition-all duration-300">Reserve Arena</a>
+      <a href="{% url 'rental_gear:catalog' %}" class="hover:text-sky-600 hover:drop-shadow-[0_0_4px_rgba(125,211,252,0.6)] transition-all duration-300">Products</a>
+      <a href="{% url 'events:list' %}" class="hover:text-sky-600 hover:drop-shadow-[0_0_4px_rgba(125,211,252,0.6)] transition-all duration-300">Events</a>
+      <a href="{% url 'forum:show_forum' %}" class="hover:text-sky-600 hover:drop-shadow-[0_0_4px_rgba(125,211,252,0.6)] transition-all duration-300">Community</a>
 
-        {% if user.is_authenticated %}
-        <!-- Profile Dropdown -->
-        <div class="relative inline-block">
-          <button id="profile-dropdown-btn"
-            class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300">
-            <i class="fas fa-user-circle text-lg"></i>
-            <span class="hidden md:inline">{{ user.username }}</span>
-            <i class="fas fa-chevron-down text-xs"></i>
-          </button>
+      {% if user.is_authenticated %}
+      <!-- Profile Dropdown -->
+      <div class="relative inline-block">
+        <button id="profile-dropdown-btn"
+                class="flex items-center space-x-2 bg-gradient-to-r from-sky-400 to-blue-500 text-white px-3 py-1.5 rounded-full shadow-md hover:shadow-sky-300/40 hover:from-sky-500 hover:to-blue-600 transition-all duration-300 text-sm">
+          <i class="fas fa-user-circle text-base"></i>
+          <span class="hidden md:inline">{{ user.username }}</span>
+          <i class="fas fa-chevron-down text-xs"></i>
+        </button>
 
-          <div id="profile-dropdown"
-               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-blue-100 hidden z-50">
-            <a href="{% url 'authentication:profile' %}" class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors">
-              <i class="fas fa-user mr-2"></i>Profil Saya
-            </a>
-            {% if user.usertype.user_type == 'seller' %}
-            <a href="{% url 'authentication:seller_profile' %}" class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors">
-              <i class="fas fa-store mr-2"></i>Profil Penjual
-            </a>
-            {% endif %}
-            <a href="{% url 'booking_arena:user_booking_list' %}" class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors">
-              <i class="fas fa-calendar-check mr-2"></i>My Bookings
-            </a>
-            <hr class="border-blue-100" />
-            <a href="{% url 'authentication:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
-              <i class="fas fa-sign-out-alt mr-2"></i>Logout
-            </a>
-          </div>
+        <div id="profile-dropdown"
+             class="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-sky-100 hidden z-50 overflow-hidden">
+          <a href="{% url 'authentication:profile' %}" class="block px-4 py-2 text-blue-900 hover:bg-sky-50 transition-colors">
+            <i class="fas fa-user mr-2"></i>Profil Saya
+          </a>
+          {% if user.usertype.user_type == 'seller' %}
+          <a href="{% url 'authentication:seller_profile' %}" class="block px-4 py-2 text-blue-900 hover:bg-sky-50 transition-colors">
+            <i class="fas fa-store mr-2"></i>Profil Penjual
+          </a>
+          {% endif %}
+          <a href="{% url 'booking_arena:user_booking_list' %}" class="block px-4 py-2 text-blue-900 hover:bg-sky-50 transition-colors">
+            <i class="fas fa-calendar-check mr-2"></i>My Bookings
+          </a>
+          <hr class="border-sky-100" />
+          <a href="{% url 'authentication:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+          </a>
         </div>
-        {% else %}
-        <a href="{% url 'authentication:login' %}" 
-           class="bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300">
-          Sign in
-        </a>
-        {% endif %}
       </div>
+      {% else %}
+      <a href="{% url 'authentication:login' %}" 
+         class="bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-400 text-white px-4 py-1.5 rounded-full shadow-sm hover:shadow-sky-300/40 hover:from-sky-500 hover:to-blue-600 transition-all duration-300 text-sm">
+        Sign in
+      </a>
+      {% endif %}
     </div>
-  </nav>
+  </div>
+</nav>
+
+
 
   <!-- Main Content -->
   <main>
