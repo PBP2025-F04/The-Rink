@@ -2,6 +2,7 @@ from django.urls import path
 from booking_arena.views import *
 
 app_name = 'booking_arena'
+
 urlpatterns = [
     path('', show_arena, name='show_arena'),
     path('arena/<str:arena_id>/', arena_detail, name="arena_detail"),

@@ -16,7 +16,7 @@ class Gear(models.Model):
     image_url = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True)
     stock = models.PositiveIntegerField(default=1)
-    seller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gears')
     is_featured = models.BooleanField(default=False)
 
     def __str__(self):
