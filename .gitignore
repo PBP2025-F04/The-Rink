@@ -113,8 +113,4 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 .history
-<<<<<<< HEAD
 Dataset/arena/arena_data_w_hours.json
-=======
-Dataset/arena/arena_data.json
->>>>>>> dev
