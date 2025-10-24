@@ -31,31 +31,169 @@
 <div class="container mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {% if user.is_superuser %}
+    <button type="button" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition duration-200"
+            data-bs-toggle="modal" data-bs-target="#addArenaModal">
+      + Add Arena
+    </button>
+    {% endif %}
+
+  {# Container buat list arena biar gampang di-update JS #}
+  <div id="arena-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {% for arena in arenas %}
-      <a href="/booking/booking_arena/arena_detail.html" class="block rounded-2xl overflow-hidden shadow-lg arena-item-card">
-        {% if arena.img_url %}
-          <img class="w-full" src="{{ arena.img_url }}" alt="{{ arena.name }}">
-        {% else %}
-          <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center">
-            <span class="text-gray-500">No Image</span>
-          </div>
+      {# Card Arena #}
+      <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-{{ arena.id }}"> {# Tambah ID unik #}
+        {# --- TOMBOL DELETE (HANYA SUPERUSER) --- #}
+        {% if user.is_superuser %}
+        <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
+                data-arena-id="{{ arena.id }}"
+                data-arena-name="{{ arena.name }}"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteArenaModal">
+          X
+        </button>
         {% endif %}
-        <div class="px-6 py-4">
-          <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
-          <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
-          <p class="text-gray-700 text-base line-clamp-2"> {# Limit description lines #}
-            {{ arena.description }}
-          </p>
-        </div>
-        <div class="px-6 pt-2 pb-4">
-          <span class="inline-block bg-sky-100 rounded-full px-3 py-1 text-sm font-semibold text-sky-700 mr-2 mb-2">Capacity: {{ arena.capacity }}</span>
-          {# Bisa tambah tag lain jika perlu #}
-        </div>
-      </a>
+        {# --- AKHIR TOMBOL DELETE --- #}
+
+        <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block text-decoration-none color-inherit">
+          {# ... (Konten Card: Gambar, Nama, Lokasi, dll) ... #}
+           {% if arena.img_url %}
+             <img class="w-full h-[200px] object-cover" src="{{ arena.img_url }}" alt="{{ arena.name }}">
+           {% else %}
+             <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
+           {% endif %}
+           <div class="px-6 py-4">
+             <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
+             <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
+             {# ... (Info lain) ... #}
+           </div>
+        </a>
+      </div>
     {% empty %}
-      <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available at the moment.</p>
+      <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available.</p>
     {% endfor %}
   </div>
 </div>
+
+{# Include template modal (buat di bawah) #}
+{% if user.is_superuser %}
+  {% include 'booking_arena/partials/add_arena_modal.html' %}
+  {% include 'booking_arena/partials/delete_arena_modal.html' %}
+{% endif %}
+
 {% endblock content %}
+
+{% block extra_js %}
+{# JavaScript buat handle modal & AJAX (buat di bawah) #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // === Handle Add Arena ===
+  const addArenaModalElement = document.getElementById('addArenaModal');
+  const addArenaForm = document.getElementById('add-arena-form');
+
+  if (addArenaForm) {
+    addArenaForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const formData = new FormData(addArenaForm);
+      const url = addArenaForm.getAttribute('action'); // Ambil dari action form
+      const csrftoken = addArenaForm.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-CSRFToken': csrftoken },
+          // Note: Jangan set Content-Type kalo pake FormData + file upload
+        });
+        const result = await response.json();
+        const modalInstance = bootstrap.Modal.getInstance(addArenaModalElement);
+
+        if (result.status === 'success') {
+          showToast(result.message || 'Arena added!', 'success');
+          modalInstance.hide();
+          addArenaForm.reset();
+          // Tambahkan kartu arena baru ke halaman (opsional, atau refresh)
+          addNewArenaCard(result.arena); // Fungsi ini perlu dibuat
+        } else {
+          // Tampilkan error validasi (lebih canggih: tampilkan di bawah field)
+          let errorMsg = result.message || 'Failed to add arena.';
+          if (result.errors) {
+            errorMsg += "\nDetails: " + JSON.stringify(result.errors); // Tampilkan detail error
+          }
+          showToast(errorMsg, 'danger');
+        }
+      } catch (error) {
+        showToast('Network error or server issue.', 'danger');
+        console.error("Add Arena Error:", error);
+      }
+    });
+  }
+  
+  // Fungsi helper buat nambah kartu baru (contoh sederhana)
+  function addNewArenaCard(arena) {
+      const grid = document.getElementById('arena-list-grid');
+      const newCardHtml = `
+          <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-${arena.id}">
+              <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
+                      data-arena-id="${arena.id}" data-arena-name="${arena.name}" data-bs-toggle="modal" data-bs-target="#deleteArenaModal">X</button>
+              <a href="${arena.detail_url}" class="block text-decoration-none color-inherit">
+                  ${arena.img_url ? `<img class="w-full h-[200px] object-cover" src="${arena.img_url}" alt="${arena.name}">` : '<div class="w-full h-[200px] bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>'}
+                  <div class="px-6 py-4">
+                      <div class="font-bold text-xl mb-1 text-sky-800">${arena.name}</div>
+                      <p class="text-gray-600 text-sm mb-2">${arena.location}</p>
+                  </div>
+              </a>
+          </div>`;
+      grid.insertAdjacentHTML('beforeend', newCardHtml); // Tambah di akhir
+  }
+
+  // === Handle Delete Arena ===
+  const deleteArenaModalElement = document.getElementById('deleteArenaModal');
+  const confirmDeleteButton = document.getElementById('confirm-delete-button');
+  let arenaToDeleteId = null; // Simpan ID arena yg mau dihapus
+
+  if (deleteArenaModalElement) {
+    // 1. Pas modal delete mau muncul, simpen ID & nama arenanya
+    deleteArenaModalElement.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget; // Tombol X yg diklik
+      arenaToDeleteId = button.getAttribute('data-arena-id');
+      const arenaName = button.getAttribute('data-arena-name');
+      // Update teks di modal
+      document.getElementById('delete-arena-name').textContent = arenaName;
+    });
+
+    // 2. Pas tombol "Confirm Delete" di modal diklik
+    confirmDeleteButton?.addEventListener('click', async function() {
+      if (!arenaToDeleteId) return;
+
+      const url = `/arena/delete-ajax/${arenaToDeleteId}/`; // URL Hardcode
+      const csrftoken = getCookie('csrftoken'); // Ambil CSRF token (fungsi getCookie harus ada)
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken },
+        });
+        const result = await response.json();
+        const modalInstance = bootstrap.Modal.getInstance(deleteArenaModalElement);
+
+        if (result.status === 'success') {
+          showToast(result.message || 'Arena deleted!', 'success');
+          modalInstance.hide();
+          // Hapus kartu arena dari halaman
+          document.getElementById(`arena-card-${arenaToDeleteId}`)?.remove();
+        } else {
+          showToast(result.message || 'Failed to delete arena.', 'danger');
+        }
+      } catch (error) {
+         showToast('Network error or server issue.', 'danger');
+         console.error("Delete Arena Error:", error);
+      } finally {
+          arenaToDeleteId = null; // Reset ID
+      }
+    });
+  }
+});
+</script>
+{% endblock extra_js %}

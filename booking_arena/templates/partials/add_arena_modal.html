@@ -1,0 +1,38 @@
+{# File: booking_arena/templates/partials/add_arena_modal.html #}
+{% load widget_tweaks %} {# Load widget_tweaks kalo mau styling form lebih gampang #}
+
+<div class="modal fade" id="addArenaModal" tabindex="-1" aria-labelledby="addArenaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg"> {# Modal lebih besar #}
+    <div class="modal-content rounded-xl">
+      <div class="modal-header border-b-0">
+        <h5 class="modal-title text-sky-800 font-semibold" id="addArenaModalLabel">Add New Arena</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      {# Ganti action ke URL AJAX #}
+      <form id="add-arena-form" method="POST" action="{% url 'booking_arena:add_arena_ajax' %}" enctype="multipart/form-data"> {# Tambah enctype kalo ada upload #}
+        {% csrf_token %}
+        <div class="modal-body text-gray-700">
+            {# Ambil form dari context (atau render manual) #}
+            {# {% include 'partials/arena_form.html' with form=form %} #}
+
+            {# Render manual fields biar gampang di-style #}
+             {% load crispy_forms_tags %} {# Atau pake Crispy Forms #}
+             {% crispy form %} {# Kalo pake Crispy #}
+
+            {# Contoh render manual pake widget_tweaks & Tailwind #}
+             {# <div class="mb-3">
+                 <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                 {% render_field form.name class="w-full p-2 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500" %}
+                 {% for error in form.name.errors %} <p class="text-red-500 text-xs mt-1">{{ error }}</p> {% endfor %}
+             </div>
+             ... (render field lain) ... #}
+
+        </div>
+        <div class="modal-footer border-t-0">
+          <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition duration-200" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition duration-200">Add Arena</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
