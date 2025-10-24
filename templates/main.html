@@ -78,25 +78,61 @@
 </section>
 
 <!-- Featured Gear Section -->
+<!-- Featured Gear Section -->
 <section class="py-20 bg-gradient-to-b from-blue-50 to-blue-100">
   <div class="container mx-auto text-center mb-12 fade-up delay-1">
     <h2 class="text-3xl font-bold text-blue-900 mb-4">Featured Gear</h2>
     <p class="text-blue-700">Top picks from our premium collection</p>
   </div>
 
-  <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
-    {% for gear in gears %}
-    <div class="fade-up delay-item-{{ forloop.counter }}">
-      <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300">
-        <div class="h-56 overflow-hidden">
-          {% if gear.image %}
-            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
-          {% else %}
-            <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
-          {% endif %}
+  <!-- Scrollable Gear Carousel -->
+  <div class="relative container mx-auto px-6">
+    <!-- Left arrow -->
+    <button id="scrollLeft" 
+      class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
+      ❮
+    </button>
+
+    <!-- Right arrow -->
+    <button id="scrollRight" 
+      class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
+      ❯
+    </button>
+
+    <!-- Scroll container with gradient edges -->
+    <div id="gearScroll" 
+         class="overflow-x-auto scroll-smooth relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-8 before:bg-gradient-to-r before:from-blue-50 before:to-transparent after:content-[''] after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-l after:from-blue-50 after:to-transparent">
+      <div class="flex gap-8 snap-x snap-mandatory pb-4">
+        {% for gear in gears %}
+        <div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
+          <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300 w-full">
+            <div class="h-56 overflow-hidden">
+              {% if gear.image %}
+                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+              {% else %}
+                <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
+              {% endif %}
+            </div>
+            <div class="p-6 text-left">
+              <h3 class="text-lg font-semibold text-blue-900">{{ gear.name }}</h3>
+              <p class="text-blue-700 mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
+              <div class="font-bold text-blue-800 mb-4">Rp{{ gear.price_per_day }}</div>
+              <div class="flex gap-3">
+                <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
+                <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">{% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="days" value="1">
+                  <button type="submit" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200">Add</button>
+                </form>
+              </div>
+            </div>
+          </article>
         </div>
         {% empty %}
-          <p class="text-blue-800 text-center mx-auto">No featured items available.</p>
+          <div class="w-full flex justify-center items-center py-10">
+            <p class="text-blue-800 text-center">No featured items available.</p>
+          </div>
+
         {% endfor %}
       </div>
     </div>
@@ -186,8 +222,62 @@
       // Mulai pertama kali
       startAutoScroll();
     });
+  document.addEventListener("DOMContentLoaded", function() {
+      const scrollContainer = document.getElementById("gearScroll");
+      const btnLeft = document.getElementById("scrollLeft");
+      const btnRight = document.getElementById("scrollRight");
+
+      const scrollAmount = 300; // jarak geser per klik
+      let autoScrollInterval;
+
+      // Fungsi geser kiri/kanan
+      btnLeft.addEventListener("click", () => {
+        scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+        resetAutoScroll();
+      });
+
+      btnRight.addEventListener("click", () => {
+        scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        resetAutoScroll();
+      });
+
+      // Auto-hide tombol di ujung kiri/kanan
+      const updateButtons = () => {
+        btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
+        btnRight.style.opacity =
+          scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
+            ? "1"
+            : "0.3";
+      };
+
+      scrollContainer.addEventListener("scroll", updateButtons);
+      updateButtons();
+
+      // Auto-scroll tiap 3 detik
+      function startAutoScroll() {
+        autoScrollInterval = setInterval(() => {
+          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+          if (scrollContainer.scrollLeft >= maxScroll - 5) {
+            scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+          } else {
+            scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+          }
+        }, 3000);
+      }
+
+      // Hentikan auto-scroll kalau user interaksi
+      function resetAutoScroll() {
+        clearInterval(autoScrollInterval);
+        startAutoScroll();
+      }
+
+      scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
+      scrollContainer.addEventListener("mouseleave", startAutoScroll);
+
+      // Mulai pertama kali
+      startAutoScroll();
+    });
 </script>
 
 
 {% endblock content %}
-
