@@ -8,7 +8,10 @@ class Gear(models.Model):
     CATEGORY_CHOICES = [
         ('hockey', 'Hockey'),
         ('curling', 'Curling'),
-        ('ice_skating', 'Ice Skating'),
+        ('apparel', 'Apparel'),
+        ('accessories', 'Accessories'),
+        ('protective_gear', 'Protective Gear'),
+        ('other', 'Other'),
     ]
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
@@ -16,6 +19,7 @@ class Gear(models.Model):
     price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='gears/', blank=True, null=True)
+    is_featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
