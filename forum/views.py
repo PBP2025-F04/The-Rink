@@ -258,3 +258,67 @@ def toggle_vote(request):
         })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+# Admin views for forum
+def admin_post_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    posts = Post.objects.all().order_by('-created_at')
+    return render(request, 'forum/admin_post_list.html', {'posts': posts})
+
+def admin_post_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import PostForm
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user  # Admin as author
+            post.save()
+            messages.success(request, 'Post created successfully!')
+            return redirect('forum:admin_post_list')
+    else:
+        form = PostForm()
+    return render(request, 'forum/admin_post_form.html', {'form': form, 'action': 'Create'})
+
+def admin_post_update(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import PostForm
+    post = get_object_or_404(Post, id=id)
+    if request.method == 'POST':
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Post updated successfully!')
+            return redirect('forum:admin_post_list')
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'forum/admin_post_form.html', {'form': form, 'action': 'Update'})
+
+def admin_post_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    post = get_object_or_404(Post, id=id)
+    if request.method == 'POST':
+        post.delete()
+        messages.success(request, 'Post deleted successfully!')
+        return redirect('forum:admin_post_list')
+    return render(request, 'forum/admin_post_confirm_delete.html', {'post': post})
+
+def admin_reply_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    replies = Reply.objects.all().order_by('-created_at')
+    return render(request, 'forum/admin_reply_list.html', {'replies': replies})
+
+def admin_reply_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    reply = get_object_or_404(Reply, id=id)
+    if request.method == 'POST':
+        reply.delete()
+        messages.success(request, 'Reply deleted successfully!')
+        return redirect('forum:admin_reply_list')
+    return render(request, 'forum/admin_reply_confirm_delete.html', {'reply': reply})

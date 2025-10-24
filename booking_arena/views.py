@@ -119,3 +119,65 @@ def cancel_booking(request, booking_id):
         booking.save()
         return JsonResponse({"status": "success", "message": "Booking successfully cancelled."})
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+# Admin views for booking arena
+def admin_arena_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    arenas = Arena.objects.all()
+    return render(request, 'booking_arena/admin_arena_list.html', {'arenas': arenas})
+
+def admin_arena_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import ArenaForm
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Arena created successfully!')
+            return redirect('booking_arena:admin_arena_list')
+    else:
+        form = ArenaForm()
+    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Create'})
+
+def admin_arena_update(request, arena_id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import ArenaForm
+    arena = get_object_or_404(Arena, id=arena_id)
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES, instance=arena)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Arena updated successfully!')
+            return redirect('booking_arena:admin_arena_list')
+    else:
+        form = ArenaForm(instance=arena)
+    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Update'})
+
+def admin_arena_delete(request, arena_id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    arena = get_object_or_404(Arena, id=arena_id)
+    if request.method == 'POST':
+        arena.delete()
+        messages.success(request, 'Arena deleted successfully!')
+        return redirect('booking_arena:admin_arena_list')
+    return render(request, 'booking_arena/admin_arena_confirm_delete.html', {'arena': arena})
+
+def admin_booking_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    bookings = Booking.objects.all().order_by('-booked_at')
+    return render(request, 'booking_arena/admin_booking_list.html', {'bookings': bookings})
+
+def admin_booking_delete(request, booking_id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    booking = get_object_or_404(Booking, id=booking_id)
+    if request.method == 'POST':
+        booking.delete()
+        messages.success(request, 'Booking deleted successfully!')
+        return redirect('booking_arena:admin_booking_list')
+    return render(request, 'booking_arena/admin_booking_confirm_delete.html', {'booking': booking})

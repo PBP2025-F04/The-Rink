@@ -1,14 +1,15 @@
 # events/forms.py
 from django import forms
-from .models import PackageBooking
+from .models import Event
 
-class PackageBookingForm(forms.ModelForm):
+class EventForm(forms.ModelForm):
     class Meta:
-        model = PackageBooking
-        fields = ['scheduled_datetime']
+        model = Event
+        fields = ['name', 'category', 'level', 'description', 'requirements', 'date', 'start_time', 'end_time', 'location', 'price', 'max_participants', 'organizer', 'instructor', 'image', 'is_active']
         widgets = {
-            # Widget HTML5 'datetime-local'
-            'scheduled_datetime': forms.DateTimeInput(
-                attrs={'type': 'datetime-local', 'class': 'form-control'}
-            )
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

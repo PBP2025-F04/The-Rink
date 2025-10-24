@@ -1,0 +1,24 @@
+{% extends 'base.html' %} {% block title %}Admin - Delete Arena{% endblock %} {% block content %}
+<div class="container mt-5">
+  <h1>Delete Arena</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        Are you sure you want to delete "{{ arena.name }}"?
+      </h5>
+      <p class="card-text">This action cannot be undone.</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a
+          href="{% url 'booking_arena:admin_arena_list' %}"
+          class="btn btn-secondary"
+          >Cancel</a
+        >
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

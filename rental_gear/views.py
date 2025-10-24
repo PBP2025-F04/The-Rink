@@ -294,3 +294,47 @@ def checkout_ajax(request):
         'total': total,
         'rental_id': rental.id
     })
+
+# Admin views for rental gear
+def admin_gear_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gears = Gear.objects.all()
+    return render(request, 'rental_gear/admin_gear_list.html', {'gears': gears})
+
+def admin_gear_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gear created successfully!')
+            return redirect('rental_gear:admin_gear_list')
+    else:
+        form = GearForm()
+    return render(request, 'rental_gear/admin_gear_form.html', {'form': form, 'action': 'Create'})
+
+def admin_gear_update(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES, instance=gear)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gear updated successfully!')
+            return redirect('rental_gear:admin_gear_list')
+    else:
+        form = GearForm(instance=gear)
+    return render(request, 'rental_gear/admin_gear_form.html', {'form': form, 'action': 'Update'})
+
+def admin_gear_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        gear.delete()
+        messages.success(request, 'Gear deleted successfully!')
+        return redirect('rental_gear:admin_gear_list')
+    return render(request, 'rental_gear/admin_gear_confirm_delete.html', {'gear': gear})
