@@ -1,7 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}The Rink{% endblock %}</title>
@@ -18,94 +18,107 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
-</head>
-<body>
-<!-- Navbar (Winter Theme) -->
-    <nav
-      class="bg-white/80 backdrop-blur-md border-b border-blue-100 text-blue-900 py-4 shadow-sm transition-all duration-300"
-    >
-  <div class="container mx-auto flex justify-between items-center px-4">
-    <!-- Brand -->
-        <a
-          href="{% url 'main' %}"
-          class="text-2xl font-extrabold text-blue-900 tracking-tight hover:text-blue-700 transition-all duration-300 ease-in-out"
-        >
-      The Rink
-    </a>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
 
-    <!-- Menu -->
-    <div class="space-x-6 font-medium flex items-center">
-          <a
-            href="{% url 'rental_gear:catalog' %}"
-            class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
-            >Products</a
-          >
-          <a
-            href="{% url 'events:list' %}"
-            class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
-            >Events</a
-          >
-          <a
-            href="#"
-            class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
-            >Community</a
-          >
-          <a
-            href="#"
-            class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
-            >Contact</a
-          >
-
-      {% if user.is_authenticated %}
-          <!-- Profile Dropdown -->
-          <div class="relative inline-block">
-            <button
-              id="profile-dropdown-btn"
-              class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300"
+  <body>
+    <!-- Navbar (Winter Theme) -->
+    <nav class="relative z-30 bg-white/80 backdrop-blur-md border-b border-blue-100 text-blue-900 py-4 shadow-sm transition-all duration-300">
+      <div class="container mx-auto flex justify-between items-center px-4">
+            <!-- Brand -->
+            <a
+              href="{% url 'main' %}"
+              class="text-2xl font-extrabold text-blue-900 tracking-tight hover:text-blue-700 transition-all duration-300 ease-in-out"
             >
-              <i class="fas fa-user-circle text-lg"></i>
-              <span class="hidden md:inline">{{ user.username }}</span>
-              <i class="fas fa-chevron-down text-xs"></i>
-            </button>
-
-            <div
-              id="profile-dropdown"
-              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-blue-100 hidden z-50"
-            >
-              <a
-                href="{% url 'authentication:profile' %}"
-                class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors"
-              >
-                <i class="fas fa-user mr-2"></i>Profil Saya
-              </a>
-              {% if user.usertype.user_type == 'seller' %}
-              <a
-                href="{% url 'authentication:seller_profile' %}"
-                class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors"
-              >
-                <i class="fas fa-store mr-2"></i>Profil Penjual
-              </a>
-              {% endif %}
-              <hr class="border-blue-100" />
-              <a
-                href="{% url 'authentication:logout' %}"
-                class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-              </a>
-            </div>
-          </div>
-      {% else %}
-          <a
-            href="{% url 'authentication:login' %}"
-            class="bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300"
-          >
-          Sign in
+          The Rink
         </a>
-      {% endif %}
-    </div>
-  </div>
-</nav>
+
+        <!-- Menu -->
+        <div class="space-x-6 font-medium flex items-center">
+          <a
+            href="{% url 'booking_arena:show_arena' %}"
+            class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
+            >Arenas</a>
+              <a
+                href="{% url 'rental_gear:catalog' %}"
+                class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
+                >Products</a>
+              <a
+                href="{% url 'events:list' %}"
+                class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
+                >Events</a
+              >
+              <a
+                href="{% url 'forum:show_forum' %}"
+                class="hover:text-blue-600 hover:drop-shadow-md transition-all duration-300 ease-in-out"
+                >Community</a
+              >
+              {% if user.is_authenticated %}
+              <!-- Profile Dropdown -->
+              <div class="relative inline-block">
+                <button
+                  id="profile-dropdown-btn"
+                  class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300"
+                >
+                  <i class="fas fa-user-circle text-lg"></i>
+                  <span class="hidden md:inline">{{ user.username }}</span>
+                  <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+
+                <div
+                  id="profile-dropdown"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-blue-100 hidden z-50"
+                >
+                  <a
+                    href="{% url 'authentication:profile' %}"
+                    class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors"
+                  >
+                    <i class="fas fa-user mr-2"></i>Profil Saya
+                  </a>
+                  {% if user.usertype.user_type == 'seller' %}
+                  <a
+                    href="{% url 'authentication:seller_profile' %}"
+                    class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors"
+                  >
+                    <i class="fas fa-store mr-2"></i>Profil Penjual
+                  </a>
+                  {% endif %}
+
+                  <a
+                    href="{% url 'booking_arena:user_booking_list' %}"
+                    class="block px-4 py-2 text-blue-900 hover:bg-blue-50 transition-colors"
+                  >
+                    <i class="fas fa-calendar-check mr-2"></i>My Bookings
+                  </a>
+
+                  <hr class="border-blue-100" />
+                  <a
+                    href="{% url 'authentication:logout' %}"
+                    class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                  </a>
+                </div>
+              </div>
+          {% else %}
+              <a
+                href="{% url 'authentication:login' %}"
+                class="bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300"
+              >
+              Sign in
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
 
     <!-- Main content -->
     <main>
@@ -132,13 +145,13 @@
                   >Rental Gear</a
                 >
               </li>
-              <li><a href="#" class="hover:text-blue-300">Book Arena</a></li>
-                        <li><a href="#" class="hover:text-blue-300">Events</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
-                    <div class="flex space-x-4">
+              <li><a href="{% url 'booking_arena:show_arena' %}" class="hover:text-blue-300">Book Arena</a></li>
+              <li><a href="#" class="hover:text-blue-300">Events</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
+            <div class="flex space-x-4">
               <a href="#" class="hover:text-blue-300"
                 ><i class="fab fa-facebook"></i
               ></a>
