@@ -5,13 +5,21 @@ from django.db import models
 from django.contrib.auth.models import User 
 
 class Gear(models.Model):
+    CATEGORY_CHOICES = [
+        ('hockey', 'Hockey'),
+        ('curling', 'Curling'),
+        ('apparel', 'Apparel'),
+        ('accessories', 'Accessories'),
+        ('protective_gear', 'Protective Gear'),
+        ('other', 'Other'),
+    ]
     name = models.CharField(max_length=100)
-    category = models.CharField(max_length=100)
-    price_per_day = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.IntegerField(default=0)
-    description = models.TextField(blank=True, null=True)
-    image_url = models.URLField(blank=True, null=True)
-    seller = models.ForeignKey('authentication.SellerProfile', on_delete=models.CASCADE, null=True, blank=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    price_per_day = models.DecimalField(max_digits=8, decimal_places=2)
+    image_url = models.URLField(blank=True)
+    description = models.TextField(blank=True)
+    stock = models.PositiveIntegerField(default=1)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gears')
     is_featured = models.BooleanField(default=False)
 
     def __str__(self):

@@ -18,7 +18,7 @@ def arena_detail(request, arena_id):
     context = {
         'arena': arena,
     }
-    return render(request, 'booking_arena/arena_detail.html', context)
+    return render(request, 'arena_detail.html', context)
 
 @login_required
 def user_booking_list(request):
@@ -26,7 +26,58 @@ def user_booking_list(request):
     context = {
         'bookings': user_bookings
     }
-    return render(request, 'booking_arena/user_bookings.html', context)
+    return render(request, "booking_arena/user_bookings.html", context)
+
+# CRUD KLO USER ADALAH SUPERUSER
+from django.contrib.auth.decorators import user_passes_test
+from .forms import ArenaForm
+
+def is_superuser(user):
+    return user.is_superuser
+
+@user_passes_test(is_superuser)
+def add_arena_ajax(request):
+    """Handles creating a new Arena via AJAX POST."""
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_arena = form.save()
+            arena_data = {
+                'id': new_arena.id, # Kirim UUID sebagai string
+                'name': new_arena.name,
+                'location': new_arena.location,
+                'capacity': new_arena.capacity,
+                'description': new_arena.description,
+                'img_url': new_arena.img_url if new_arena.img_url else None,
+                # URL buat detail view (hardcode, sesuaikan kalo perlu)
+                'detail_url': f'/arena/{new_arena.id}/'
+            }
+            return JsonResponse({'status': 'success', 'message': 'Arena added successfully!', 'arena': arena_data})
+        else:
+            # Kirim error validasi form
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    form = ArenaForm()
+    # Kita bisa render potongan HTML form di sini kalo mau
+    # return render(request, 'partials/arena_form.html', {'form': form})
+    # Atau return JSON kosong/error jika GET tidak diharapkan
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+
+@user_passes_test(is_superuser) # Hanya superuser
+def delete_arena_ajax(request, arena_id):
+    """Handles deleting an Arena via AJAX POST."""
+    if request.method == 'POST':
+        try:
+            arena = Arena.objects.get(pk=arena_id)
+            arena_name = arena.name # Simpen nama buat pesan
+            arena.delete()
+            return JsonResponse({'status': 'success', 'message': f'Arena "{arena_name}" deleted successfully!'})
+        except Arena.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Arena not found.'}, status=404)
+        except Exception as e:
+             return JsonResponse({'status': 'error', 'message': f'Error deleting arena: {e}'}, status=500)
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
 
 
 

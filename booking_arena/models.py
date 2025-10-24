@@ -13,6 +13,8 @@ class Arena(models.Model):
     capacity = models.IntegerField()
     location = models.CharField(max_length=200)
     img_url = models.URLField(max_length=500, null=True, blank=True)
+    opening_hours_text = models.TextField(null=True, blank=True)
+    google_maps_url = models.URLField(max_length=500, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -38,6 +40,11 @@ class Booking(models.Model):
         ('Booked', 'Booked'),
         ('Cancelled', 'Cancelled'),
         ('Completed', 'Completed'),
+    )
+    CATEGORY_CHOICES = (
+        ('ice_skating', 'Ice Skating'),
+        ('ice_hockey', 'Ice Hockey'),
+        ('curling', 'Curling'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True)
