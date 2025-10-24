@@ -1,5 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
+
+# Create your models here.
+from django.db import models
+from django.contrib.auth.models import User 
 
 class Gear(models.Model):
     CATEGORY_CHOICES = [
@@ -22,6 +25,7 @@ class Gear(models.Model):
     def __str__(self):
         return self.name
 
+
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     gear = models.ForeignKey(Gear, on_delete=models.CASCADE)
@@ -34,14 +38,14 @@ class CartItem(models.Model):
 
 class Rental(models.Model):
     customer_name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True) 
     rental_date = models.DateTimeField(auto_now_add=True)
     return_date = models.DateField()
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
 
 class RentalItem(models.Model): #Buat simpan detail gear yang di rental
-    rental = models.ForeignKey(Rental, related_name='items', on_delete=models.CASCADE)
-    gear_name = models.CharField(max_length=100)
+    rental = models.ForeignKey(Rental, related_name='items', on_delete=models.CASCADE) 
+    gear_name = models.CharField(max_length=100) 
     quantity = models.PositiveIntegerField(default=1)
     price_per_day_at_checkout = models.DecimalField(max_digits=8, decimal_places=2)
 
