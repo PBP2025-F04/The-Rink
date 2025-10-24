@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from forum.models import Reply, Post, UpVote
 from django.utils.timezone import localtime
+import json
 
 def show_forum(request):
     posts = Post.objects.all()
@@ -145,57 +146,115 @@ def show_json_by_id(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({'detail': 'Not found'}, status=404)
+
+@login_required
+@csrf_exempt
+def add_reply(request, post_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        content = data.get("content")
+
+        post = Post.objects.get(id=post_id)
+        reply = Reply.objects.create(
+            post=post,
+            author=request.user,
+            content=content
+        )
+
+        return JsonResponse({
+            "id": reply.id,
+            "author": reply.author.username,
+            "author_id": reply.author.id,  # ✅ penting banget
+            "content": reply.content,
+            "created_at": reply.created_at.isoformat(),
+            "post_id": reply.post.id,      # ✅ biar JS tahu id post-nya
+        })
     
-def show_replies_json(request, post_id):
-    replies = Reply.objects.filter(post_id=post_id).select_related('author').order_by('-created_at')
-    data = [
-        {
-            'author': reply.author.usertitle,
-            'content': reply.content,
-            'created_at': reply.created_at.strftime("%H:%M, %d %b %Y")
-        }
-        for reply in replies
-    ]
+def get_replies(request, post_id):
+    replies = Reply.objects.filter(post_id=post_id).order_by("created_at")
+    data = [{
+        "id": r.id,
+        "author": r.author.username,
+        "author_id": r.author.id, 
+        "content": r.content,
+        "created_at": r.created_at.isoformat().replace("+00:00", "Z"),
+    } for r in replies]
     return JsonResponse(data, safe=False)
 
-    
+@csrf_exempt
 @login_required
-def add_reply(request, id):
-    post = get_object_or_404(Post, pk=id)
+def delete_reply(request, reply_id):
+    if request.method == "DELETE":
+        try:
+            reply = Reply.objects.get(pk=reply_id)
 
+            # Pastikan hanya author yang boleh hapus
+            if reply.author != request.user:
+                return JsonResponse({"error": "Unauthorized"}, status=403)
+
+            reply.delete()
+            return JsonResponse({"success": True}, status=200)
+
+        except Reply.DoesNotExist:
+            return JsonResponse({"error": "Reply not found"}, status=404)
+
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+@login_required
+@require_POST
+def edit_reply(request, reply_id):
+    reply = get_object_or_404(Reply, pk=reply_id)
+
+    if reply.author != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    data = json.loads(request.body)
+    new_content = data.get("content", "").strip()
+
+    if not new_content:
+        return JsonResponse({"error": "Empty content"}, status=400)
+
+    reply.content = new_content
+    reply.save()
+
+    return JsonResponse({
+        "id": reply.id,
+        "content": reply.content,
+        "updated_at": reply.updated_at.isoformat()
+    })
+
+@csrf_exempt
+def toggle_vote(request):
     if request.method == "POST":
-        content = request.POST.get("content")
-        if content:
-            Reply.objects.create(
-                post=post,
-                author=request.user,
-                content=content
-            )
-    return redirect('main:post_detail', id=post.id)
+        data = json.loads(request.body)
+        user = request.user
+        target_type = data.get("type")  # 'post' atau 'reply'
+        target_id = data.get("id")
+        is_upvote = data.get("is_upvote", True)
 
-@login_required
-def toggle_vote(request, post_id=None, reply_id=None, is_upvote=True):
-    if post_id:
-        target = get_object_or_404(Post, id=post_id)
-        vote, created = UpVote.objects.get_or_create(user=request.user, post=target)
-    elif reply_id:
-        target = get_object_or_404(Reply, id=reply_id)
-        vote, created = UpVote.objects.get_or_create(user=request.user, reply=target)
-    else:
-        return JsonResponse({'error': 'Invalid target'}, status=400)
+        if not user.is_authenticated:
+            return JsonResponse({"error": "User must be logged in"}, status=403)
 
-    if not created:
-        if vote.is_upvote == is_upvote:
-            vote.delete()  # toggle off
+        # Tentukan target (Post atau Reply)
+        if target_type == "post":
+            target = Post.objects.get(pk=target_id)
+            vote, created = UpVote.objects.get_or_create(user=user, post=target, reply=None)
+        elif target_type == "reply":
+            target = Reply.objects.get(pk=target_id)
+            vote, created = UpVote.objects.get_or_create(user=user, reply=target, post=None)
+        else:
+            return JsonResponse({"error": "Invalid target type"}, status=400)
+
+        # Toggle jika user klik tombol yang sama dua kali
+        if not created and vote.is_upvote == is_upvote:
+            vote.delete()  # hapus vote
         else:
             vote.is_upvote = is_upvote
             vote.save()
-    else:
-        vote.is_upvote = is_upvote
-        vote.save()
 
-    return JsonResponse({
-        'upvotes': target.total_upvotes(),
-        'downvotes': target.total_downvotes(),
-        'reputation': target.author.profile.reputation,
-    })
+        return JsonResponse({
+            "upvotes": target.total_upvotes(),
+            "downvotes": target.total_downvotes(),
+        })
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
