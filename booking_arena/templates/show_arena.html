@@ -33,9 +33,9 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {% for arena in arenas %}
-      <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block rounded-2xl overflow-hidden shadow-lg arena-item-card">
+      <a href="/booking/booking_arena/arena_detail.html" class="block rounded-2xl overflow-hidden shadow-lg arena-item-card">
         {% if arena.img %}
-          <img class="w-full" src="{{ arena.img.url }}" alt="{{ arena.name }}">
+          <img class="w-full" src="{{ arena.img_url }}" alt="{{ arena.name }}">
         {% else %}
           <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center">
             <span class="text-gray-500">No Image</span>
