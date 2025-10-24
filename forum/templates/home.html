@@ -3,8 +3,24 @@
 
 {% block content %}
 <section class="max-w-2xl mx-auto px-4 py-10 mt-20">
-  <!-- Header -->
-  <h1 class="text-3xl font-bold text-cyan-700 mb-6 text-center">Forum Community</h1>
+<!-- ❄️ & 👥 Centered Header -->
+<div class="flex flex-col items-center justify-center mb-8 space-y-2">
+
+  <!-- Baris Ikon Atas -->
+  <div class="flex items-center justify-center gap-4">
+
+    <!-- Ikon Users -->
+    <div class="flex items-center justify-center w-8 h-8">
+      <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
+    </div>
+  </div>
+
+  <!-- Judul Tengah -->
+  <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
+   <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">  Forum  Community</span>
+  </h1>
+</div>
+
 
   <!-- Post Box -->
   <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
@@ -32,9 +48,9 @@
         />
 
         <!-- Thumbnail preview -->
-<div id="thumbnailPreview" class="hidden p-4 flex justify-center">
-  <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
-</div>
+        <div id="thumbnailPreview" class="hidden p-4 flex justify-center">
+          <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
+        </div>
 
         <!-- Content -->
         <textarea
@@ -46,7 +62,8 @@
 
         <!-- Toolbar -->
         <div id="toolbar"
-          class="flex justify-between items-center px-4 pb-3 text-gray-500 opacity-0 translate-y-2 transition-all duration-500 ease-out hover:scale-[1.02]">
+  class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
+
           
           <!-- Kiri: input URL gambar -->
           <div class="flex items-center gap-2 w-full mr-3">
@@ -707,31 +724,51 @@ function closePostModal() {
     window.location.href = "{% url 'authentication:login' %}?next=/forum/";
     return;
   }
+
   const box = document.getElementById("expandedBox");
   const toolbar = document.getElementById("toolbar");
   const input = document.getElementById("postInput");
-
   const isOpen = box.classList.contains("open");
 
   if (isOpen) {
+    // 🔻 Tutup smooth
     box.style.maxHeight = "0px";
     box.style.opacity = "0";
     toolbar.style.opacity = "0";
     toolbar.style.transform = "translateY(8px)";
-    box.classList.remove("open");
     input.classList.remove("ring-2", "ring-cyan-300");
+
+    // sembunyikan toolbar setelah transisi
+    setTimeout(() => {
+      toolbar.classList.add("hidden");
+      box.classList.remove("open");
+    }, 400);
   } else {
-    box.style.maxHeight = box.scrollHeight + 100 + "px";
+    // 🔹 Buka expand box
+    box.classList.remove("max-h-0", "opacity-0", "hidden");
+    box.style.display = "block";
+    void box.offsetHeight; // force reflow
+    box.style.maxHeight = box.scrollHeight + 150 + "px";
     box.style.opacity = "1";
     box.classList.add("open");
     input.classList.add("ring-2", "ring-cyan-300");
 
+    // 🔹 Tampilkan toolbar setelah delay
+    toolbar.classList.remove("hidden");
+    toolbar.style.display = "flex";
     setTimeout(() => {
       toolbar.style.opacity = "1";
       toolbar.style.transform = "translateY(0)";
     }, 250);
+
+    // Pastikan parent tinggi cukup besar untuk toolbar
+    setTimeout(() => {
+      box.style.maxHeight = box.scrollHeight + 150 + "px";
+    }, 350);
   }
 }
+
+
 
 
   function adjustExpandedHeight() {
