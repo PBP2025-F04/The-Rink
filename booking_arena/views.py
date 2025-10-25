@@ -26,7 +26,7 @@ def user_booking_list(request):
     context = {
         'bookings': user_bookings
     }
-    return render(request, "booking_arena/user_bookings.html", context)
+    return render(request, "user_bookings.html", context)
 
 # CRUD KLO USER ADALAH SUPERUSER
 from django.contrib.auth.decorators import user_passes_test
