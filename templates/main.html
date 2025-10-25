@@ -22,12 +22,90 @@
     animation: fadeUp 0.8s ease-out forwards;
   }
 
-  /* Optional delay untuk grid berurutan */
   .delay-1 { transition-delay: 0.1s; }
   .delay-2 { transition-delay: 0.3s; }
   .delay-3 { transition-delay: 0.5s; }
   .delay-4 { transition-delay: 0.7s; }
   .delay-5 { transition-delay: 0.9s; }
+
+#gearScroll::before,
+#gearScroll::after {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 56px; /* tambahkan sedikit lebar biar gradasinya halus */
+  pointer-events: none;
+  z-index: 5;
+  content: "";
+}
+
+/* sisi kiri */
+#gearScroll::before {
+  left: -56px; /* dorong lebih keluar */
+  background: linear-gradient(
+    to right,
+    rgba(245, 248, 255, 1) 20%,
+    rgba(245, 248, 255, 0) 100%
+  );
+}
+
+/* sisi kanan */
+#gearScroll::after {
+  right: -56px; /* dorong lebih keluar */
+  background: linear-gradient(
+    to left,
+    rgba(245, 248, 255, 1) 20%,
+    rgba(245, 248, 255, 0) 100%
+  );
+}
+/* Jaga agar teks sejajar antar card */
+.gear-card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.gear-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.gear-name {
+  min-height: 3rem; /* Tinggi tetap untuk nama */
+}
+
+.gear-meta {
+  margin-top: auto; /* Category + harga turun ke bawah sebelum tombol */
+}
+
+.gear-category {
+  min-height: 1.5rem; /* Tinggi tetap */
+}
+
+.gear-price {
+  min-height: 1.5rem; /* Tinggi tetap */
+}
+
+/* Custom Scrollbar for Carousel */
+#gearScroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+#gearScroll::-webkit-scrollbar-track {
+  background: rgba(14, 165, 233, 0.1); /* Light sky blue */
+  border-radius: 4px;
+}
+
+#gearScroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #0ea5e9, #3b82f6); /* Sky to blue gradient */
+  border-radius: 4px;
+}
+
+#gearScroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #0284c7, #2563eb); /* Darker on hover */
+}
 </style>
 {% endblock meta %}
 
@@ -42,7 +120,7 @@
     <h1 class="text-6xl font-extrabold drop-shadow-md mb-4">
       Welcome to <span class="text-blue-200">The Rink</span>
     </h1>
-    <p class="text-lg mb-8">Your Premier Ice Sports Destination ⛸️</p>
+    <p class="text-lg mb-8">Your Premier Ice Sports Destination </p>
     <a href="{% url 'rental_gear:catalog' %}"
        class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-full font-semibold shadow-lg transition duration-300">
        Explore Gear
@@ -67,13 +145,13 @@
         <p class="text-blue-700">Quality gear for all skill levels</p>
       </div>
     </a>
-    <div class="fade-up delay-3">
+    <a href="{% url 'events:list' %}" class="fade-up delay-3">
       <div class="p-8 bg-blue-50 rounded-2xl shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 duration-300">
         <div class="text-4xl mb-4">🏆</div>
         <h3 class="text-xl font-semibold text-blue-900 mb-2">Join Events</h3>
         <p class="text-blue-700">Participate in competitions and workshops</p>
       </div>
-    </div>
+    </a>
   </div>
 </section>
 
@@ -85,58 +163,79 @@
     <p class="text-blue-700">Top picks from our premium collection</p>
   </div>
 
-  <!-- Scrollable Gear Carousel -->
-  <div class="relative container mx-auto px-6">
+  <div class="relative container mx-auto px-4 md:px-8 py-6 bg-white/70 backdrop-blur-lg rounded-3xl shadow-inner overflow-hidden">
     <!-- Left arrow -->
     <button id="scrollLeft" 
-      class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
+      class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
       ❮
     </button>
 
     <!-- Right arrow -->
     <button id="scrollRight" 
-      class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
+      class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-blue-100 transition z-10">
       ❯
     </button>
 
-    <!-- Scroll container with gradient edges -->
-    <div id="gearScroll" 
-         class="overflow-x-auto scroll-smooth relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-8 before:bg-gradient-to-r before:from-blue-50 before:to-transparent after:content-[''] after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-l after:from-blue-50 after:to-transparent">
-      <div class="flex gap-8 snap-x snap-mandatory pb-4">
-        {% for gear in gears %}
-        <div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
-          <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:-translate-y-2 duration-300 w-full">
-            <div class="h-56 overflow-hidden">
-              {% if gear.image %}
-                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
-              {% else %}
-                <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
-              {% endif %}
-            </div>
-            <div class="p-6 text-left">
-              <h3 class="text-lg font-semibold text-blue-900">{{ gear.name }}</h3>
-              <p class="text-blue-700 mb-2">Category: {{ gear.get_category_display }} • Size: {{ gear.size }}</p>
-              <div class="font-bold text-blue-800 mb-4">Rp{{ gear.price_per_day }}</div>
-              <div class="flex gap-3">
-                <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
-                <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">{% csrf_token %}
-                  <input type="hidden" name="quantity" value="1">
-                  <input type="hidden" name="days" value="1">
-                  <button type="submit" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200">Add</button>
-                </form>
-              </div>
-            </div>
-          </article>
-        </div>
-        {% empty %}
-          <div class="w-full flex justify-center items-center py-10">
-            <p class="text-blue-800 text-center">No featured items available.</p>
-          </div>
+    <!-- Scrollable container -->
+    <div id="gearScroll" class="relative overflow-x-auto scroll-smooth flex-nowrap px-2 md:px-6 py-4">
+      <div class="flex gap-6 snap-x snap-mandatory pb-6 items-stretch">
+{% for gear in gears %}
+<div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
+  <article class="bg-white border border-blue-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
+    <!-- Gambar -->
+    <div class="h-56 overflow-hidden flex-shrink-0">
+      {% if gear.image %}
+        <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+      {% else %}
+        <div class="w-full h-full bg-blue-200 flex items-center justify-center text-blue-700">No Image</div>
+      {% endif %}
+    </div>
 
-        {% endfor %}
+    <!-- Konten teks -->
+    <div class="p-6 flex flex-col justify-between flex-grow text-left gear-card-content">
+      <div class="gear-info">
+        <!-- Nama -->
+        <h3 class="text-lg font-semibold text-blue-900 gear-name min-h-[3rem] leading-tight mb-1">
+          {{ gear.name }}
+        </h3>
+
+        <!-- Category dan harga (selalu sejajar) -->
+        <div class="gear-meta mt-auto">
+          <p class="text-blue-700 text-sm gear-category min-h-[1.5rem] mb-1">
+            Category: {{ gear.get_category_display }}
+          </p>
+          <div class="font-bold text-blue-800 gear-price min-h-[1.5rem]">
+            ${{ gear.price_per_day }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol -->
+      <div class="flex gap-3 mt-4">
+        <a href="{% url 'rental_gear:gear_detail' gear.id %}"
+           class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
+        <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="days" value="1">
+          <button type="submit"
+                  class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200">Add</button>
+        </form>
+      </div>
+    </div>
+  </article>
+</div>
+{% empty %}
+<div class="w-full flex justify-center items-center py-10">
+  <p class="text-blue-800 text-center">No featured items available.</p>
+</div>
+{% endfor %}
+
+
       </div>
     </div>
   </div>
+</section>
 
 <!-- Testimonials Section -->
 <section class="py-16 bg-gradient-to-b from-blue-100 to-blue-50 text-center">
@@ -152,9 +251,8 @@
     </div>
   </div>
 </section>
-<<<<<<< HEAD
 
-<!-- Fade-up Scroll Animation Script -->
+<!-- Fade-up Scroll Animation + Auto Scroll Script -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const observer = new IntersectionObserver((entries) => {
@@ -167,118 +265,55 @@
     }, { threshold: 0.2 });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    const scrollContainer = document.getElementById("gearScroll");
+    const btnLeft = document.getElementById("scrollLeft");
+    const btnRight = document.getElementById("scrollRight");
+
+    const scrollAmount = 300;
+    let autoScrollInterval;
+
+    btnLeft.addEventListener("click", () => {
+      scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      resetAutoScroll();
+    });
+
+    btnRight.addEventListener("click", () => {
+      scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      resetAutoScroll();
+    });
+
+    const updateButtons = () => {
+      btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
+      btnRight.style.opacity =
+        scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
+          ? "1"
+          : "0.3";
+    };
+
+    scrollContainer.addEventListener("scroll", updateButtons);
+    updateButtons();
+
+    function startAutoScroll() {
+      autoScrollInterval = setInterval(() => {
+        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+        if (scrollContainer.scrollLeft >= maxScroll - 5) {
+          scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        }
+      }, 3000);
+    }
+
+    function resetAutoScroll() {
+      clearInterval(autoScrollInterval);
+      startAutoScroll();
+    }
+
+    scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
+    scrollContainer.addEventListener("mouseleave", startAutoScroll);
+
+    startAutoScroll();
   });
-  document.addEventListener("DOMContentLoaded", function() {
-      const scrollContainer = document.getElementById("gearScroll");
-      const btnLeft = document.getElementById("scrollLeft");
-      const btnRight = document.getElementById("scrollRight");
-
-      const scrollAmount = 300; // jarak geser per klik
-      let autoScrollInterval;
-
-      // Fungsi geser kiri/kanan
-      btnLeft.addEventListener("click", () => {
-        scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-        resetAutoScroll();
-      });
-
-      btnRight.addEventListener("click", () => {
-        scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-        resetAutoScroll();
-      });
-
-      // Auto-hide tombol di ujung kiri/kanan
-      const updateButtons = () => {
-        btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
-        btnRight.style.opacity =
-          scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
-            ? "1"
-            : "0.3";
-      };
-
-      scrollContainer.addEventListener("scroll", updateButtons);
-      updateButtons();
-
-      // Auto-scroll tiap 3 detik
-      function startAutoScroll() {
-        autoScrollInterval = setInterval(() => {
-          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-          if (scrollContainer.scrollLeft >= maxScroll - 5) {
-            scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
-          } else {
-            scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-          }
-        }, 3000);
-      }
-
-      // Hentikan auto-scroll kalau user interaksi
-      function resetAutoScroll() {
-        clearInterval(autoScrollInterval);
-        startAutoScroll();
-      }
-
-      scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
-      scrollContainer.addEventListener("mouseleave", startAutoScroll);
-
-      // Mulai pertama kali
-      startAutoScroll();
-    });
-  document.addEventListener("DOMContentLoaded", function() {
-      const scrollContainer = document.getElementById("gearScroll");
-      const btnLeft = document.getElementById("scrollLeft");
-      const btnRight = document.getElementById("scrollRight");
-
-      const scrollAmount = 300; // jarak geser per klik
-      let autoScrollInterval;
-
-      // Fungsi geser kiri/kanan
-      btnLeft.addEventListener("click", () => {
-        scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-        resetAutoScroll();
-      });
-
-      btnRight.addEventListener("click", () => {
-        scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-        resetAutoScroll();
-      });
-
-      // Auto-hide tombol di ujung kiri/kanan
-      const updateButtons = () => {
-        btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
-        btnRight.style.opacity =
-          scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
-            ? "1"
-            : "0.3";
-      };
-
-      scrollContainer.addEventListener("scroll", updateButtons);
-      updateButtons();
-
-      // Auto-scroll tiap 3 detik
-      function startAutoScroll() {
-        autoScrollInterval = setInterval(() => {
-          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-          if (scrollContainer.scrollLeft >= maxScroll - 5) {
-            scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
-          } else {
-            scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-          }
-        }, 3000);
-      }
-
-      // Hentikan auto-scroll kalau user interaksi
-      function resetAutoScroll() {
-        clearInterval(autoScrollInterval);
-        startAutoScroll();
-      }
-
-      scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
-      scrollContainer.addEventListener("mouseleave", startAutoScroll);
-
-      // Mulai pertama kali
-      startAutoScroll();
-    });
 </script>
-
-
 {% endblock content %}

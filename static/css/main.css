@@ -44,3 +44,17 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;margin:0;background:var(--
 .delay-item-7 { transition-delay: 0.7s; }
 .delay-item-8 { transition-delay: 0.8s; }
 .delay-item-9 { transition-delay: 0.9s; }
+
+.frosted {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 6s linear infinite;
+}

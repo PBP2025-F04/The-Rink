@@ -35,7 +35,7 @@
         <p class="text-gray-700"><strong>Price:</strong> 
             <span class="font-bold">
             {% if event.price > 0 %}
-                Rp {{ event.price|floatformat:0 }}
+                $ {{ event.price|floatformat:0 }}
             {% else %}
                 Free
             {% endif %}
