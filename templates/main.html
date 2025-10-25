@@ -213,7 +213,7 @@
       <div class="flex gap-3 mt-4">
         <a href="{% url 'rental_gear:gear_detail' gear.id %}"
            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Detail</a>
-        <form method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}" class="inline">
+        <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}">
           {% csrf_token %}
           <input type="hidden" name="quantity" value="1">
           <input type="hidden" name="days" value="1">

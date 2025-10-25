@@ -4,6 +4,55 @@
 {% block meta %}
 <title>Checkout — The Rink</title>
 <link rel="stylesheet" href="{% static 'rental_gear/checkout.css' %}">
+<style>
+  /* Tombol Checkout - Ice Theme */
+  .confirm-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 9999px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .confirm-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+  }
+
+  .confirm-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .checkout-page {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    max-width: 700px;
+    margin: 2rem auto;
+  }
+
+  .checkout-page h2 {
+    color: #1e3a8a;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checkout-items {
+    margin-bottom: 2rem;
+  }
+</style>
 {% endblock meta %}
 
 {% block content %}
@@ -16,7 +65,9 @@
 
   <form method="post" class="checkout-form">
     {% csrf_token %}
-    <button type="submit" class="confirm-btn">Confirm</button>
+    <button type="submit" class="confirm-btn">
+      <span class="inline-block align-middle mr-1">🧊</span> Confirm Order
+    </button>
   </form>
 </div>
 {% endblock content %}
