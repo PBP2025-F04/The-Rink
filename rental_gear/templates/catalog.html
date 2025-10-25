@@ -8,7 +8,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="text-center py-16 bg-gradient-to-b from-blue-50 via-blue-100 to-sky-200">
+<section class="text-center py-16 bg-gradient-to-b from-sky-50 via-blue-100 to-sky-200">
   <div class="container mx-auto px-4">
     <h1 class="text-4xl font-extrabold text-sky-900 mb-4 drop-shadow-sm">Our Gear Catalog</h1>
     <p class="text-sky-800 mb-6">Glide through our premium ice gear ❄️</p>
@@ -46,7 +46,7 @@
 </section>
 
 <!-- Featured Gear Section -->
-<section class="py-20 bg-gradient-to-b from-sky-50 to-sky-100">
+<section class="py-20 bg-gradient-to-b from-sky-200 via-sky-100 to-sky-50">
   <div class="container mx-auto text-center mb-12 fade-up delay-1">
     <h2 class="text-3xl font-bold text-sky-900 mb-4">Featured Gear</h2>
     <p class="text-sky-700">Top picks from our premium collection</p>
@@ -68,127 +68,94 @@
     <!-- Scrollable container -->
     <div id="gearScrollCatalog" class="relative overflow-x-auto scroll-smooth flex-nowrap px-2 md:px-6 py-4">
       <div class="flex gap-6 snap-x snap-mandatory pb-6 items-stretch">
-{% for gear in featured_gears %}
-<div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
-  <article class="bg-white border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
-    <!-- Gambar -->
-    <div class="h-56 overflow-hidden flex-shrink-0">
-      {% if gear.image %}
-        <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
-      {% else %}
-        <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
-      {% endif %}
-    </div>
-
-    <!-- Konten teks -->
-    <div class="p-6 flex flex-col justify-between flex-grow text-left gear-card-content">
-      <div class="gear-info">
-        <!-- Nama -->
-        <h3 class="text-lg font-semibold text-sky-900 gear-name min-h-[3rem] leading-tight mb-1">
-          {{ gear.name }}
-        </h3>
-
-        <!-- Category dan harga (selalu sejajar) -->
-        <div class="gear-meta mt-auto">
-          <p class="text-sky-700 text-sm gear-category min-h-[1.5rem] mb-1">
-            Category: {{ gear.get_category_display }}
-          </p>
-          <div class="font-bold text-sky-800 gear-price min-h-[1.5rem]">
-            ${{ gear.price_per_day }}
-          </div>
+        {% for gear in featured_gears %}
+        <div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
+          <article class="bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
+            <div class="h-56 overflow-hidden flex-shrink-0">
+              {% if gear.image %}
+                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+              {% else %}
+                <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
+              {% endif %}
+            </div>
+            <div class="p-6 flex flex-col justify-between flex-grow text-left">
+              <div>
+                <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
+                <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
+                <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
+              </div>
+              <div class="flex gap-3 mt-4">
+                <a href="{% url 'rental_gear:gear_detail' gear.id %}"
+                   class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
+                <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="days" value="1">
+                  <button type="submit"
+                          class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
+                </form>
+              </div>
+            </div>
+          </article>
         </div>
-      </div>
-
-      <!-- Tombol -->
-      <div class="flex gap-3 mt-4">
-        <a href="{% url 'rental_gear:gear_detail' gear.id %}"
-           class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700">Detail</a>
-        <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
-          {% csrf_token %}
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="days" value="1">
-          <button type="submit"
-                  class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200">Add To Cart</button>
-        </form>
-      </div>
-    </div>
-  </article>
-</div>
-{% empty %}
-<div class="w-full flex justify-center items-center py-10">
-  <p class="text-sky-800 text-center">No featured items available.</p>
-</div>
-{% endfor %}
-
-
+        {% empty %}
+        <div class="w-full flex justify-center items-center py-10">
+          <p class="text-sky-800 text-center">No featured items available.</p>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 </section>
 
 <!-- Product Grid -->
-<section class="py-16 bg-gradient-to-b from-sky-100 via-blue-50 to-white">
-  <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-6 transition-all" id="product-grid">
-    {% if gears %}
-      {% for gear in gears %}
-      <article class="bg-white border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
-        <!-- Gambar -->
-        <div class="h-56 overflow-hidden flex-shrink-0">
-          {% if gear.image %}
-            <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
-          {% else %}
-            <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
-          {% endif %}
-        </div>
-
-        <!-- Konten teks -->
-        <div class="p-6 flex flex-col justify-between flex-grow text-left gear-card-content">
-          <div class="gear-info">
-            <!-- Nama -->
-            <h3 class="text-lg font-semibold text-sky-900 gear-name min-h-[3rem] leading-tight mb-1">
-              {{ gear.name }}
-            </h3>
-
-            <!-- Category dan harga (selalu sejajar) -->
-            <div class="gear-meta mt-auto">
-              <p class="text-sky-700 text-sm gear-category min-h-[1.5rem] mb-1">
-                Category: {{ gear.get_category_display }}
-              </p>
-              <div class="font-bold text-sky-800 gear-price min-h-[1.5rem]">
-                ${{ gear.price_per_day }}
-              </div>
+<section class="py-20 bg-gradient-to-b from-sky-50 via-blue-100 to-sky-200">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-sky-900 text-center mb-8">All Products</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 transition-all" id="product-grid">
+      {% if gears %}
+        {% for gear in gears %}
+        <article class="fade-up bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-inner hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
+          <div class="h-56 overflow-hidden flex-shrink-0 rounded-t-2xl">
+            {% if gear.image %}
+              <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+            {% else %}
+              <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
+            {% endif %}
+          </div>
+          <div class="p-6 flex flex-col justify-between flex-grow text-left">
+            <div>
+              <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
+              <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
+              <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
             </div>
+            <div class="flex gap-3 mt-4">
+              <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
+              <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="days" value="1">
+                <button type="submit"
+                        class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
+              </form>
+            </div>
+            {% if user.is_superuser %}
+            <div class="flex gap-3 mt-2">
+              <a href="{% url 'rental_gear:update_gear' gear.id %}" class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition">Edit</a>
+              <a href="{% url 'rental_gear:delete_gear' gear.id %}" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition">Delete</a>
+            </div>
+            {% endif %}
           </div>
-
-          <!-- Tombol -->
-          <div class="flex gap-3 mt-4">
-            <a href="{% url 'rental_gear:gear_detail' gear.id %}"
-               class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700">Detail</a>
-            <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="quantity" value="1">
-              <input type="hidden" name="days" value="1">
-              <button type="submit"
-                      class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200">Add To Cart</button>
-            </form>
-          </div>
-          {% if user.is_superuser %}
-          <div class="flex gap-3 mt-2">
-            <a href="{% url 'rental_gear:update_gear' gear.id %}" class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500">Edit</a>
-            <a href="{% url 'rental_gear:delete_gear' gear.id %}" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">Delete</a>
-          </div>
-          {% endif %}
-        </div>
-      </article>
-      {% endfor %}
-    {% else %}
-      <p class="col-span-full text-center text-sky-700 italic">No products available.</p>
-    {% endif %}
+        </article>
+        {% endfor %}
+      {% else %}
+        <p class="col-span-full text-center text-sky-700 italic">No products available.</p>
+      {% endif %}
+    </div>
   </div>
 </section>
-
-
 {% endblock content %}
+
 
 {% block extra_js %}
 <style>
