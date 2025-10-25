@@ -9,13 +9,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from forum.models import Reply, Post, UpVote
 from django.utils.timezone import localtime
+from django.db.models import Count, Q
+from django.db.models import F
 import json
 
 def show_forum(request):
     posts = Post.objects.all()
-    context = {'posts': posts}
-    return render(request, "home.html", context)
-
+    top_posts = (
+        Post.objects
+        .annotate(total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)))
+        .order_by('-total_up')[:5]
+    )
+    return render(request, "home.html", {"posts": posts, "top_posts": top_posts})
 
 @csrf_exempt
 @require_POST
@@ -257,3 +262,29 @@ def toggle_vote(request):
         })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+# forum/views.py
+def get_top_posts_json(request):
+    posts = (
+        Post.objects
+        .annotate(
+            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)),
+            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
+        )
+        .annotate(score=F('total_up') - F('total_down'))
+        .order_by('-score', '-total_up', '-created_at')[:5]
+    )
+
+    data = [
+        {
+            "id": p.id,
+            "title": p.title,
+            "total_up": p.total_up,
+            "total_down": p.total_down,
+            "replies": p.replies.count(),
+            "thumbnail_url": p.thumbnail_url,
+        }
+        for p in posts
+    ]
+    return JsonResponse(data, safe=False)
+
