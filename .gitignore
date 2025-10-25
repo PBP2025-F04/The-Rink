@@ -109,8 +109,5 @@ GitHub.sublime-settings
 # Visual Studio Code
 .vscode/
 .history
-<<<<<<< HEAD
 Dataset/arena/arena_data_w_hours.json
-=======
-Dataset/arena/arena_data.json
->>>>>>> dev
+

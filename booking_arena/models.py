@@ -19,42 +19,55 @@ class Arena(models.Model):
     def __str__(self):
         return self.name
     
-class TimeSlot(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    DAY_CHOICES = (
-        (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'),
-        (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')
+class ArenaOpeningHours(models.Model):
+    arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='opening_hours_rules')
+    DAY_CHOICES = ((0, 'Senin'), 
+                   (1, 'Selasa'), 
+                   (2, 'Rabu'), 
+                   (3, 'Kamis'),
+                   (4, 'Jumat'), 
+                   (5, 'Sabtu'), 
+                   (6, 'Minggu')
     )
-    arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='time_slot')
     day = models.IntegerField(choices=DAY_CHOICES)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    is_avalaible = models.BooleanField(default=True)
+    open_time = models.TimeField(null=True, blank=True)
+    close_time = models.TimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('arena', 'day') # Satu aturan per hari per arena
+        ordering = ['arena', 'day'] # Urutkan
+        verbose_name = "Opening Hour Rule" # Nama yg bagus di admin
+        verbose_name_plural = "Opening Hours Rules" # Nama jamak yg bagus
 
     def __str__(self):
-        return f"{self.arena.name} - {self.day} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
+        if self.open_time and self.close_time:
+            return f"{self.arena.name} - {self.get_day_display()}: {self.open_time.strftime('%H:%M')} - {self.close_time.strftime('%H:%M')}"
+        else:
+            return f"{self.arena.name} - {self.get_day_display()}: Closed"
 
 class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='bookings')
     STATUS_CHOICES = (
         ('Booked', 'Booked'),
         ('Cancelled', 'Cancelled'),
         ('Completed', 'Completed'),
     )
-    CATEGORY_CHOICES = (
+    ACTIVITY_CHOICES = (
         ('ice_skating', 'Ice Skating'),
         ('ice_hockey', 'Ice Hockey'),
         ('curling', 'Curling'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
-    time_slot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE, null=True)
     date = models.DateField()
+    start_hour = models.IntegerField()
     booked_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Booked')
+    activity = models.CharField(max_length=50, choices=ACTIVITY_CHOICES, blank=True, null=True)
 
     class Meta:
         # Mencegah double book untuk slot & tanggal yang sama
-        unique_together = ('time_slot', 'date')
+        unique_together = ('arena', 'date', 'start_hour')
 
     def __str__(self):
-        return f"{self.user.username} @ {self.time_slot} on {self.date}"
+        return f"{self.user.username} @ {self.arena.name} on {self.date} ({self.start_hour:02d}:00)"
