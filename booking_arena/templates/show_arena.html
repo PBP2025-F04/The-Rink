@@ -28,57 +28,65 @@
   }
 </style>
 
-<div class="container mx-auto px-4 py-12">
-  <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
+<section class="text-center py-16 bg-gradient-to-b from-blue-50 via-blue-100 to-sky-200">
+        <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
 
-  {% if user.is_superuser %}
-    <button type="button" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition duration-200"
-            data-bs-toggle="modal" data-bs-target="#addArenaModal">
-      + Add Arena
-    </button>
-    {% endif %}
-
-  {# Container buat list arena biar gampang di-update JS #}
-  <div id="arena-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for arena in arenas %}
-      {# Card Arena #}
-      <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-{{ arena.id }}"> {# Tambah ID unik #}
-        {# --- TOMBOL DELETE (HANYA SUPERUSER) --- #}
         {% if user.is_superuser %}
-        <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
+        <div class="mb-6">
+            <button type="button" class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-5 py-2 rounded-full hover:from-sky-600 hover:to-blue-600 transition-all shadow-lg"
+            data-bs-toggle="modal" data-bs-target="#addArenaModal">
+                Add New Arena
+            </button>
+        </div>
+        {% endif %}
+</section>
+
+<section class="py-20 bg-gradient-to-b from-sky-50 to-sky-100">
+        
+<div class="container mx-auto px-4 py-12">
+    {# Container buat list arena biar gampang di-update JS #}
+    <div id="arena-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        {% for arena in arenas %}
+        {# Card Arena #}
+        <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-{{ arena.id }}"> {# Tambah ID unik #}
+        {# --- TOMBOL DELETE (HANYA SUPERUSER) --- #}
+            {% if user.is_superuser %}
+            <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
                 data-arena-id="{{ arena.id }}"
                 data-arena-name="{{ arena.name }}"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteArenaModal">
-          X
-        </button>
-        {% endif %}
+            X
+            </button>
+            {% endif %}
         {# --- AKHIR TOMBOL DELETE --- #}
 
-        <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block text-decoration-none color-inherit">
-          {# ... (Konten Card: Gambar, Nama, Lokasi, dll) ... #}
-           {% if arena.img_url %}
+            <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block text-decoration-none color-inherit">
+            {# ... (Konten Card: Gambar, Nama, Lokasi, dll) ... #}
+            {% if arena.img_url %}
              <img class="w-full h-[200px] object-cover" src="{{ arena.img_url }}" alt="{{ arena.name }}">
-           {% else %}
+            {% else %}
              <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
-           {% endif %}
-           <div class="px-6 py-4">
-             <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
-             <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
-             {# ... (Info lain) ... #}
-           </div>
-        </a>
+            {% endif %}
+                <div class="px-6 py-4">
+                    <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
+                    <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
+                    {# ... (Info lain) ... #}
+                </div>
+            </a>
       </div>
-    {% empty %}
-      <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available.</p>
-    {% endfor %}
-  </div>
+        {% empty %}
+        <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available.</p>
+        {% endfor %}
+    </div>
 </div>
+</section>
+  
 
 {# Include template modal (buat di bawah) #}
 {% if user.is_superuser %}
-  {% include 'booking_arena/partials/add_arena_modal.html' %}
-  {% include 'booking_arena/partials/delete_arena_modal.html' %}
+  {% include 'partials/add_arena_modal.html' %}
+  {% include 'partials/delete_arena_modal.html' %}
 {% endif %}
 
 {% endblock content %}
