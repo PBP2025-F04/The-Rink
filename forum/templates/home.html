@@ -2,28 +2,116 @@
 {% load static %}
 
 {% block content %}
-<section class="max-w-2xl mx-auto px-4 py-10 mt-20">
-<!-- ❄️ & 👥 Centered Header -->
-<div class="flex flex-col items-center justify-center mb-8 space-y-2">
+<div class="relative min-h-screen bg-gradient-to-b from-blue-200 via-cyan-20 to-blue-10">
+  <!-- Spacer kecil agar box gak nempel ke navbar -->
+  <div class="h-16"></div>  
+<section 
+  class="max-w-2xl mx-auto px-4 py-10 
+           bg-gradient-to-b from-blue-100 via-cyan-50 to-white 
+           rounded-3xl shadow-md relative overflow-hidden"> 
+  <!-- Header -->
+  <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
+    <div class="flex flex-col items-center justify-center mb-8 space-y-2">
+      <div class="flex items-center justify-center gap-4">
+       <div class="flex items-center justify-center w-8 h-8">
+        <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
+       </div>
+      </div>
 
-  <!-- Baris Ikon Atas -->
-  <div class="flex items-center justify-center gap-4">
-
-    <!-- Ikon Users -->
-    <div class="flex items-center justify-center w-8 h-8">
-      <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
-    </div>
-  </div>
-
-  <!-- Judul Tengah -->
+  <!-- Title -->
   <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">  Forum  Community</span>
   </h1>
+  </div>
+
+  <!-- ✨ Tagline -->
+  <p class="text-lg font-medium text-center mt-3 mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
+    Where ideas grow, and connections come alive
+  </p>
+  
+  <!-- Refresh Button -->
+  <div class="flex justify-center mb-6">
+    <button onclick="refreshPost()" 
+      class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 
+             hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
+             rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+      <i class="fa-solid fa-rotate-right"></i> Refresh
+    </button>
+  </div>
+
+<!-- 🔍 Search Filter -->
+<div class="flex justify-center mt-4 mb-8">
+  <div class="relative w-full max-w-md transform transition-all duration-300 hover:scale-[1.03] focus-within:scale-[1.03]">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Search posts by title..."
+      class="w-full pl-10 pr-4 py-2 rounded-xl border border-cyan-200 shadow-sm 
+             focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
+             outline-none text-gray-700 placeholder-gray-400 transition-all duration-300 bg-white/70 backdrop-blur-sm"
+      oninput="filterBySearch()"
+    />
+    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500"></i>
+  </div>
 </div>
 
 
+<!-- ❄️ Top Posts Leaderboard -->
+<section class="bg-gradient-to-b from-cyan-50 to-blue-50 backdrop-blur-md border border-cyan-100 rounded-2xl p-6 mt-10 mb-10 shadow-sm">
+  <h3 class="text-xl font-extrabold text-cyan-700 mb-5 flex items-center gap-2">
+    <i class="fa-regular fa-snowflake text-cyan-400 animate-spin-slow"></i>
+    Top Posts This Week
+  </h3>
+
+  <div id="top-posts-container"  class="space-y-4">
+    {% for post in top_posts %}
+    <div 
+      class="flex items-center gap-4 p-4 rounded-xl bg-white border border-cyan-100 
+             hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+      onclick="scrollToPost('{{ post.id }}')"
+    >
+      <!-- Thumbnail -->
+      {% if post.thumbnail_url %}
+        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" 
+             class="w-16 h-16 object-cover rounded-lg shadow-sm border border-cyan-100">
+      {% else %}
+        <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400 text-sm border">
+          No Img
+        </div>
+      {% endif %}
+
+      <!-- Title & Meta -->
+      <div class="flex-1">
+        <h4 class="text-cyan-700 font-semibold leading-tight hover:underline">
+          {{ forloop.counter }}. {{ post.title }}
+        </h4>
+        <div class="flex items-center gap-4 text-sm mt-1">
+          <span class="flex items-center gap-1 text-cyan-600">
+            <i class="fa-regular fa-comment-dots"></i>
+            {{ post.replies.count }}
+          </span>
+          <span class="flex items-center gap-1 text-green-600">
+            <i class="fa-solid fa-thumbs-up"></i>
+            {{ post.total_upvotes }}
+          </span>
+          <span class="flex items-center gap-1 text-red-500">
+            <i class="fa-solid fa-thumbs-down"></i>
+            {{ post.total_downvotes }}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <p class="text-gray-500 text-center py-4">No popular posts yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+
+
   <!-- Post Box -->
-  <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
+  <div id="postBox" class="frosted rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
+
     <!-- Input utama -->
     <div  class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
       <input
@@ -61,11 +149,7 @@
         ></textarea>
 
         <!-- Toolbar -->
-        <div id="toolbar"
-  class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
-
-          
-          <!-- Kiri: input URL gambar -->
+        <div id="toolbar" class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
           <div class="flex items-center gap-2 w-full mr-3">
             <i class="fa-regular fa-image text-cyan-500"></i>
             <input
@@ -89,28 +173,55 @@
   </div> 
 
   <!-- Filter Buttons -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
+  
   <button id="filter-all"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500
+           text-white font-semibold px-4 py-2 rounded-md shadow-md
+           transition-all duration-300 transform hover:scale-105 active:scale-95">
     All Post
   </button>
 
   <button id="filter-my"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500
+           text-white font-semibold px-4 py-2 rounded-md shadow-md
+           transition-all duration-300 transform hover:scale-105 active:scale-95">
     My Post
   </button>
 
-   <!-- 🔄 Refresh Button -->
-  <button onclick="refreshPost()" 
-  class="bg-white border border-black text-black font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 hover:bg-gray-100">
-  🔄 Refresh
-</button>
-
 </div>
-
   <!-- Post List -->
   <div id="grid" class="flex flex-col gap-6"></div>
 </section>
+</div>
+
+<!-- Pagination Controls -->
+<div class="flex justify-center items-center gap-3 mt-6 bg-white/70 backdrop-blur-sm border border-cyan-100 rounded-xl px-4 py-2 shadow-sm">
+
+  <!-- Tombol Prev -->
+  <button id="prevBtn"
+    class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+           hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
+           shadow-md transition-all duration-300 transform hover:scale-105 
+           disabled:opacity-40 disabled:cursor-not-allowed">
+    ◀️ Prev
+  </button>
+
+  <!-- Info halaman -->
+  <p id="pagination-info"
+     class="text-gray-700 font-medium bg-cyan-50 px-3 py-1 rounded-md border border-cyan-100">
+     1–10 of 1000
+  </p>
+
+  <!-- Tombol Next -->
+  <button id="nextBtn"
+    class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+           hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
+           shadow-md transition-all duration-300 transform hover:scale-105 
+           disabled:opacity-40 disabled:cursor-not-allowed">
+    Next ▶️
+  </button>
+</div>
 
 <!-- Loading State -->
 <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
@@ -160,12 +271,21 @@
 
   let activeFilter = 'all';
   let allPostData = [];
+  let currentPage = 1;
+  const perPage = 10;
+  
+  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+    loadingSpinner.classList.toggle('hidden', !showLoading);
+    errorMessage.classList.toggle('hidden', !showError);
+    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+    postGridContainer.classList.toggle('hidden', !showGrid);
+
+    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
+  }
 
   function updateFilterButtonsAppearance() {
   const activeClass = "bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105"
   const inactiveClass = "bg-white text-gray-700 border border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-gray-200";
-
-
   if (activeFilter === 'all') {
     showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
     showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
@@ -174,15 +294,6 @@
     showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
     showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
     }
-  }
-
-  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
-    loadingSpinner.classList.toggle('hidden', !showLoading);
-    errorMessage.classList.toggle('hidden', !showError);
-    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
-    postGridContainer.classList.toggle('hidden', !showGrid);
-
-    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
   }
 
   async function fetchPostFromServer() {
@@ -212,105 +323,97 @@
   }
 }
 
+  function buildPost(postItem) {
+    const postElement = document.createElement('div');
+    postElement.dataset.postId = postItem.id;
+    postElement.className =
+      'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
 
-  document.addEventListener('click', e => {
-    const modal = document.getElementById('postDetailModal');
-    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
-      closePostModal();
-    }
-  });
-function buildPost(postItem) {
-  const postElement = document.createElement('div');
-  postElement.dataset.postId = postItem.id;
-  postElement.className =
-    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
+    const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
 
-  const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric'
-  });
+    const thumbnailHtml = postItem.thumbnail_url
+      ? `<img src="${postItem.thumbnail_url}" alt="${postItem.title}" class="w-36 h-36 object-cover rounded-lg border border-gray-200">`
+      : `<div class="w-36 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border">No Image</div>`;
 
-  const thumbnailHtml = postItem.thumbnail_url
-    ? `<img src="${postItem.thumbnail_url}" alt="${postItem.title}" class="w-36 h-36 object-cover rounded-lg border border-gray-200">`
-    : `<div class="w-36 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border">No Image</div>`;
-
-  postElement.innerHTML = `
-    <div class="flex flex-row gap-5 items-start">
-      ${thumbnailHtml}
-      <div class="flex flex-col justify-between flex-1">
-        <div>
-          <div class="flex justify-between text-sm text-gray-500 mb-1">
-            <time>${formattedDate}</time>
-            ${
-              CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
-                ? `<div class="flex gap-3">
-                    <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
-                    <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
-                   </div>`
-                : ''
-            }
+    postElement.innerHTML = `
+      <div class="flex flex-row gap-5 items-start">
+        ${thumbnailHtml}
+        <div class="flex flex-col justify-between flex-1">
+          <div>
+            <div class="flex justify-between text-sm text-gray-500 mb-1">
+              <time>${formattedDate}</time>
+              ${
+                CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
+                  ? `<div class="flex gap-3">
+                      <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
+                      <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
+                    </div>`
+                  : ''
+              }
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
+            <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
-          <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
-        </div>
 
-        <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
-          <button onclick="toggleReplyBox(${postItem.id})" 
-            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-            💬 Reply
-          </button>
-          <div class="flex items-center gap-3">
-            <button onclick="votePost(${postItem.id}, true)" 
-              class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
-                <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+          <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+            <button onclick="toggleReplyBox(${postItem.id})" 
+              class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+              <i class="fa-regular fa-comment-dots"></i> Reply
             </button>
+            <div class="flex items-center gap-3">
+              <button onclick="votePost(${postItem.id}, true)" 
+                class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                  <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+              </button>
 
-            <button onclick="votePost(${postItem.id}, false)" 
-              class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
-                <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
-            </button>
+              <button onclick="votePost(${postItem.id}, false)" 
+                class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                  <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Reply Section -->
-    <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3">
-      <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
-      <div class="flex gap-2">
-        <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
-          class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
-        <button onclick="sendReply(${postItem.id})" 
-          class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">Send</button>
+      <!-- Reply Section -->
+      <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3">
+        <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+        <div class="flex gap-2">
+          <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
+            class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+          <button onclick="sendReply(${postItem.id})" 
+            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">Send</button>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  return postElement;
-}
-
-
-function toggleReplyBox(postId) {
-  const box = document.getElementById(`replyBox-${postId}`);
-  if (box.classList.contains('hidden')) {
-    box.classList.remove('hidden');
-    loadReplies(postId);
-  } else {
-    box.classList.add('hidden');
+    return postElement;
   }
-}
 
-// 🕒 Helper: hitung waktu relatif yang akurat
-function getTimeAgo(createdAtStr) {
-  const createdAt = new Date(createdAtStr);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
-  if (diff < 60) return `${diff}s yang lalu`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m yang lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`;
-  return `${Math.floor(diff / 86400)} hari yang lalu`;
-}
+  function toggleReplyBox(postId) {
+    const box = document.getElementById(`replyBox-${postId}`);
+    if (box.classList.contains('hidden')) {
+      box.classList.remove('hidden');
+      loadReplies(postId);
+    } 
+    else {
+      box.classList.add('hidden');
+    }
+  }
 
-async function loadReplies(postId) {
+  function getTimeAgo(createdAtStr) {
+    const createdAt = new Date(createdAtStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+    if (diff < 60) return `${diff}s yang lalu`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m yang lalu`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`;
+    return `${Math.floor(diff / 86400)} hari yang lalu`;
+  }
+
+  async function loadReplies(postId) {
   const container = document.getElementById(`replies-${postId}`);
   container.innerHTML = `<p class="text-gray-400 text-sm">Loading...</p>`;
 
@@ -391,16 +494,13 @@ async function loadReplies(postId) {
   }
 }
 
-
-function confirmDeleteReply(replyId, postId) {
-  // Buat elemen overlay
+  function confirmDeleteReply(replyId, postId) {
   const overlay = document.createElement("div");
   overlay.className = `
     fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center
     animate-fadeIn
   `;
 
-  // Buat dialog box
   overlay.innerHTML = `
     <div class="bg-white rounded-xl shadow-xl w-80 p-5 text-center animate-scaleIn">
       <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirm Delete</h3>
@@ -420,10 +520,8 @@ function confirmDeleteReply(replyId, postId) {
     </div>
   `;
 
-  // Tambah ke body
   document.body.appendChild(overlay);
 
-  // Event listeners
   document.getElementById("cancelDelete").onclick = () => overlay.remove();
   document.getElementById("confirmDelete").onclick = async () => {
     overlay.remove();
@@ -431,18 +529,7 @@ function confirmDeleteReply(replyId, postId) {
   };
 }
 
-
-
-// 🕓 Auto-update label waktu tiap 1 menit
-setInterval(() => {
-  document.querySelectorAll("[data-created-at]").forEach(el => {
-    el.textContent = getTimeAgo(el.dataset.createdAt);
-  });
-}, 60000);
-
-
-
-async function sendReply(postId) {
+  async function sendReply(postId) {
   if (!CURRENT_USER_ID) {
     window.location.href = "{% url 'authentication:login' %}?next=/forum/";
     return;
@@ -467,11 +554,8 @@ async function sendReply(postId) {
 
     const container = document.getElementById(`replies-${postId}`);
     const initials = newReply.author ? newReply.author[0].toUpperCase() : "U";
-
-    // ✅ Cek apakah user login adalah author reply
     const isAuthor = Number(CURRENT_USER_ID) === Number(newReply.author_id);
 
-    // 💬 Tambahkan reply baru lengkap dengan tombol edit/delete (kalau author)
     container.insertAdjacentHTML("beforeend", `
 <div id="reply-${newReply.id}" 
      class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
@@ -529,10 +613,8 @@ async function sendReply(postId) {
 </div>
     `);
 
-    // Auto scroll ke bawah
     container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
 
-    // Update waktu dinamis di label baru
     const timeLabel = container.querySelector(`[data-created-at="${newReply.created_at}"]`);
     if (timeLabel) timeLabel.textContent = "baru saja";
 
@@ -541,10 +623,7 @@ async function sendReply(postId) {
   }
 }
 
-
-
-
-async function votePost(id, isUpvote) {
+  async function votePost(id, isUpvote) {
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
@@ -563,7 +642,20 @@ async function votePost(id, isUpvote) {
   }
 }
 
-async function voteReply(id, isUpvote) {
+  function scrollToPost(postId) {
+  const target = document.querySelector(`[data-post-id="${postId}"]`);
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add("ring-2", "ring-cyan-400", "bg-cyan-50", "transition");
+    setTimeout(() => {
+      target.classList.remove("ring-2", "ring-cyan-400", "bg-cyan-50");
+    }, 1500);
+  } else {
+    console.warn("Post not found in DOM:", postId);
+  }
+}
+
+  async function voteReply(id, isUpvote) {
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
@@ -582,7 +674,7 @@ async function voteReply(id, isUpvote) {
   }
 }
 
-async function deleteReply(replyId, postId) {
+  async function deleteReply(replyId, postId) {
   try {
     const res = await fetch(`/forum/delete-reply/${replyId}/`, {
       method: "DELETE",
@@ -608,9 +700,7 @@ async function deleteReply(replyId, postId) {
   }
 }
 
-
-
-function showEditReply(replyId, currentContent) {
+  function showEditReply(replyId, currentContent) {
   const contentEl = document.getElementById(`reply-content-${replyId}`);
   const original = contentEl.innerText;
   contentEl.innerHTML = `
@@ -622,12 +712,12 @@ function showEditReply(replyId, currentContent) {
   `;
 }
 
-function cancelEdit(replyId, originalText) {
+  function cancelEdit(replyId, originalText) {
   const contentEl = document.getElementById(`reply-content-${replyId}`);
   contentEl.textContent = originalText;
 }
 
-async function saveEditReply(replyId) {
+  async function saveEditReply(replyId) {
   const textarea = document.getElementById(`edit-text-${replyId}`);
   const newContent = textarea.value.trim();
   if (!newContent) return;
@@ -651,73 +741,67 @@ async function saveEditReply(replyId) {
   }
 }
 
-
-
-
-function filterPosts() {
+  function filterPosts() {
   updateFilterButtonsAppearance();
-  const filtered = activeFilter === 'all'
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  
+  let filtered = activeFilter === 'all'
     ? allPostData
     : allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+  }
 
   if (!filtered.length) displayPageSection({ showEmpty: true });
   else { renderPosts(filtered); displayPageSection({ showGrid: true }); }
 }
 
-  async function openPostModal(id) {
-  const modal = document.getElementById('postDetailModal');
-  const content = document.getElementById('postDetailContent');
 
-  modal.classList.remove('hidden');
-  content.innerHTML = `<p>Loading...</p>`;
-
-  try {
-    const postRes = await fetch(`/forum/json/${id}/`);
-    const post = await postRes.json();
-
-    const replyRes = await fetch(`/forum/get-replies/${id}/`);
-    const replies = await replyRes.json();
-
-    let repliesHtml = replies.map(r => `
-      <div class="bg-gray-50 p-3 rounded-lg mb-2 border">
-        <p class="text-sm text-gray-700"><b>${r.author}</b> ${r.content}</p>
-        <p class="text-xs text-gray-500">${r.created_at}</p>
-      </div>
-    `).join('');
-
-    content.innerHTML = `
-      <h2 class="text-xl font-bold mb-2">${post.title}</h2>
-      <p class="text-gray-700 mb-4">${post.content}</p>
-
-      <div id="repliesSection" class="max-h-64 overflow-y-auto mb-4 p-2 bg-gray-100 rounded-lg">
-        ${repliesHtml || '<p class="text-sm text-gray-500 text-center">Belum ada balasan.</p>'}
-      </div>
-
-      <div class="flex items-center gap-2">
-        <input id="replyInput" type="text" placeholder="Tulis balasan kamu..." class="w-full border rounded-lg px-3 py-2">
-        <button onclick="sendReply(${id})" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Kirim</button>
-      </div>
-    `;
-  } catch (err) {
-    console.error(err);
-    content.innerHTML = `<p class="text-red-500">Gagal memuat data.</p>`;
-  }
-}
-
-function closePostModal() {
+  function closePostModal() {
   document.getElementById('postDetailModal').classList.add('hidden');
 }
-  // Render post
+  
   function renderPosts(postItems) {
-    postGridContainer.innerHTML = '';
-    postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
-  }
+  postGridContainer.innerHTML = '';
+  postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
+}
 
-  // Refresh post
-  function refreshPost() {
-    showToast("Refreshing", "Showing latest posts...");
-    fetchPostFromServer();
-  }
+  async function refreshPost() {
+  showToast("Refreshing", "Showing latest posts...");
+  fetchPostFromServer();
+  refreshTopPosts()
+}
+
+async function refreshTopPosts() {
+  const res = await fetch("{% url 'forum:get_top_posts_json' %}");
+  const data = await res.json();
+  const container = document.querySelector("#top-posts-container");
+
+  container.innerHTML = data.map((p, i) => `
+    <div onclick="scrollToPost('${p.id}')"
+         class="flex items-center gap-4 p-3 rounded-xl bg-white border border-cyan-100 hover:shadow-md hover:scale-[1.02] transition">
+      ${p.thumbnail_url
+        ? `<img src="${p.thumbnail_url}" class="w-16 h-16 rounded-lg object-cover">`
+        : `<div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400">No Img</div>`}
+      <div>
+        <h4 class="text-cyan-700 font-semibold leading-tight hover:underline">${i+1}. ${p.title}</h4>
+        <p class="text-sm text-gray-500 flex items-center gap-3">
+  <span class="flex items-center gap-1 text-cyan-600">
+    <i class="fa-regular fa-comment-dots"></i> ${p.replies}
+  </span>
+  <span class="flex items-center gap-1 text-green-600">
+    <i class="fa-solid fa-thumbs-up"></i> ${p.total_up}
+  </span>
+  <span class="flex items-center gap-1 text-red-500">
+    <i class="fa-solid fa-thumbs-down"></i> ${p.total_down}
+  </span>
+</p>
+
+      </div>
+    </div>
+  `).join('');
+}
 
   function toggleExpandBox() {
   if (!CURRENT_USER_ID) {
@@ -768,8 +852,39 @@ function closePostModal() {
   }
 }
 
+  function filterBySearch() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const filtered = allPostData.filter(p =>
+    p.title.toLowerCase().includes(query)
+  );
 
+  if (!filtered.length) {
+    displayPageSection({ showEmpty: true });
+  } else {
+    renderPosts(filtered);
+    displayPageSection({ showGrid: true });
+  }
 
+  const info = document.getElementById("pagination-info");
+  if (query) {
+    info.textContent = `1–${filtered.length} of ${filtered.length}`;
+  } else {
+    renderPaginatedPosts();
+  }
+}
+
+  function jumpToSearchedPost() {
+  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+  if (!query) return;
+
+  const targetPost = allPostData.find(p => p.title.toLowerCase().includes(query));
+
+  if (targetPost) {
+    scrollToPost(targetPost.id);
+  } else {
+    
+  }
+}
 
   function adjustExpandedHeight() {
   const box = document.getElementById("expandedBox");
@@ -778,8 +893,55 @@ function closePostModal() {
   }
 }
 
-// Handle POST submission
-document.getElementById("postBtn").addEventListener("click", async () => {
+  function renderPaginatedPosts() {
+  const total = allPostData.length;
+  const totalPages = Math.ceil(total / perPage);
+
+  // 🧩 kalau tidak ada post sama sekali
+  if (total === 0) {
+    document.getElementById("pagination-info").textContent = "0–0 of 0";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+    return; // keluar biar gak lanjut render
+  }
+
+  const start = (currentPage - 1) * perPage;
+  const end = Math.min(start + perPage, total);
+  const visiblePosts = allPostData.slice(start, end);
+
+  postGridContainer.innerHTML = '';
+  visiblePosts.forEach(p => postGridContainer.appendChild(buildPost(p)));
+
+  document.getElementById("pagination-info").textContent = `${start + 1}–${end} of ${total}`;
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
+}
+
+  function nextPage() {
+  const totalPages = Math.ceil(allPostData.length / perPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderPaginatedPosts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+  function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderPaginatedPosts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+  setInterval(() => {
+    document.querySelectorAll("[data-created-at]").forEach(el => {
+      el.textContent = getTimeAgo(el.dataset.createdAt);
+    });
+  }, 60000);
+
+  // Handle POST submission
+  document.getElementById("postBtn").addEventListener("click", async () => {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
   const imageUrl = document.getElementById("thumbnailUrl").value.trim();
@@ -829,8 +991,22 @@ document.getElementById("postBtn").addEventListener("click", async () => {
     postBtn.textContent = "Post";
   }
 });
+  
+  document.getElementById("searchInput").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); // biar gak reload halaman
+    jumpToSearchedPost();
+  }
+});
 
-
+  document.getElementById("searchInput").blur();
+  
+  document.addEventListener('click', e => {
+    const modal = document.getElementById('postDetailModal');
+    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+      closePostModal();
+    }
+  });
 
   // Refresh post list when post added, edited, or deleted
   document.addEventListener('postAdded', fetchPostFromServer);
@@ -854,9 +1030,13 @@ document.getElementById("postBtn").addEventListener("click", async () => {
   if (savedFilter) {
     activeFilter = savedFilter;
   }
+  
   // Load Post
   updateFilterButtonsAppearance();
-  fetchPostFromServer();
+  fetchPostFromServer().then(() => {
+    renderPaginatedPosts();
+  });
 </script>
+
 {% include 'modal.html' %}
 {% endblock content%}
