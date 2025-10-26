@@ -305,12 +305,12 @@
               <i class="fa-regular fa-comment-dots"></i> Reply
             </button>
             <div class="flex items-center gap-3">
-              <button onclick="votePost(${postItem.id}, true)" 
+              <button onclick="votePost(${postItem.id}, true, event)" 
                 class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
                   <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
               </button>
 
-              <button onclick="votePost(${postItem.id}, false)" 
+              <button onclick="votePost(${postItem.id}, false, event)" 
                 class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
                   <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
               </button>
@@ -651,22 +651,35 @@ async function replyToUser(username, postId, event) {
   }, 10);
 }
 
-  async function votePost(id, isUpvote) {
+  async function votePost(id, isUpvote, event) {
+  if (event) event.stopPropagation();
+
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken":  csrftoken,
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       },
       credentials: "include",
       body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
     });
 
+    if (!res.ok) throw new Error("Failed to vote");
+
     const data = await res.json();
+
     document.getElementById(`up-${id}`).textContent = data.upvotes;
     document.getElementById(`down-${id}`).textContent = data.downvotes;
-  } catch {
+
+    const index = allPostData.findIndex(p => p.id === id);
+    if (index !== -1) {
+      allPostData[index].upvotes_count = data.upvotes;
+      allPostData[index].downvotes_count = data.downvotes;
+    }
+
+  } catch (error) {
+    console.error(error);
     showToast("Error", "Gagal vote", "error");
   }
 }
