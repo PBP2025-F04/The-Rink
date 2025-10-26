@@ -45,10 +45,13 @@ class AuthenticationTestCase(TestCase):
             description='Test description',
             seller=self.seller
         )
+        # Create event in the future so it counts in dashboard
+        from django.utils import timezone
+        future_date = timezone.now().date() + timezone.timedelta(days=30)
         self.event = Event.objects.create(
             name='Test Event',
             description='Test event description',
-            date='2024-12-25'
+            date=future_date
         )
         self.post = Post.objects.create(
             title='Test Post',
@@ -66,6 +69,12 @@ class AuthenticationTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 302)  # Redirect to dashboard
         self.assertTrue(self.client.session.get('is_admin'))
+        # Check that admin user is created and logged in
+        admin_user = User.objects.get(username='cbkadal')
+        self.assertTrue(admin_user.is_staff)
+        self.assertTrue(admin_user.is_superuser)
+        self.assertEqual(admin_user.first_name, 'Admin')
+        self.assertEqual(admin_user.last_name, 'The Rink')
 
     def test_admin_login_failure(self):
         """Test failed admin login with wrong credentials"""
@@ -158,9 +167,9 @@ class AuthenticationTestCase(TestCase):
 
         # Check context data - adjust expected values based on test setup
         self.assertEqual(response.context['gear_count'], 1)
-        self.assertEqual(response.context['event_count'], 5)  # May include existing events
+        self.assertEqual(response.context['event_count'], 1)  # Only the future event we created
         self.assertEqual(response.context['post_count'], 1)
-        self.assertEqual(response.context['user_count'], 2)  # testuser and testseller
+        self.assertEqual(response.context['user_count'], 3)  # testuser, testseller, and admin user
 
     def test_admin_user_update(self):
         """Test updating user information as admin"""

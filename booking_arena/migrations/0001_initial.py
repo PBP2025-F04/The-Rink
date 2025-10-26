@@ -28,22 +28,7 @@ class Migration(migrations.Migration):
                 ('google_maps_url', models.URLField(blank=True, max_length=500, null=True)),
             ],
         ),
-        migrations.CreateModel(
-            name='ArenaOpeningHours',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('day', models.IntegerField(choices=[(0, 'Senin'), (1, 'Selasa'), (2, 'Rabu'), (3, 'Kamis'), (4, 'Jumat'), (5, 'Sabtu'), (6, 'Minggu')])),
-                ('open_time', models.TimeField(blank=True, null=True)),
-                ('close_time', models.TimeField(blank=True, null=True)),
-                ('arena', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='opening_hours_rules', to='booking_arena.arena')),
-            ],
-            options={
-                'verbose_name': 'Opening Hour Rule',
-                'verbose_name_plural': 'Opening Hours Rules',
-                'ordering': ['arena', 'day'],
-                'unique_together': {('arena', 'day')},
-            },
-        ),
+
         migrations.CreateModel(
             name='Booking',
             fields=[
