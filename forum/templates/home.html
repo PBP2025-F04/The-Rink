@@ -310,7 +310,6 @@
                 <i class="fa-regular fa-thumbs-up"></i>  
                 <span id="post-up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
             </button>
-
             <button onclick="votePost(${postItem.id}, false, event, 'post')" 
               class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
                 <i class="fa-regular fa-thumbs-down"></i>  
@@ -318,22 +317,23 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Reply Box Section -->
-    <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3 transition-all duration-500 ease-in-out">
-      <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
-      <div class="flex gap-2">
-        <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
-          class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
-        <button onclick="sendReply(${postItem.id})" 
-          class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
-                 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-          Send
-        </button>
-      </div>
-    </div>
+        <!-- Reply section -->
+        <div id="replyBox-${postItem.id}" 
+             class="hidden mt-3 border-t pt-3 text-sm text-gray-700 transition-all duration-500 ease-in-out overflow-hidden">
+          <div id="replies-${postItem.id}" 
+               class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+          <div class="flex gap-2 mt-3">
+            <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
+              class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+            <button onclick="sendReply(${postItem.id})" 
+              class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
+                     text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+              Send
+            </button>
+          </div>
+        </div>
+
   `;
   return postElement;
 }
