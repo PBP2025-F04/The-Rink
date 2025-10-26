@@ -1,0 +1,3 @@
+- [x] Update Featured Gear section: Modify Add to Cart button condition to show only for authenticated users who are not superusers and not sellers
+- [x] Update Product Grid section: Modify Add to Cart button condition to show only for authenticated users who are not superusers and not sellers
+- [x] Ensure Edit/Delete buttons remain only for superusers or sellers in Product Grid
