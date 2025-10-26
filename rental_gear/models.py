@@ -8,6 +8,7 @@ class Gear(models.Model):
     CATEGORY_CHOICES = [
         ('hockey', 'Hockey'),
         ('curling', 'Curling'),
+        ('ice_skating', 'Ice Skating'),
         ('apparel', 'Apparel'),
         ('accessories', 'Accessories'),
         ('protective_gear', 'Protective Gear'),

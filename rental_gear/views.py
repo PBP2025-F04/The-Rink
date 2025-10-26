@@ -37,10 +37,10 @@ def create_gear(request):
             gear.seller = request.user
             gear.save()
             messages.success(request, 'Equipment berhasil ditambahkan!')
-            return redirect('rental_gear:catalog')
+            return redirect('authentication:seller_profile')
     else:
         form = GearForm()
-    return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Add'})
+    return render(request, 'rental_gear/seller_gear_form.html', {'form': form, 'action': 'Add'})
 
 
 def catalog(request):
@@ -58,18 +58,20 @@ def update_gear(request, id):
     if request.method == 'POST':
         form = GearForm(request.POST, request.FILES, instance=gear)
         if form.is_valid():
-            form.save()
+            gear = form.save(commit=False)
+            gear.seller = request.user
+            gear.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
             else:
                 messages.success(request, 'Equipment berhasil diupdate!')
-                return redirect('rental_gear:catalog')
+                return redirect('authentication:seller_profile')
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = GearForm(instance=gear)
-    return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Edit'})
+    return render(request, 'rental_gear/seller_gear_form.html', {'form': form, 'action': 'Edit'})
 
 # Delete
 @login_required
@@ -82,8 +84,8 @@ def delete_gear(request, id):
             return JsonResponse({'success': True})
         else:
             messages.success(request, 'Equipment berhasil dihapus!')
-            return redirect('rental_gear:catalog')
-    return render(request, 'rental_gear/gear_confirm_delete.html', {'gear': gear})
+            return redirect('authentication:seller_profile')
+    return render(request, 'rental_gear/seller_gear_confirm_delete.html', {'gear': gear})
 
 def filter_gear(request):
     category = request.GET.get('category')
