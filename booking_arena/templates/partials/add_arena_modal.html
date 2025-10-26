@@ -1,8 +1,87 @@
 {# File: booking_arena/templates/partials/add_arena_modal.html #}
 
 <div class="modal fade" id="addArenaModal" tabindex="-1" aria-labelledby="addArenaModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg"> {# Modal lebih besar #}
+  <div class="modal-dialog modal-lg">
     <div class="modal-content rounded-xl">
+<<<<<<< HEAD
+      
+      <form id="add-arena-form" action="{% url 'booking_arena:add_arena_ajax' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-header border-b-0">
+          <h5 class="modal-title text-sky-800 font-semibold" id="addArenaModalLabel">Add New Arena</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body text-gray-700">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mb-3">
+              <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Nama Arena</label>
+              {{ form.name }}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.capacity.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Kapasitas</label>
+              {{ form.capacity }}
+            </div>
+            <div class="md:col-span-2 mb-3">
+              <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+              {{ form.location }}
+            </div>
+            <div class="md:col-span-2 mb-3">
+              <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+              {{ form.description }}
+            </div>
+            <div class="md:col-span-2 mb-3">
+              <label for="{{ form.img_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">URL Gambar</label>
+              {{ form.img_url }}
+            </div>
+             <div class="md:col-span-2 mb-3">
+              <label for="{{ form.google_maps_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">URL Google Maps Embed</label>
+              {{ form.google_maps_url }}
+            </div>
+          </div>
+          
+          <hr class="my-4">
+          
+          <h6 class="font-semibold text-sky-800">Jam Operasional</h6>
+          <p class="text-xs text-gray-500 mb-2">Kosongkan jam jika hari itu tutup.</p>
+          
+          {{ formset.management_form }}
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead>
+                <tr class="text-xs text-left text-gray-600">
+                  <th class="py-2 px-2" style="width: 30%;">Hari</th>
+                  <th class="py-2 px-2" style="width: 35%;">Jam Buka</th>
+                  <th class="py-2 px-2" style="width: 35%;">Jam Tutup</th>
+                </tr>
+              </thead>
+              <tbody>
+                {# Looping formset-nya #}
+                {% for hour_form in formset %}
+                  <tr class="border-b border-gray-200">
+                    <td class="py-2 px-2 align-middle">
+                      <strong class="text-sm text-gray-800">{{ hour_form.instance.get_day_display }}</strong>
+                      {# Simpen 'day' di hidden input (udah di-handle forms.py) #}
+                      {{ hour_form.day }}
+                    </td>
+                    <td class="py-2 px-2">{{ hour_form.open_time }}</td>
+                    <td class="py-2 px-2">{{ hour_form.close_time }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+        
+        <div class="modal-footer border-t-0">
+          <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-white font-semibold rounded-lg shadow-md gradient-btn" style="background: linear-gradient(90deg, #00b4d8, #0077b6);">Save Arena</button>
+        </div>
+      </form>
+      
+=======
       <div class="modal-header border-b-0">
         <h5 class="modal-title text-sky-800 font-semibold" id="addArenaModalLabel">Add New Arena</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -23,6 +102,7 @@
           </div>
       {% endfor %} #}
   </div>
+>>>>>>> dev
     </div>
   </div>
 </div>

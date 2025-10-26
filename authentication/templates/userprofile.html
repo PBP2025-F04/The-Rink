@@ -1,5 +1,4 @@
-{% extends 'base.html' %} {% load static indodate %} {% block title %} Profil
-Pengguna - The Rink {% endblock %} {% block content %}
+{% extends 'base.html' %} {% load static indodate %} {% block title %} User Profile - The Rink {% endblock %} {% block content %}
 <div
   class="container-fluid py-5"
   style="
@@ -20,11 +19,10 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 </div>
                 <div>
                   <h2 class="mb-0 fw-bold text-dark">
-                    👋 Halo, {{ user.first_name|default:user.username }}!
+                    👋 Hello, {{ user.first_name|default:user.username }}!
                   </h2>
                   <p class="text-muted mb-0 small">
-                    Kelola profil Anda dan jadikan pengalaman skating lebih
-                    personal
+                    Manage your profile and make your skating experience more personal
                   </p>
                 </div>
               </div>
@@ -35,7 +33,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 data-bs-target="#editProfileModal"
                 class="btn btn-primary rounded-pill px-4 py-2"
               >
-                <i class="fas fa-edit me-2"></i>Edit Profil
+                <i class="fas fa-edit me-2"></i>Edit Profile
               </button>
             </div>
           </div>
@@ -49,13 +47,13 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-user text-primary me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >NAMA LENGKAP</span
+                        >FULL NAME</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
                       {% if full_name_display %} {{ full_name_display }} 
-                      {% else%}
-                      <strong>Belum diisi</strong>
+                      {% else %}
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -65,13 +63,13 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-phone text-success me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >NOMOR TELEPON</span
+                        >PHONE NUMBER</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
                       {% if profile.phone_number %} {{ profile.phone_number }}
                       {% else %}
-                      <strong>Belum diisi</strong>
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -84,7 +82,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
                       {% if profile.email %} {{ profile.email }} {% else %}
-                      <strong>Belum diisi</strong>
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -94,13 +92,12 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-calendar text-warning me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >TANGGAL LAHIR</span
+                        >DATE OF BIRTH</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
-                      {% if profile.date_of_birth %} {{
-                      profile.date_of_birth|indodate }} {% else %}
-                      <strong>Belum diisi</strong>
+                      {% if profile.date_of_birth %} {{ profile.date_of_birth|date:"M d, Y" }} {% else %}
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -109,12 +106,12 @@ Pengguna - The Rink {% endblock %} {% block content %}
                   <div class="info-card p-4 rounded-3 bg-light border">
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                      <span class="fw-semibold text-muted small">ALAMAT</span>
+                      <span class="fw-semibold text-muted small">ADDRESS</span>
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewAddress">
                       {% if profile.address %} {{ profile.address|linebreaks }}
                       {% else %}
-                      <strong>Belum diisi</strong>
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -140,7 +137,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header bg-gradient-primary text-white">
         <h5 class="modal-title fw-bold" id="editProfileModalLabel">
-          <i class="fas fa-edit me-2"></i>Edit Profil Pengguna
+          <i class="fas fa-edit me-2"></i>Edit User Profile
         </h5>
         <button
           type="button"
@@ -167,7 +164,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 <img
                   id="modalProfileImage"
                   src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'images/default-profile.svg' %}{% endif %}"
-                  alt="Foto Profil"
+                  alt="Profile Picture"
                   class="w-100 h-100 object-fit-cover"
                 />
               </div>
@@ -186,14 +183,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
               </div>
             </div>
             <p class="text-muted small mt-2">
-              Klik ikon kamera untuk mengubah foto profil
+              Click the camera icon to change profile picture
             </p>
           </div>
 
           <div class="row g-3">
             <div class="col-md-6">
               <label for="modal_full_name" class="form-label fw-bold text-dark">
-                <i class="fas fa-user text-primary me-2"></i>Nama Lengkap
+                <i class="fas fa-user text-primary me-2"></i>Full Name
               </label>
               <input
                 type="text"
@@ -201,7 +198,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_full_name"
                 name="full_name"
                 value="{{ profile.full_name }}"
-                placeholder="Masukkan nama lengkap"
+                placeholder="Enter full name"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -210,7 +207,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 for="modal_phone_number"
                 class="form-label fw-bold text-dark"
               >
-                <i class="fas fa-phone text-success me-2"></i>Nomor Telepon
+                <i class="fas fa-phone text-success me-2"></i>Phone Number
               </label>
               <input
                 type="text"
@@ -218,7 +215,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_phone_number"
                 name="phone_number"
                 value="{{ profile.phone_number }}"
-                placeholder="Masukkan nomor telepon"
+                placeholder="Enter phone number"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -232,7 +229,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_email"
                 name="email"
                 value="{{ profile.email }}"
-                placeholder="Masukkan email"
+                placeholder="Enter email"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -241,7 +238,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 for="modal_date_of_birth"
                 class="form-label fw-bold text-dark"
               >
-                <i class="fas fa-calendar text-warning me-2"></i>Tanggal Lahir
+                <i class="fas fa-calendar text-warning me-2"></i>Date of Birth
               </label>
               <input
                 type="date"
@@ -254,14 +251,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
             </div>
             <div class="col-12">
               <label for="modal_address" class="form-label fw-bold text-dark">
-                <i class="fas fa-map-marker-alt text-danger me-2"></i>Alamat
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>Address
               </label>
               <textarea
                 class="form-control form-control-lg rounded-3 border-0 shadow-sm"
                 id="modal_address"
                 name="address"
                 rows="3"
-                placeholder="Masukkan alamat lengkap"
+                placeholder="Enter full address"
                 style="background: rgba(255, 255, 255, 0.8)"
               >
 {{ profile.address }}</textarea
@@ -275,14 +272,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
             class="btn btn-outline-secondary rounded-pill px-4"
             data-bs-dismiss="modal"
           >
-            <i class="fas fa-times me-2"></i>Batal
+            <i class="fas fa-times me-2"></i>Cancel
           </button>
           <button
             type="submit"
             class="btn btn-primary rounded-pill px-5"
             id="modalSaveBtn"
           >
-            <i class="fas fa-save me-2"></i>Simpan Perubahan
+            <i class="fas fa-save me-2"></i>Save Changes
           </button>
         </div>
       </form>
@@ -373,24 +370,26 @@ Pengguna - The Rink {% endblock %} {% block content %}
       profileModal.show();
     });
 
-    // Fungsi untuk format tanggal ke bahasa Indonesia
-    function formatDateIndo(dateStr) {
+    // Function to format date in English
+    function formatDateEnglish(dateStr) {
       const date = new Date(dateStr);
       const months = [
-        "Januari",
-        "Februari",
-        "Maret",
+        "January",
+        "February",
+        "March",
         "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
+        "May",
+        "June",
+        "July",
+        "August",
         "September",
-        "Oktober",
+        "October",
         "November",
-        "Desember",
+        "December",
       ];
-      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      return `${
+        months[date.getMonth()]
+      } ${date.getDate()}, ${date.getFullYear()}`;
     }
 
     // Modal form submission
@@ -402,7 +401,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
       var submitBtn = $("#modalSaveBtn");
       var originalText = submitBtn.html();
       submitBtn
-        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...')
         .prop("disabled", true);
 
       $.ajax({
@@ -420,35 +419,35 @@ Pengguna - The Rink {% endblock %} {% block content %}
             $("#viewFullName").html(
               $("#modal_full_name").val() && $("#modal_full_name").val().trim()
                 ? $("#modal_full_name").val()
-                : "<strong>Belum diisi</strong>"
+                : "<strong>Not Provided</strong>"
             );
             $("#viewPhone").html(
               $("#modal_phone_number").val()
                 ? $("#modal_phone_number").val()
-                : "<strong>Belum diisi</strong>"
+                : "<strong>Not Provided</strong>"
             );
             $("#viewEmail").html(
               $("#modal_email").val()
                 ? $("#modal_email").val()
-                : "<strong>Belum diisi</strong>"
+                : "<strong>Not Provided</strong>"
             );
 
             const birthDate = $("#modal_date_of_birth").val();
             if (birthDate) {
-              $("#viewBirthDate").html(formatDateIndo(birthDate));
+              $("#viewBirthDate").html(formatDateEnglish(birthDate));
             } else {
-              $("#viewBirthDate").html("<strong>Belum diisi</strong>");
+              $("#viewBirthDate").html("<strong>Not Provided</strong>");
             }
 
             $("#viewAddress").html(
               $("#modal_address").val()
                 ? $("#modal_address").val().replace(/\n/g, "<br>")
-                : "<strong>Belum diisi</strong>"
+                : "<strong>Not Provided</strong>"
             );
 
             // Show success state
             submitBtn
-              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .html('<i class="fas fa-check me-2"></i>Saved!')
               .removeClass("btn-primary")
               .addClass("btn-success");
 
@@ -463,12 +462,12 @@ Pengguna - The Rink {% endblock %} {% block content %}
             }, 1500);
           } else {
             submitBtn.html(originalText).prop("disabled", false);
-            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+            alert("An error occurred: " + JSON.stringify(response.errors));
           }
         },
         error: function () {
           submitBtn.html(originalText).prop("disabled", false);
-          alert("Terjadi kesalahan saat menyimpan data.");
+          alert("An error occurred while saving data.");
         },
       });
     });
@@ -497,7 +496,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
     $("#editProfileModal").on("hidden.bs.modal", function () {
       $("#modalProfileForm")[0].reset();
       $("#modalSaveBtn")
-        .html('<i class="fas fa-save me-2"></i>Simpan Perubahan')
+        .html('<i class="fas fa-save me-2"></i>Save Changes')
         .prop("disabled", false)
         .removeClass("btn-success")
         .addClass("btn-primary");

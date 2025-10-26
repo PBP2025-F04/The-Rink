@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block title %}Admin - Delete Gear{% endblock %} 
+{% extends 'base.html' %} {% block title %}Seller - Delete Gear{% endblock %} 
+
 {% block content %}
 <div class="container mx-auto px-4 py-8">
   <!-- Header -->
@@ -8,10 +9,10 @@
       <p class="text-blue-700 mt-2">Confirm deletion of gear item</p>
     </div>
     <a
-      href="{% url 'rental_gear:admin_gear_list' %}"
+      href="{% url 'authentication:seller_profile' %}"
       class="bg-gradient-to-r from-gray-500 to-gray-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-500 transition-all duration-300 font-medium"
     >
-      <i class="fas fa-arrow-left mr-2"></i>Back to List
+      <i class="fas fa-arrow-left mr-2"></i>Back to Profile
     </a>
   </div>
 
@@ -110,7 +111,7 @@
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-4">
           <a
-            href="{% url 'rental_gear:catalog' %}"
+            href="{% url 'authentication:seller_profile' %}"
             class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
           >
             <i class="fas fa-times mr-2"></i>Cancel
@@ -130,3 +131,12 @@
   </div>
 </div>
 {% endblock %}
+<environment_details>
+  # VSCode Visible Files
+  rental_gear/templates/rental_gear/seller_gear_confirm_delete.html # VSCode
+  Open Tabs rental_gear/templates/rental_gear/admin_gear_form.html
+  rental_gear/templates/rental_gear/admin_gear_confirm_delete.html
+  authentication/templates/sellerprofile.html
+  rental_gear/templates/rental_gear/seller_gear_form.html
+  rental_gear/templates/rental_gear/seller_gear_confirm_delete.html
+</environment_details>
