@@ -261,4 +261,9 @@ document.addEventListener("postAdded", refreshTopPosts);
 document.addEventListener("postEdited", refreshTopPosts);
 document.addEventListener("postDeleted", refreshTopPosts);
 
+document.addEventListener("postEdited", async () => {
+  await fetchPostFromServer();
+  filterPosts();
+  refreshTopPosts();
+});
 </script>
