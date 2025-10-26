@@ -266,15 +266,13 @@
 }
 
   function buildPost(postItem) {
-  const postElement = document.createElement("div");
+  const postElement = document.createElement('div');
   postElement.dataset.postId = postItem.id;
   postElement.className =
-    "bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4";
+    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
 
-  const formattedDate = new Date(postItem.created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric'
   });
 
   const thumbnailHtml = postItem.thumbnail_url
@@ -282,83 +280,47 @@
     : `<div class="w-36 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border">No Image</div>`;
 
   postElement.innerHTML = `
-  <div class="flex flex-row gap-5 items-start">
-    ${thumbnailHtml}
-
-    <!-- KANAN -->
-    <div class="flex flex-col justify-between flex-1">
-      <div>
-        <div class="flex justify-between text-sm text-gray-500 mb-1">
-          <time>${formattedDate}</time>
-          ${
-            CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
-              ? `<div class="flex gap-3">
-                  <button onclick='showEditModal(${JSON.stringify(
-                    postItem
-                  )})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
-                  <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
-                </div>`
-              : ""
-          }
+    <div class="flex flex-row gap-5 items-start">
+      ${thumbnailHtml}
+      <div class="flex flex-col justify-between flex-1">
+        <div>
+          <div class="flex justify-between text-sm text-gray-500 mb-1">
+            <time>${formattedDate}</time>
+            ${
+              CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
+                ? `<div class="flex gap-3">
+                    <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
+                    <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
+                  </div>`
+                : ''
+            }
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
+          <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
         </div>
 
-        <h3 class="text-lg font-semibold text-gray-900 mb-1">${
-          postItem.title || "Untitled"
-        }</h3>
-        <p class="text-gray-700 text-sm leading-relaxed mb-2">${
-          postItem.content || ""
-        }</p>
-      </div>
-
-      <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
-        <button onclick="toggleReplyBox(${postItem.id})"
-          class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-          <i class="fa-regular fa-comment-dots"></i> Reply
-        </button>
-
-        <div class="flex items-center gap-3">
-          <button onclick="votePost(${postItem.id}, true, event)"
-            class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
-            <i class="fa-regular fa-thumbs-up"></i>
-            <span id="up-${postItem.id}" class="font-medium">${
-              postItem.upvotes_count || 0
-            }</span>
+        <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+          <button onclick="toggleReplyBox(${postItem.id}, event)" 
+            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+            <i class="fa-regular fa-comment-dots"></i> Reply
           </button>
+          <div class="flex items-center gap-3">
+            <button onclick="votePost(${postItem.id}, true, event, 'post')" 
+              class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                <i class="fa-regular fa-thumbs-up"></i>  
+                <span id="post-up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+            </button>
 
-          <button onclick="votePost(${postItem.id}, false, event)"
-            class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
-            <i class="fa-regular fa-thumbs-down"></i>
-            <span id="down-${postItem.id}" class="font-medium">${
-              postItem.downvotes_count || 0
-            }</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ✅ Reply Box di dalam kolom kanan, sejajar bawah gambar -->
-      <div id="replyBox-${postItem.id}" 
-           class="hidden mt-3 overflow-hidden transition-all duration-500 ease-in-out">
-        <div class="border-t pt-3 text-sm text-gray-700 bg-white/70 rounded-xl shadow-inner px-3 pb-3">
-          <div id="replies-${postItem.id}" 
-               class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
-
-          <div class="flex gap-2 mt-3">
-            <input id="replyInput-${postItem.id}" 
-                   type="text" 
-                   placeholder="Create your reply" 
-                   class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 bg-white/70 backdrop-blur-sm">
-            <button onclick="sendReply(${postItem.id})" 
-                    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
-                           text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-              Send
+            <button onclick="votePost(${postItem.id}, false, event, 'post')" 
+              class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                <i class="fa-regular fa-thumbs-down"></i>  
+                <span id="post-down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
             </button>
           </div>
         </div>
       </div>
-    </div> <!-- /flex-1 -->
-  </div> <!-- /flex-row -->
-`;
-
+    </div>
+  `;
   return postElement;
 }
 
