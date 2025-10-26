@@ -1,14 +1,66 @@
-{% for item in cart_items %}
-<div class="cart-item" data-id="{{ item.id }}">
-  <div class="item-name">{{ item.gear.name }}</div>
-  <div class="item-details">
-    <div>Qty: {{ item.quantity }}</div>
-    <div>Days: {{ item.days }}</div>
-    <div>Price/day: Rp{{ item.gear.price_per_day }}</div>
+{% load static %}
+
+<div id="cart-container" class="space-y-4">
+  {% for item in cart_items %}
+  <div class="cart-item bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-blue-100 hover:shadow-md transition-all duration-300 p-5 flex justify-between items-center"
+       data-id="{{ item.id }}">
+    
+    <!-- Left: Item info -->
+    <div class="flex flex-col">
+      <h3 class="text-blue-900 font-semibold text-lg">{{ item.gear.name }}</h3>
+      <p class="text-sm text-blue-700 mt-1">
+        Quantity: <span class="font-medium">{{ item.quantity }}</span> |
+        Days: <span class="font-medium">{{ item.days }}</span> |
+        Price/day: <span class="font-medium">${{ item.gear.price_per_day }}</span>
+      </p>
+      <p class="text-blue-900 font-semibold mt-2">
+        Total: ${{ item.get_total_price }}
+      </p>
+    </div>
+
+    <!-- Right: Remove button -->
+    <button class="remove-btn px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 hover:shadow-md transition-all duration-200"
+            data-id="{{ item.id }}"
+            data-url="{% url 'rental_gear:remove_from_cart_ajax' item.id %}">
+      Remove
+    </button>
   </div>
-  <div class="item-total">Total: Rp{{ item.get_total_price }}</div>
-  <button class="remove-ajax btn" data-id="{{ item.id }}" data-href="{% url 'rental_gear:remove_from_cart_ajax' item.id %}" style="background:transparent;border:1px solid rgba(0,0,0,0.06);padding:6px 10px;border-radius:6px;">Remove</button>
+  {% empty %}
+  <p class="text-center text-blue-700 py-8 bg-white/60 rounded-2xl shadow-inner">Your cart is empty ❄️</p>
+  {% endfor %}
 </div>
-{% empty %}
-<p>Keranjang kosong.</p>
-{% endfor %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const buttons = document.querySelectorAll(".remove-btn");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", function() {
+      const itemId = this.dataset.id;
+      const url = this.dataset.url;
+      const itemDiv = document.querySelector(`.cart-item[data-id='${itemId}']`);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Animasi fade out sebelum dihapus
+          itemDiv.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
+          setTimeout(() => itemDiv.remove(), 300);
+
+          // Kalau semua item udah dihapus, tampilkan pesan kosong
+          if (document.querySelectorAll(".cart-item").length === 1) {
+            document.getElementById("cart-container").innerHTML =
+              `<p class="text-center text-blue-700 py-8 bg-white/60 rounded-2xl shadow-inner">Your cart is empty ❄️</p>`;
+          }
+        }
+      });
+    });
+  });
+});
+</script>

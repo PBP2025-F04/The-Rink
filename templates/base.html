@@ -35,7 +35,7 @@
 </head>
 
 <body>
- <!-- ❄️ Compact Winter Navbar -->
+ <!-- Compact Winter Navbar -->
 <nav class="relative z-30 bg-gradient-to-r from-blue-50/70 via-white/60 to-sky-100/60 backdrop-blur-lg border-b border-sky-200 text-blue-900 py-2.5 shadow-sm transition-all duration-500">
   <div class="container mx-auto flex justify-between items-center px-5">
     <!-- Brand -->
@@ -52,6 +52,16 @@
       <a href="{% url 'forum:show_forum' %}" class="hover:text-sky-600 hover:drop-shadow-[0_0_4px_rgba(125,211,252,0.6)] transition-all duration-300">Community</a>
 
       {% if user.is_authenticated %}
+      <!-- Cart Icon -->
+      <a href="{% url 'rental_gear:view_cart' %}"
+         class="flex items-center space-x-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1.5 rounded-full shadow-md hover:shadow-green-300/40 hover:from-green-500 hover:to-emerald-600 transition-all duration-300 text-sm">
+        <i class="fas fa-shopping-cart text-base"></i>
+        <span class="hidden md:inline">Cart</span>
+        {% if cart_count %}
+        <span class="bg-white text-green-600 text-xs font-bold px-1.5 py-0.5 rounded-full">{{ cart_count }}</span>
+        {% endif %}
+      </a>
+
       <!-- Profile Dropdown -->
       <div class="relative inline-block">
         <button id="profile-dropdown-btn"

@@ -53,7 +53,10 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
-                      {{ profile.full_name|default:"Belum diisi" }}
+                      {% if full_name_display %} {{ full_name_display }} 
+                      {% else%}
+                      <strong>Belum diisi</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -66,7 +69,10 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
-                      {{ profile.phone_number|default:"Belum diisi" }}
+                      {% if profile.phone_number %} {{ profile.phone_number }}
+                      {% else %}
+                      <strong>Belum diisi</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -77,7 +83,9 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       <span class="fw-semibold text-muted small">EMAIL</span>
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
-                      {{ profile.email|default:"Belum diisi" }}
+                      {% if profile.email %} {{ profile.email }} {% else %}
+                      <strong>Belum diisi</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -90,10 +98,9 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
-                      {% if profile.date_of_birth %}
-                        {{ profile.date_of_birth|indodate }}
-                      {% else %}
-                        Belum diisi
+                      {% if profile.date_of_birth %} {{
+                      profile.date_of_birth|indodate }} {% else %}
+                      <strong>Belum diisi</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -105,7 +112,10 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       <span class="fw-semibold text-muted small">ALAMAT</span>
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewAddress">
-                      {{ profile.address|default:"Belum diisi"|linebreaks }}
+                      {% if profile.address %} {{ profile.address|linebreaks }}
+                      {% else %}
+                      <strong>Belum diisi</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -407,26 +417,33 @@ Pengguna - The Rink {% endblock %} {% block content %}
         success: function (response) {
           if (response.success) {
             // Update view mode data
-            $("#viewFullName").text(
-              $("#modal_full_name").val() || "Belum diisi"
+            $("#viewFullName").html(
+              $("#modal_full_name").val() && $("#modal_full_name").val().trim()
+                ? $("#modal_full_name").val()
+                : "<strong>Belum diisi</strong>"
             );
-            $("#viewPhone").text(
-              $("#modal_phone_number").val() || "Belum diisi"
+            $("#viewPhone").html(
+              $("#modal_phone_number").val()
+                ? $("#modal_phone_number").val()
+                : "<strong>Belum diisi</strong>"
             );
-            $("#viewEmail").text($("#modal_email").val() || "Belum diisi");
+            $("#viewEmail").html(
+              $("#modal_email").val()
+                ? $("#modal_email").val()
+                : "<strong>Belum diisi</strong>"
+            );
 
             const birthDate = $("#modal_date_of_birth").val();
             if (birthDate) {
-              $("#viewBirthDate").text(formatDateIndo(birthDate));
+              $("#viewBirthDate").html(formatDateIndo(birthDate));
             } else {
-              $("#viewBirthDate").text("Belum diisi");
+              $("#viewBirthDate").html("<strong>Belum diisi</strong>");
             }
 
             $("#viewAddress").html(
-              ($("#modal_address").val() || "Belum diisi").replace(
-                /\n/g,
-                "<br>"
-              )
+              $("#modal_address").val()
+                ? $("#modal_address").val().replace(/\n/g, "<br>")
+                : "<strong>Belum diisi</strong>"
             );
 
             // Show success state

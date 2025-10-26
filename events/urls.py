@@ -19,4 +19,10 @@ urlpatterns = [
 
     # POST untuk batal
     path('<slug:slug>/cancel/', views.cancel_registration, name='cancel'),
+
+    # Admin URLs
+    path('admin/events/', views.admin_event_list, name='admin_event_list'),
+    path('admin/events/add/', views.admin_event_create, name='admin_event_create'),
+    path('admin/events/<int:id>/edit/', views.admin_event_update, name='admin_event_update'),
+    path('admin/events/<int:id>/delete/', views.admin_event_delete, name='admin_event_delete'),
 ]

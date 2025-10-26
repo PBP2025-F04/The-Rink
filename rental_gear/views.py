@@ -9,6 +9,7 @@ from .forms import GearForm, AddToCartForm, CheckoutForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.template.loader import render_to_string
 
 
 def gear_json(request, id):
@@ -20,8 +21,8 @@ def gear_json(request, id):
         'price_per_day': str(gear.price_per_day),
         'stock': gear.stock,
         'description': gear.description,
-        'image_url': gear.image.url,
-        'image': gear.image.url,
+        'image_url': gear.image_url,
+        'image': gear.image_url,
     }
     return JsonResponse(data)
 
@@ -41,13 +42,11 @@ def create_gear(request):
         form = GearForm()
     return render(request, 'rental_gear/gear_form.html', {'form': form, 'action': 'Add'})
 
-# Read (existing catalog view)
+
 def catalog(request):
     gears = Gear.objects.all()
-    featured_gears = Gear.objects.filter(is_featured=True)  # 👈 ambil yang featured
     return render(request, 'catalog.html', {
-        'gears': gears,
-        'featured_gears': featured_gears
+        'gears': gears
     })
 
 
@@ -118,18 +117,50 @@ def gear_detail(request, id):
 @login_required
 def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
-    return render(request, 'cart.html', {'cart_items': cart_items})
+    total_price = sum(item.get_total_price() for item in cart_items)
 
-@login_required
+    return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
+
+
+
 @require_POST
 def add_to_cart(request, gear_id):
+    if not request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'login_required': True,
+                'message': 'Silakan login terlebih dahulu untuk menambahkan ke keranjang.'
+            }, status=401)
+        else:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+
     gear = get_object_or_404(Gear, id=gear_id)
-    try:
-        body = json.loads(request.body.decode() or '{}')
-        qty = int(body.get('quantity', 1))
-        days = int(body.get('days', 1))
-    except:
-        qty = days = 1
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        qty = int(request.POST.get('quantity', 1))
+        days = int(request.POST.get('days', 1))
+    else:
+        try:
+            body = json.loads(request.body.decode() or '{}')
+            qty = int(body.get('quantity', 1))
+            days = int(body.get('days', 1))
+        except:
+            qty = days = 1
+
+    if days < 1 or days > 30:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': "Durasi rental harus antara 1–30 hari."
+            }, status=400)
+        else:
+            messages.error(request, "Durasi rental harus antara 1–30 hari.")
+            return redirect('rental_gear:gear_detail', id=gear_id)
 
     item, created = CartItem.objects.get_or_create(user=request.user, gear=gear)
 
@@ -137,14 +168,25 @@ def add_to_cart(request, gear_id):
         item.quantity = qty
         item.days = days
     else:
-        item.quantity += qty
+        item.quantity = qty  # Set to qty instead of adding
 
     item.save()
 
     cart_items = CartItem.objects.filter(user=request.user)
-    return render(request, 'partials/cart_items.html', {
-        'cart_items': cart_items
-    })
+    total_price = sum(item.get_total_price() for item in cart_items)
+
+    # Jika request AJAX, kirim JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'{gear.name} added to cart!',
+            'total_items': cart_items.count(),
+            'total_price': total_price
+        })
+    else:
+        # fallback untuk normal POST
+        messages.success(request, f'{gear.name} added to cart!')
+        return redirect('rental_gear:view_cart')
 
 @login_required
 @require_POST
@@ -153,7 +195,11 @@ def remove_from_cart(request, item_id):
     item.delete()
 
     cart_items = CartItem.objects.filter(user=request.user)
-    return render(request, 'partials/cart_items.html', {'cart_items': cart_items})
+    total_price = sum(item.get_total_price() for item in cart_items)
+    return render(request, 'partials/cart_items.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
 
 @login_required
 @transaction.atomic
@@ -162,7 +208,7 @@ def checkout(request):
 
     if not cart_items.exists():
         messages.warning(request, "Keranjang kamu masih kosong!")
-        return redirect('cart')
+        return redirect('rental_gear:view_cart')
 
     total = sum(item.get_total_price() for item in cart_items)
 
@@ -181,7 +227,6 @@ def checkout(request):
 
 @require_POST
 def add_to_cart_ajax(request, gear_id):
-    """Menambahkan barang ke keranjang via AJAX, mengembalikan JSON jika belum login."""
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -193,16 +238,15 @@ def add_to_cart_ajax(request, gear_id):
 
     qty = days = 1
     try:
-        body = json.loads(request.body.decode() or '{}')
-        qty = int(body.get('quantity', 1))
-        days = int(body.get('days', 1))
+        qty = int(request.POST.get('quantity', 1))
+        days = int(request.POST.get('days', 1))
     except Exception:
         qty = days = 1
 
     if days < 1 or days > 30:
         return JsonResponse({
             'success': False,
-            'message': "Durasi rental harus antara 1-30 hari."
+            'message': "Durasi rental harus antara 1–30 hari."
         }, status=400)
 
     item, created = CartItem.objects.get_or_create(user=request.user, gear=gear)
@@ -210,46 +254,39 @@ def add_to_cart_ajax(request, gear_id):
         item.quantity = qty
         item.days = days
     else:
-        item.quantity += qty
+        item.quantity = qty  # Set to qty instead of adding
     item.save()
 
-    total_items = CartItem.objects.filter(user=request.user).count()
+    cart_items = CartItem.objects.filter(user=request.user)
+    html = render_to_string('partials/cart_items.html', {'cart_items': cart_items}, request=request)
 
     return JsonResponse({
         'success': True,
         'message': f"{gear.name} ditambahkan ke keranjang untuk {days} hari!",
-        'item_quantity': item.quantity,
-        'total_items': total_items
+        'cart_html': html,
     })
 
-
-@require_POST
+@csrf_exempt
 def remove_from_cart_ajax(request, item_id):
-    """Menghapus item dari keranjang via AJAX"""
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
             'login_required': True,
-            'message': 'Silakan login terlebih dahulu.'
+            'message': 'Silakan login terlebih dahulu untuk menghapus item dari keranjang.'
         }, status=401)
 
-    item = get_object_or_404(CartItem, id=item_id, user=request.user)
-    gear_name = item.gear.name
-    item.delete()
-
-    total_items = CartItem.objects.filter(user=request.user).count()
-
-    return JsonResponse({
-        'success': True,
-        'message': f"{gear_name} dihapus dari keranjang.",
-        'total_items': total_items
-    })
+    from .models import CartItem
+    try:
+        item = CartItem.objects.get(id=item_id, user=request.user)
+        item.delete()
+        return JsonResponse({'success': True})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Item not found'})
 
 
 @require_POST
 @transaction.atomic
 def checkout_ajax(request):
-    """Checkout keranjang via AJAX"""
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -293,3 +330,47 @@ def checkout_ajax(request):
         'total': total,
         'rental_id': rental.id
     })
+
+# Admin views for rental gear
+def admin_gear_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gears = Gear.objects.all()
+    return render(request, 'rental_gear/admin_gear_list.html', {'gears': gears})
+
+def admin_gear_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gear created successfully!')
+            return redirect('rental_gear:admin_gear_list')
+    else:
+        form = GearForm()
+    return render(request, 'rental_gear/admin_gear_form.html', {'form': form, 'action': 'Create'})
+
+def admin_gear_update(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        form = GearForm(request.POST, request.FILES, instance=gear)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Gear updated successfully!')
+            return redirect('rental_gear:admin_gear_list')
+    else:
+        form = GearForm(instance=gear)
+    return render(request, 'rental_gear/admin_gear_form.html', {'form': form, 'action': 'Update'})
+
+def admin_gear_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    gear = get_object_or_404(Gear, id=id)
+    if request.method == 'POST':
+        gear.delete()
+        messages.success(request, 'Gear deleted successfully!')
+        return redirect('rental_gear:admin_gear_list')
+    return render(request, 'rental_gear/admin_gear_confirm_delete.html', {'gear': gear})

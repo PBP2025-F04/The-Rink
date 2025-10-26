@@ -256,7 +256,7 @@
       {{ gear.price_per_day }}</div>
       <p class="short-desc">Size: {{ gear.size }} • Stock: {{ gear.stock }}</p>
 
-      <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+      <form class="ajax-add-to-cart" method="post" action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}">
         {% csrf_token %}
         <input type="hidden" name="quantity" id="qty" value="1">
         <input type="hidden" name="days" id="days" value="1">

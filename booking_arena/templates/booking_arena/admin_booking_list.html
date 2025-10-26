@@ -1,0 +1,48 @@
+{% extends 'base.html' %} {% block title %}Admin - Manage Bookings{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h1>Manage Bookings</h1>
+
+  <div class="row">
+    {% for booking in bookings %}
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">
+            {{ booking.time_slot.arena.name }} - {{ booking.date }}
+          </h5>
+          <p class="card-text">
+            <strong>User:</strong> {{ booking.user.username }}
+          </p>
+          <p class="card-text">
+            <strong>Time:</strong> {{ booking.time_slot.start_time }} - {{
+            booking.time_slot.end_time }}
+          </p>
+          <p class="card-text"><strong>Status:</strong> {{ booking.status }}</p>
+          <p class="card-text">
+            <strong>Booked At:</strong> {{ booking.booked_at }}
+          </p>
+          <div class="btn-group" role="group">
+            <a
+              href="{% url 'booking_arena:admin_booking_delete' booking.id %}"
+              class="btn btn-danger btn-sm"
+              >Delete</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <p class="text-center">No bookings found.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'authentication:dashadmin' %}" class="btn btn-secondary"
+      >Back to Admin Dashboard</a
+    >
+  </div>
+</div>
+{% endblock %}

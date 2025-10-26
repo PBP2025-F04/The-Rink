@@ -61,7 +61,7 @@
 
             <div class="text-4xl font-extrabold text-blue-900 mb-6">
               {% if event.price > 0 %}
-                Rp {{ event.price|floatformat:0 }}
+                $ {{ event.price|floatformat:0 }}
               {% else %}
                 Free Event
               {% endif %}

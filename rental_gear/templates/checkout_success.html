@@ -5,15 +5,138 @@
   <meta charset="UTF-8">
   <title>Checkout Success - The Rink</title>
   <link rel="stylesheet" href="{% static 'rental_gear/checkout_success.css' %}">
+  <style>
+    /* 🌨️ Background winter style */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom right, #dbeafe, #e0f2fe, #f0f9ff);
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* ❄️ Salju animasi */
+    @keyframes fall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      color: white;
+      font-size: 1.5rem;
+      animation: fall linear infinite;
+      opacity: 0.9;
+    }
+
+    /* Membuat banyak salju secara acak */
+    .snowflake:nth-child(1) { left: 10%; animation-duration: 8s; animation-delay: 0s; }
+    .snowflake:nth-child(2) { left: 20%; animation-duration: 7s; animation-delay: 1s; }
+    .snowflake:nth-child(3) { left: 30%; animation-duration: 9s; animation-delay: 2s; }
+    .snowflake:nth-child(4) { left: 40%; animation-duration: 6s; animation-delay: 0.5s; }
+    .snowflake:nth-child(5) { left: 50%; animation-duration: 8s; animation-delay: 1.5s; }
+    .snowflake:nth-child(6) { left: 60%; animation-duration: 7s; animation-delay: 2.5s; }
+    .snowflake:nth-child(7) { left: 70%; animation-duration: 9s; animation-delay: 0.8s; }
+    .snowflake:nth-child(8) { left: 80%; animation-duration: 6s; animation-delay: 1.2s; }
+    .snowflake:nth-child(9) { left: 90%; animation-duration: 8s; animation-delay: 2.8s; }
+    .snowflake:nth-child(10) { left: 15%; animation-duration: 7s; animation-delay: 0.3s; }
+    .snowflake:nth-child(11) { left: 25%; animation-duration: 9s; animation-delay: 1.8s; }
+    .snowflake:nth-child(12) { left: 35%; animation-duration: 6s; animation-delay: 2.2s; }
+    .snowflake:nth-child(13) { left: 45%; animation-duration: 8s; animation-delay: 0.7s; }
+    .snowflake:nth-child(14) { left: 55%; animation-duration: 7s; animation-delay: 1.9s; }
+    .snowflake:nth-child(15) { left: 65%; animation-duration: 9s; animation-delay: 2.6s; }
+    .snowflake:nth-child(16) { left: 75%; animation-duration: 6s; animation-delay: 0.4s; }
+    .snowflake:nth-child(17) { left: 85%; animation-duration: 8s; animation-delay: 1.6s; }
+    .snowflake:nth-child(18) { left: 5%; animation-duration: 7s; animation-delay: 2.1s; }
+    .snowflake:nth-child(19) { left: 95%; animation-duration: 9s; animation-delay: 0.9s; }
+    .snowflake:nth-child(20) { left: 12%; animation-duration: 6s; animation-delay: 1.4s; }
+
+    /* 💎 Card utama */
+    .checkout-success {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .success-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+      text-align: center;
+      padding: 3rem 2.5rem;
+      max-width: 400px;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-card h2 {
+      color: #1e3a8a;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .success-card p {
+      color: #1e40af;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .total {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ⛸️ Tombol kembali */
+    .back-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      color: white;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+    }
+  </style>
 </head>
 <body>
+  <!-- ❄️ Elemen salju -->
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">✨</div>
+  <div class="snowflake">❅</div>
+  <div class="snowflake">❆</div>
+
+  <div class="snowflake">❄️</div>
+
   <div class="checkout-success">
     <div class="success-card">
-      <div class="snowflake">❄️</div>
+      <div class="text-5xl mb-3">❄️</div>
       <h2>Checkout Berhasil!</h2>
-      <p class="total">Total: Rp{{ total }}</p>
+      <p class="total">Total: <span class="text-blue-900 font-semibold">${{ total }}</span></p>
       <p>Terima kasih telah menyewa di <strong>The Rink</strong> ⛸️</p>
-      <a href="{% url 'rental_gear:catalog' %}" class="back-btn">Kembali ke katalog</a>
+      <a href="{% url 'rental_gear:catalog' %}" class="back-btn">Kembali ke Katalog</a>
     </div>
   </div>
 </body>
