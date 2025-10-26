@@ -1,6 +1,5 @@
 {# File: booking_arena/templates/partials/slot_list.html #}
 
-{# Simpan status is_bookable_date (Dari file lama lu) #}
 <div data-is-bookable-date="{{ is_bookable_date|yesno:'True,False' }}">
 
 {% if is_closed_today %}
@@ -14,9 +13,7 @@
         <p class="text-center text-sm">Tidak ada slot tersedia untuk {{ selected_date|date:"l, d F Y" }}.</p>
     </div>
 {% else %}
-    {# Loop per jam dari view #}
     {% for hour_data in hourly_slots_data %}
-        
         <div class="slot-item 
                 {% if hour_data.status == 'Booked' and hour_data.is_user_booking %} slot-booked {% endif %}
                 {% if hour_data.status == 'Booked' and not hour_data.is_user_booking %} slot-unavailable {% endif %}
@@ -24,41 +21,35 @@
                 {% if not is_bookable_date %} slot-unavailable {% endif %}"
              id="hour-slot-{{ hour_data.hour }}">
 
-            {# === Bagian Info Jam & Status (Info dari file lama lu) === #}
+            {# Info Jam & Status #}
             <div>
                 <span class="font-semibold" style="font-size: 1.05rem; margin-bottom: 2px;">
                     {{ hour_data.hour }}:00 - {{ hour_data.hour | add:"1" }}:00
                 </span>
-                
                 <div class="text-xs" style="margin-top: 2px;">
                     {% if hour_data.status == 'Available' and is_bookable_date %}
                         <span style="color: #1a7431; font-weight: 500;">
                             Tersedia - {{ hour_data.price_info|default:"Rp 350000" }}
                         </span>
-                    
                     {% elif hour_data.status == 'Booked' and hour_data.is_user_booking %}
                         <span style="color: #0077b6; font-weight: 600;">
                             Booking Anda ({{ hour_data.booking_info.get_activity_display|default:"-" }})
                         </span>
-
                     {% elif hour_data.status == 'Booked' and not hour_data.is_user_booking %}
                         <span class="italic text-gray-500">
                             Booked by {{ hour_data.booking_info.user.username|default:"other" }}
                         </span>
-
                     {% elif hour_data.status == 'Unavailable' %}
                         <span class="italic text-gray-400">Unavailable</span>
-
-                    {% else %} {# Tanggal lampau #}
+                    {% else %}
                         <span class="italic text-gray-400">Past Date</span>
                     {% endif %}
                 </div>
             </div>
 
-            {# === Bagian Tombol Aksi (Logika BARU) === #}
+            {# Tombol Aksi #}
             <div>
                 {% if hour_data.status == 'Available' and is_bookable_date %}
-                    {# Tombol ini sekarang akan pake style .btn-action-book dari CSS di atas #}
                     <button type="button" class="btn-slot-action btn-action-book"
                             hx-get="{% url 'booking_arena:get_sport_modal' arena_id=arena.id hour=hour_data.hour %}?date={{ selected_date|date:'Y-m-d' }}" 
                             hx-target="#modal-container" 
@@ -68,9 +59,9 @@
                     </button>
 
                 {% elif hour_data.status == 'Booked' and hour_data.is_user_booking and is_bookable_date %}
-                    {# Tombol ini akan pake style .btn-action-cancel #}
                     <button type="button" class="btn-slot-action btn-action-cancel"
-                            hx-post="{% url 'booking_arena:cancel_booking' hour_data.booking_info.id %}"
+                            hx-post="{% url 'booking_arena:cancel_booking' hour_data.booking_info.id %}?from=arena"
+                            hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
                             hx-target="#slot-list-target" 
                             hx-swap="innerHTML"
                             hx-confirm="Anda yakin ingin membatalkan booking ini?">
@@ -78,13 +69,11 @@
                     </button>
                 
                 {% elif hour_data.status == 'Booked' and hour_data.is_user_booking and not is_bookable_date %}
-                    <button type="button" class="btn-slot-action btn-action-disabled" disabled
-                            title="Booking ini sudah lewat">
+                    <button type="button" class="btn-slot-action btn-action-disabled" disabled>
                         Booked
                     </button>
 
                 {% else %}
-                    {# Tombol ini akan pake style .btn-action-disabled #}
                     <button type="button" class="btn-slot-action btn-action-disabled" disabled>
                         {% if not is_bookable_date %}Past{% else %}Booked{% endif %}
                     </button>
@@ -95,4 +84,4 @@
     {% endfor %}
 {% endif %}
 
-</div> {# Penutup div data-is-bookable-date #}
+</div>

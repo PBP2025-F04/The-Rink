@@ -6,6 +6,8 @@
 {% endblock meta %}
 
 {% block content %}
+{% csrf_token %}
+
 <style>
     /* === Custom styles (Light Theme - Sesuai CSS Lu) === */
     body { background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%); background-attachment: fixed; min-height: 100vh; color: #013a63; }
