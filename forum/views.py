@@ -14,13 +14,20 @@ from django.db.models import F
 import json
 
 def show_forum(request):
-    posts = Post.objects.all()
+    posts = Post.objects.order_by("-created_at", "-id")
+
     top_posts = (
         Post.objects
-        .annotate(total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)))
-        .order_by('-total_up')[:5]
+        .annotate(
+            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)),
+            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
+        )
+        .annotate(score=F('total_up') - F('total_down'))
+        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:5]
     )
+
     return render(request, "home.html", {"posts": posts, "top_posts": top_posts})
+
 
 @csrf_exempt
 @require_POST
@@ -28,13 +35,11 @@ def add_post(request):
     import json
 
     try:
-        # Coba baca body JSON
         data = json.loads(request.body.decode('utf-8'))
         title = data.get('title', 'Untitled')
         content = data.get('content', '')
         thumbnail_url = data.get('thumbnail_url', None)
     except:
-        # fallback ke form-data
         title = request.POST.get('title', 'Untitled')
         content = request.POST.get('content', '')
         thumbnail_url = request.POST.get('thumbnail_url', None)
@@ -70,16 +75,16 @@ def edit_post(request, id):
         if request.POST:
             title = request.POST.get("title", post.title)
             content = request.POST.get("content", post.content)
-            thumbnail = request.POST.get("thumbnail", "")
+            thumbnail_url = request.POST.get("thumbnail_url", post.thumbnail_url)
         else:
-            import json
             data = json.loads(request.body.decode('utf-8'))
             title = data.get("title", post.title)
             content = data.get("content", post.content)
-            thumbnail = data.get("thumbnail", "")
+            thumbnail_url = data.get("thumbnail_url", post.thumbnail_url)
 
         post.title = title
         post.content = content
+        post.thumbnail_url = thumbnail_url 
         post.save()
 
         return JsonResponse({
@@ -89,6 +94,7 @@ def edit_post(request, id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
 
 @login_required
 @csrf_exempt
@@ -109,7 +115,12 @@ def show_xml(request):
     return HttpResponse(xml_data, content_type="application/xml")
 
 def show_json(request):
-    post_list = Post.objects.all()
+    post_list = (
+        Post.objects
+        .all()
+        .order_by("-created_at", "-id") 
+    )
+
     data = [
         {
             'id': post.id, 
@@ -119,15 +130,14 @@ def show_json(request):
             "created_at": localtime(post.created_at).isoformat(),
             "thumbnail_url": post.thumbnail_url,
             'updated_at': post.updated_at,
-            'user_id': post.author.id,     
+            'user_id': post.author.id if post.author else None,
             'upvotes_count': post.total_upvotes(),
             'downvotes_count': post.total_downvotes(), 
-            
         }
         for post in post_list
     ]
-    return JsonResponse(data, safe=False)
 
+    return JsonResponse(data, safe=False)
 
 def show_xml_by_id(request, post_id):
     try:   
@@ -181,6 +191,7 @@ def get_replies(request, post_id):
         "id": r.id,
         "author": r.author.username,
         "author_id": r.author.id, 
+        "post_id": r.post.id,  
         "content": r.content,
         "created_at": r.created_at.isoformat().replace("+00:00", "Z"),
         "upvotes_count": r.total_upvotes(),
@@ -232,38 +243,52 @@ def edit_reply(request, reply_id):
 @csrf_exempt
 def toggle_vote(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        user = request.user
-        target_type = data.get("type")  
-        target_id = data.get("id")
-        is_upvote = data.get("is_upvote", True)
+        try:
+            data = json.loads(request.body)
+            user = request.user if request.user.is_authenticated else None
+            target_type = data.get("type")
+            target_id = data.get("id")
+            is_upvote = data.get("is_upvote", True)
 
-        if not user.is_authenticated:
-            return JsonResponse({"error": "User must be logged in"}, status=403)
+            if not request.session.session_key:
+                request.session.save()
+            session_key = request.session.session_key
 
-        if target_type == "post":
-            target = Post.objects.get(pk=target_id)
-            vote, created = UpVote.objects.get_or_create(user=user, post=target, reply=None)
-        elif target_type == "reply":
-            target = Reply.objects.get(pk=target_id)
-            vote, created = UpVote.objects.get_or_create(user=user, reply=target, post=None)
-        else:
-            return JsonResponse({"error": "Invalid target type"}, status=400)
+            if target_type == "post":
+                target = Post.objects.get(pk=target_id)
+                vote_filter = {"post": target}
+            elif target_type == "reply":
+                target = Reply.objects.get(pk=target_id)
+                vote_filter = {"reply": target}
+            else:
+                return JsonResponse({"error": "Invalid target type"}, status=400)
 
-        if not created and vote.is_upvote == is_upvote:
-            vote.delete() 
-        else:
-            vote.is_upvote = is_upvote
-            vote.save()
+            try:
+                if user:
+                    vote, created = UpVote.objects.get_or_create(user=user, **vote_filter)
+                else:
+                    vote, created = UpVote.objects.get_or_create(session_key=session_key, **vote_filter)
+            except Exception as e:
+                print("Vote creation error:", e)
+                return JsonResponse({"error": "Database constraint error"}, status=400)
 
-        return JsonResponse({
-            "upvotes": target.total_upvotes(),
-            "downvotes": target.total_downvotes(),
-        })
+            if not created and vote.is_upvote == is_upvote:
+                vote.delete()
+            else:
+                vote.is_upvote = is_upvote
+                vote.save()
+
+            return JsonResponse({
+                "upvotes": target.total_upvotes(),
+                "downvotes": target.total_downvotes(),
+            })
+        except Exception as e:
+            print("Vote toggle error:", e)
+            return JsonResponse({"error": "Vote failed"}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-# forum/views.py
+
 def get_top_posts_json(request):
     posts = (
         Post.objects
@@ -272,19 +297,42 @@ def get_top_posts_json(request):
             total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
         )
         .annotate(score=F('total_up') - F('total_down'))
-        .order_by('-score', '-total_up', '-created_at')[:5]
+        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:3]
     )
 
     data = [
         {
             "id": p.id,
             "title": p.title,
+            "content": strip_tags(p.content)[:120],
             "total_up": p.total_up,
             "total_down": p.total_down,
             "replies": p.replies.count(),
             "thumbnail_url": p.thumbnail_url,
+            "created_at": localtime(p.created_at).isoformat() if p.created_at else None,
         }
         for p in posts
     ]
+
     return JsonResponse(data, safe=False)
+
+def get_post_detail(request, post_id):
+    try:
+        post = Post.objects.select_related("author").get(pk=post_id)
+        data = {
+            "id": post.id,
+            "title": post.title,
+            "content": post.content,
+            "thumbnail_url": post.thumbnail_url,
+            "created_at": localtime(post.created_at).isoformat() if post.created_at else None,
+            "author": post.author.username if post.author else "Anonymous",
+            "user_id": post.author.id if post.author else None,
+            "upvotes_count": post.total_upvotes(),
+            "downvotes_count": post.total_downvotes(),
+            "replies_count": post.replies.count(),
+        }
+        return JsonResponse(data)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
 
