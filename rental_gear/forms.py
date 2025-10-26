@@ -1,10 +1,18 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import CartItem, Rental, Gear
 
 class GearForm(forms.ModelForm):
+    seller = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        empty_label="Created by Admin",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Gear
-        fields = ['name', 'category', 'price_per_day', 'image_url', 'description', 'stock']
+        fields = ['name', 'category', 'price_per_day', 'image_url', 'description', 'stock', 'seller']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
@@ -13,6 +21,13 @@ class GearForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': 1})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from authentication.models import UserType
+        # Only show seller users for admin selection
+        seller_users = UserType.objects.filter(user_type='seller').values_list('user', flat=True)
+        self.fields['seller'].queryset = User.objects.filter(id__in=seller_users)
 
 class AddToCartForm(forms.ModelForm):
     quantity = forms.IntegerField(min_value=1, initial=1)

@@ -1,46 +1,79 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block meta %}
+{% extends 'base.html' %} {% load static %} {% block meta %}
 <title>Catalog — The Rink</title>
-<link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}">
-{% endblock meta %}
-
-{% block content %}
+<link rel="stylesheet" href="{% static 'rental_gear/catalog.css' %}" />
+{% endblock meta %} {% block content %}
 <!-- Hero Section -->
-<section class="text-center py-16 bg-gradient-to-b from-sky-50 via-blue-100 to-sky-200">
+<section
+  class="text-center py-16 bg-gradient-to-b from-sky-50 via-blue-100 to-sky-200"
+>
   <div class="container mx-auto px-4">
-    <h1 class="text-4xl font-extrabold text-sky-900 mb-4 drop-shadow-sm">Our Gear Catalog</h1>
+    <h1 class="text-4xl font-extrabold text-sky-900 mb-4 drop-shadow-sm">
+      Our Gear Catalog
+    </h1>
     <p class="text-sky-800 mb-6">Glide through our premium ice gear ❄️</p>
-    
+
     {% if user.is_superuser %}
     <div class="mb-6">
-      <a href="{% url 'rental_gear:create_gear' %}" class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-5 py-2 rounded-full hover:from-sky-600 hover:to-blue-600 transition-all shadow-lg">Add New Equipment</a>
+      <a
+        href="{% url 'rental_gear:create_gear' %}"
+        class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-5 py-2 rounded-full hover:from-sky-600 hover:to-blue-600 transition-all shadow-lg"
+        >Add New Equipment</a
+      >
     </div>
     {% endif %}
 
     <!-- Search Bar -->
     <div class="mb-8 flex justify-center">
       <div class="relative w-full sm:w-96">
-        <input 
+        <input
           id="search-bar"
-          type="text" 
+          type="text"
           placeholder="Search gear..."
-          class="w-full px-5 py-3 rounded-full border border-sky-200 bg-white/70 backdrop-blur-lg text-sky-900 placeholder-sky-400 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300" />
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-          class="absolute right-4 top-3.5 w-5 h-5 text-sky-500 pointer-events-none">
-          <path stroke-linecap="round" stroke-linejoin="round" 
-                d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 7.5 7.5a7.5 7.5 0 0 0 9.15 9.15z" />
+          class="w-full px-5 py-3 rounded-full border border-sky-200 bg-white/70 backdrop-blur-lg text-sky-900 placeholder-sky-400 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all duration-300"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          class="absolute right-4 top-3.5 w-5 h-5 text-sky-500 pointer-events-none"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 7.5 7.5a7.5 7.5 0 0 0 9.15 9.15z"
+          />
         </svg>
       </div>
     </div>
 
     <!-- Filter Buttons -->
     <div class="flex flex-wrap justify-center gap-3">
-      <button class="filter-btn active px-5 py-2.5 rounded-full bg-sky-600 text-white shadow-md transition" data-category="">All</button>
-      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="hockey">Hockey</button>
-      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="curling">Curling</button>
-      <button class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition" data-category="ice_skating">Ice Skating</button>
+      <button
+        class="filter-btn active px-5 py-2.5 rounded-full bg-sky-600 text-white shadow-md transition"
+        data-category=""
+      >
+        All
+      </button>
+      <button
+        class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition"
+        data-category="hockey"
+      >
+        Hockey
+      </button>
+      <button
+        class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition"
+        data-category="curling"
+      >
+        Curling
+      </button>
+      <button
+        class="filter-btn px-5 py-2.5 rounded-full bg-sky-100 backdrop-blur-sm border border-sky-300 text-sky-900 hover:bg-sky-200 transition"
+        data-category="ice_skating"
+      >
+        Ice Skating
+      </button>
     </div>
   </div>
 </section>
@@ -52,54 +85,123 @@
     <p class="text-sky-700">Top picks from our premium collection</p>
   </div>
 
-  <div class="relative container mx-auto px-4 md:px-8 py-6 bg-white/70 backdrop-blur-lg rounded-3xl shadow-inner overflow-hidden">
+  <div
+    class="relative container mx-auto px-4 md:px-8 py-6 bg-white/70 backdrop-blur-lg rounded-3xl shadow-inner overflow-hidden"
+  >
     <!-- Left arrow -->
-    <button id="scrollLeftCatalog"
-      class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10">
+    <button
+      id="scrollLeftCatalog"
+      class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10"
+    >
       ❮
     </button>
 
     <!-- Right arrow -->
-    <button id="scrollRightCatalog"
-      class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10">
+    <button
+      id="scrollRightCatalog"
+      class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 items-center justify-center hover:bg-sky-100 transition z-10"
+    >
       ❯
     </button>
 
     <!-- Scrollable container -->
-    <div id="gearScrollCatalog" class="relative overflow-x-auto scroll-smooth flex-nowrap px-2 md:px-6 py-4">
+    <div
+      id="gearScrollCatalog"
+      class="relative overflow-x-auto scroll-smooth flex-nowrap px-2 md:px-6 py-4"
+    >
       <div class="flex gap-6 snap-x snap-mandatory pb-6 items-stretch">
         {% for gear in featured_gears %}
-        <div class="fade-up snap-start shrink-0 w-72" style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;">
-          <article class="bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
+        <div
+          class="fade-up snap-start shrink-0 w-72"
+          style="transition-delay: {{ forloop.counter|add:'0.1'|floatformat:1 }}s;"
+        >
+          <article
+            class="bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 w-full h-full flex flex-col"
+          >
             <div class="h-56 overflow-hidden flex-shrink-0">
               {% if gear.image %}
-                <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover" />
+              <img
+                src="{{ gear.image.url }}"
+                alt="{{ gear.name }}"
+                class="w-full h-full object-cover"
+              />
               {% else %}
-                <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
+              <div
+                class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700"
+              >
+                No Image
+              </div>
               {% endif %}
             </div>
             <div class="p-6 flex flex-col justify-between flex-grow text-left">
               <div>
-                <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
-                <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
-                <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
+                <h3 class="text-lg font-semibold text-sky-900 mb-1">
+                  {{ gear.name }}
+                </h3>
+                <p class="text-sky-700 text-sm mb-1">
+                  Category: {{ gear.get_category_display }}
+                </p>
+                <div class="font-bold text-sky-800">
+                  ${{ gear.price_per_day }}
+                </div>
               </div>
               <div class="flex gap-3 mt-4">
-                <a href="{% url 'rental_gear:gear_detail' gear.id %}"
-                   class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
-                {% if user.is_authenticated %}
-                <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+                <a
+                  href="{% url 'rental_gear:gear_detail' gear.id %}"
+                  class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition"
+                  >Detail</a
+                >
+                {% if user.is_authenticated and not user.is_superuser and user.usertype.user_type != 'seller' %}
+                <form
+                  class="ajax-add-to-cart inline"
+                  method="post"
+                  action="{% url 'rental_gear:add_to_cart' gear.id %}"
+                >
                   {% csrf_token %}
-                  <input type="hidden" name="quantity" value="1">
-                  <input type="hidden" name="days" value="1">
-                  <button type="submit"
-                          class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
+                  <input type="hidden" name="quantity" value="1" />
+                  <input type="hidden" name="days" value="1" />
+                  <button
+                    type="submit"
+                    class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition"
+                  >
+                    Add To Cart
+                  </button>
                 </form>
-                {% else %}
-                <a href="{% url 'authentication:login' %}"
-                   class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</a>
+                {% elif not user.is_authenticated %}
+                <a
+                  href="{% url 'authentication:login' %}"
+                  class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition"
+                  >Add To Cart</a
+                >
                 {% endif %}
               </div>
+              {% if user.is_superuser %}
+              <div class="flex gap-3 mt-2">
+                <a
+                  href="{% url 'rental_gear:admin_gear_update' gear.id %}"
+                  class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition"
+                  >Edit</a
+                >
+                <a
+                  href="{% url 'rental_gear:admin_gear_delete' gear.id %}"
+                  class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition"
+                  >Delete</a
+                >
+              </div>
+              {% elif user.is_authenticated and user.usertype.user_type == 'seller' %}
+              <div class="flex gap-3 mt-2">
+                <a
+                  href="{% url 'rental_gear:update_gear' gear.id %}"
+                  class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition"
+                  >Edit</a
+                >
+                <a
+                  href="{% url 'rental_gear:delete_gear' gear.id %}"
+                  class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition"
+                  >Delete</a
+                >
+              </div>
+              {% endif %}
             </div>
           </article>
         </div>
@@ -116,221 +218,290 @@
 <!-- Product Grid -->
 <section class="py-20 bg-gradient-to-b from-sky-50 via-blue-100 to-sky-200">
   <div class="container mx-auto px-6">
-    <h2 class="text-3xl font-bold text-sky-900 text-center mb-8">All Products</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 transition-all" id="product-grid">
-      {% if gears %}
-        {% for gear in gears %}
-        <article class="fade-up bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-inner hover:shadow-lg transition duration-300 w-full h-full flex flex-col">
-          <div class="h-56 overflow-hidden flex-shrink-0 rounded-t-2xl">
-            {% if gear.image %}
-              <img src="{{ gear.image.url }}" alt="{{ gear.name }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-            {% else %}
-              <div class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700">No Image</div>
+    <h2 class="text-3xl font-bold text-sky-900 text-center mb-8">
+      All Products
+    </h2>
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 transition-all"
+      id="product-grid"
+    >
+      {% if gears %} {% for gear in gears %}
+      <article
+        class="fade-up bg-white/80 backdrop-blur-lg border border-sky-100 rounded-2xl shadow-inner hover:shadow-lg transition duration-300 w-full h-full flex flex-col"
+      >
+        <div class="h-56 overflow-hidden flex-shrink-0 rounded-t-2xl">
+          {% if gear.image %}
+          <img
+            src="{{ gear.image.url }}"
+            alt="{{ gear.name }}"
+            class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+          {% else %}
+          <div
+            class="w-full h-full bg-sky-200 flex items-center justify-center text-sky-700"
+          >
+            No Image
+          </div>
+          {% endif %}
+        </div>
+        <div class="p-6 flex flex-col justify-between flex-grow text-left">
+          <div>
+            <h3 class="text-lg font-semibold text-sky-900 mb-1">
+              {{ gear.name }}
+            </h3>
+            <p class="text-sky-700 text-sm mb-1">
+              Category: {{ gear.get_category_display }}
+            </p>
+            <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
+          </div>
+          <div class="flex gap-3 mt-4">
+            <a
+              href="{% url 'rental_gear:gear_detail' gear.id %}"
+              class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition"
+              >Detail</a
+            >
+            {% if user.is_authenticated and not user.is_superuser and user.usertype.user_type != 'seller' %}
+            <form
+              class="ajax-add-to-cart inline"
+              method="post"
+              action="{% url 'rental_gear:add_to_cart' gear.id %}"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="1" />
+              <input type="hidden" name="days" value="1" />
+              <button
+                type="submit"
+                class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition"
+              >
+                Add To Cart
+              </button>
+            </form>
+            {% elif not user.is_authenticated %}
+            <a
+              href="{% url 'authentication:login' %}"
+              class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition"
+              >Add To Cart</a
+            >
             {% endif %}
           </div>
-          <div class="p-6 flex flex-col justify-between flex-grow text-left">
-            <div>
-              <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
-              <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
-              <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
-            </div>
-            <div class="flex gap-3 mt-4">
-              <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
-              {% if user.is_authenticated %}
-              <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="quantity" value="1">
-                <input type="hidden" name="days" value="1">
-                <button type="submit"
-                        class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
-              </form>
-              {% else %}
-              <a href="{% url 'authentication:login' %}"
-                 class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</a>
-              {% endif %}
-            </div>
-            {% if user.is_superuser %}
-            <div class="flex gap-3 mt-2">
-              <a href="{% url 'rental_gear:update_gear' gear.id %}" class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition">Edit</a>
-              <a href="{% url 'rental_gear:delete_gear' gear.id %}" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition">Delete</a>
-            </div>
-            {% endif %}
+          {% if user.is_superuser %}
+          <div class="flex gap-3 mt-2">
+            <a
+              href="{% url 'rental_gear:admin_gear_update' gear.id %}"
+              class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition"
+              >Edit</a
+            >
+            <a
+              href="{% url 'rental_gear:admin_gear_delete' gear.id %}"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition"
+              >Delete</a
+            >
           </div>
-        </article>
-        {% endfor %}
-      {% else %}
-        <p class="col-span-full text-center text-sky-700 italic">No products available.</p>
+          {% elif user.is_authenticated and user.usertype.user_type == 'seller' and gear.seller == user %}
+          <div class="flex gap-3 mt-2">
+            <a
+              href="{% url 'rental_gear:update_gear' gear.id %}"
+              class="bg-yellow-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-500 transition"
+              >Edit</a
+            >
+            <a
+              href="{% url 'rental_gear:delete_gear' gear.id %}"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition"
+              >Delete</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %} {% else %}
+      <p class="col-span-full text-center text-sky-700 italic">
+        No products available.
+      </p>
       {% endif %}
     </div>
   </div>
 </section>
-{% endblock content %}
-
-
-{% block extra_js %}
+{% endblock content %} {% block extra_js %}
 <style>
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeInUp { animation: fadeInUp 0.6s ease-out; }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+  }
 
-.line-clamp-4 {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-/* Custom Scrollbar for Carousel */
-#gearScrollCatalog::-webkit-scrollbar {
-  height: 8px;
-}
+  /* Custom Scrollbar for Carousel */
+  #gearScrollCatalog::-webkit-scrollbar {
+    height: 8px;
+  }
 
-#gearScrollCatalog::-webkit-scrollbar-track {
-  background: rgba(14, 165, 233, 0.1); /* Light sky blue */
-  border-radius: 4px;
-}
+  #gearScrollCatalog::-webkit-scrollbar-track {
+    background: rgba(14, 165, 233, 0.1); /* Light sky blue */
+    border-radius: 4px;
+  }
 
-#gearScrollCatalog::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #0ea5e9, #3b82f6); /* Sky to blue gradient */
-  border-radius: 4px;
-}
+  #gearScrollCatalog::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      90deg,
+      #0ea5e9,
+      #3b82f6
+    ); /* Sky to blue gradient */
+    border-radius: 4px;
+  }
 
-#gearScrollCatalog::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, #0284c7, #2563eb); /* Darker on hover */
-}
+  #gearScrollCatalog::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #0284c7, #2563eb); /* Darker on hover */
+  }
 </style>
 
 <script>
-
-// === Fade-up Animation ===
-document.addEventListener("DOMContentLoaded", function() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-
-  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-  // === Featured Gear Carousel ===
-  const scrollContainer = document.getElementById("gearScrollCatalog");
-  const btnLeft = document.getElementById("scrollLeftCatalog");
-  const btnRight = document.getElementById("scrollRightCatalog");
-
-  const scrollAmount = 300;
-  let autoScrollInterval;
-
-  btnLeft.addEventListener("click", () => {
-    scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-    resetAutoScroll();
-  });
-
-  btnRight.addEventListener("click", () => {
-    scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    resetAutoScroll();
-  });
-
-  const updateButtons = () => {
-    btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
-    btnRight.style.opacity =
-      scrollContainer.scrollLeft + scrollContainer.clientWidth < scrollContainer.scrollWidth
-        ? "1"
-        : "0.3";
-  };
-
-  scrollContainer.addEventListener("scroll", updateButtons);
-  updateButtons();
-
-  function startAutoScroll() {
-    autoScrollInterval = setInterval(() => {
-      const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-      if (scrollContainer.scrollLeft >= maxScroll - 5) {
-        scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
-      }
-    }, 3000);
-  }
-
-  function resetAutoScroll() {
-    clearInterval(autoScrollInterval);
-    startAutoScroll();
-  }
-
-  scrollContainer.addEventListener("mouseenter", () => clearInterval(autoScrollInterval));
-  scrollContainer.addEventListener("mouseleave", startAutoScroll);
-
-  startAutoScroll();
-});
-
-
-// Tangani Add To Cart dengan AJAX
-document.querySelectorAll('.ajax-add-to-cart').forEach(form => {
-  form.addEventListener('submit', function(e) {
-    e.preventDefault(); // cegah reload halaman
-
-    const action = this.action;
-    const formData = new FormData(this);
-
-    fetch(action, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': getCookie('csrftoken'),
-        'x-requested-with': 'XMLHttpRequest'
+  // === Fade-up Animation ===
+  document.addEventListener("DOMContentLoaded", function () {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
       },
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      // tampilkan toast
-      showToast('Success', data.message, 'success');
-    })
-    .catch(err => {
-      showToast('Error', 'Failed to add to cart', 'error');
-      console.error(err);
+      { threshold: 0.2 }
+    );
+
+    document.querySelectorAll(".fade-up").forEach((el) => observer.observe(el));
+
+    // === Featured Gear Carousel ===
+    const scrollContainer = document.getElementById("gearScrollCatalog");
+    const btnLeft = document.getElementById("scrollLeftCatalog");
+    const btnRight = document.getElementById("scrollRightCatalog");
+
+    const scrollAmount = 300;
+    let autoScrollInterval;
+
+    btnLeft.addEventListener("click", () => {
+      scrollContainer.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      resetAutoScroll();
+    });
+
+    btnRight.addEventListener("click", () => {
+      scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      resetAutoScroll();
+    });
+
+    const updateButtons = () => {
+      btnLeft.style.opacity = scrollContainer.scrollLeft > 0 ? "1" : "0.3";
+      btnRight.style.opacity =
+        scrollContainer.scrollLeft + scrollContainer.clientWidth <
+        scrollContainer.scrollWidth
+          ? "1"
+          : "0.3";
+    };
+
+    scrollContainer.addEventListener("scroll", updateButtons);
+    updateButtons();
+
+    function startAutoScroll() {
+      autoScrollInterval = setInterval(() => {
+        const maxScroll =
+          scrollContainer.scrollWidth - scrollContainer.clientWidth;
+        if (scrollContainer.scrollLeft >= maxScroll - 5) {
+          scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          scrollContainer.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        }
+      }, 3000);
+    }
+
+    function resetAutoScroll() {
+      clearInterval(autoScrollInterval);
+      startAutoScroll();
+    }
+
+    scrollContainer.addEventListener("mouseenter", () =>
+      clearInterval(autoScrollInterval)
+    );
+    scrollContainer.addEventListener("mouseleave", startAutoScroll);
+
+    startAutoScroll();
+  });
+
+  // Tangani Add To Cart dengan AJAX
+  document.querySelectorAll(".ajax-add-to-cart").forEach((form) => {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // cegah reload halaman
+
+      const action = this.action;
+      const formData = new FormData(this);
+
+      fetch(action, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "x-requested-with": "XMLHttpRequest",
+        },
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // tampilkan toast
+          showToast("Success", data.message, "success");
+        })
+        .catch((err) => {
+          showToast("Error", "Failed to add to cart", "error");
+          console.error(err);
+        });
     });
   });
-});
-// === Filter Functionality ===
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
+  // === Filter Functionality ===
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      document
+        .querySelectorAll(".filter-btn")
+        .forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
 
-    const category = this.dataset.category;
-    fetch(`{% url 'rental_gear:filter_gear' %}?category=${category}`)
-      .then(r => r.text())
-      .then(html => {
-        const grid = document.getElementById('product-grid');
+      const category = this.dataset.category;
+      fetch(`{% url 'rental_gear:filter_gear' %}?category=${category}`)
+        .then((r) => r.text())
+        .then((html) => {
+          const grid = document.getElementById("product-grid");
+          grid.innerHTML = html;
+          grid.querySelectorAll("article").forEach((el, i) => {
+            el.style.animationDelay = `${i * 0.05}s`;
+            el.classList.add("animate-fadeInUp");
+          });
+        });
+    });
+  });
+
+  // === Search Functionality ===
+  document.getElementById("search-bar").addEventListener("input", function () {
+    const query = this.value.trim();
+    fetch(`{% url 'rental_gear:filter_gear' %}?search=${query}`)
+      .then((r) => r.text())
+      .then((html) => {
+        const grid = document.getElementById("product-grid");
         grid.innerHTML = html;
-        grid.querySelectorAll('article').forEach((el, i) => {
+        grid.querySelectorAll("article").forEach((el, i) => {
           el.style.animationDelay = `${i * 0.05}s`;
-          el.classList.add('animate-fadeInUp');
+          el.classList.add("animate-fadeInUp");
         });
       });
   });
-});
-
-// === Search Functionality ===
-document.getElementById('search-bar').addEventListener('input', function() {
-  const query = this.value.trim();
-  fetch(`{% url 'rental_gear:filter_gear' %}?search=${query}`)
-    .then(r => r.text())
-    .then(html => {
-      const grid = document.getElementById('product-grid');
-      grid.innerHTML = html;
-      grid.querySelectorAll('article').forEach((el, i) => {
-        el.style.animationDelay = `${i * 0.05}s`;
-        el.classList.add('animate-fadeInUp');
-      });
-    });
-});
-
-
 </script>
 {% endblock extra_js %}
