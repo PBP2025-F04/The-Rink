@@ -78,7 +78,10 @@ def profile(request):
                 return render(request, 'userprofile.html', {'form': form, 'profile': user_profile})
     else:
         form = UserProfileForm(instance=user_profile)
-    return render(request, 'userprofile.html', {'form': form, 'profile': user_profile})
+    # Add cleaned full_name for display
+    full_name_display = user_profile.full_name.strip() if user_profile.full_name else ''
+    context = {'form': form, 'profile': user_profile, 'full_name_display': full_name_display}
+    return render(request, 'userprofile.html', context)
 
 @login_required
 def seller_profile(request):

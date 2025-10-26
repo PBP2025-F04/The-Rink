@@ -1,0 +1,58 @@
+{# File: booking_arena/templates/partials/_booking_row.html #}
+
+{# Ini adalah barisnya. ID-nya penting #}
+<tr class="booking-row" id="booking-row-{{ booking.id }}">
+
+  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+    {{ booking.date|date:"l, d M Y" }}
+  </td>
+  
+  {# FIX: Pake start_hour, bukan time_slot #}
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+    {{ booking.start_hour }}:00 - {{ booking.start_hour | add:"1" }}:00
+  </td>
+  
+  {# FIX: Pake arena.name, bukan time_slot.arena.name #}
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+    {{ booking.arena.name }}
+  </td>
+  
+  {# TAMBAH: Nampilin activity #}
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+    {{ booking.get_activity_display }}
+  </td>
+  
+  {# Status (CSS badge lu udah oke) #}
+  <td class="px-6 py-4 whitespace-nowrap">
+    {% if booking.status == 'Booked' %}
+      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+        {{ booking.status }}
+      </span>
+    {% elif booking.status == 'Cancelled' %}
+       <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+        {{ booking.status }}
+      </span>
+    {% else %}
+       <span class.="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+        {{ booking.status }}
+      </span>
+    {% endif %}
+  </td>
+  
+  {# Action Button #}
+  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+    {# FIX: Cek tanggalnya pake var 'today' dari view #}
+    {% if booking.status == 'Booked' and booking.date >= today %}
+      <button
+        hx-post="{% url 'booking_arena:cancel_booking' booking.id %}"
+        hx-target="#booking-row-{{ booking.id }}" {# Target baris ini #}
+        hx-swap="outerHTML" {# Ganti seluruh baris #}
+        hx-confirm="Anda yakin ingin membatalkan booking ini?"
+        class="btn-cancel">
+          Cancel
+      </button>
+    {% else %}
+      <span class="text-gray-400">-</span>
+    {% endif %}
+  </td>
+</tr>

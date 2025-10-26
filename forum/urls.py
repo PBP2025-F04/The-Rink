@@ -1,6 +1,5 @@
 from django.urls import path
-from forum.views import show_forum, add_post, edit_post, delete_post, show_xml, show_json, show_xml_by_id, show_json_by_id, add_reply
-from forum.views import add_reply, get_replies, toggle_vote, delete_reply, edit_reply, admin_post_list, admin_post_create, admin_post_update, admin_post_delete, admin_reply_list, admin_reply_delete
+from forum.views import show_forum, add_post, edit_post, delete_post, show_xml, show_json, show_xml_by_id, show_json_by_id, add_reply, get_replies, toggle_vote, delete_reply, edit_reply, get_top_posts_json, admin_post_list, admin_post_create, admin_post_update, admin_post_delete, admin_reply_list, admin_reply_delete
 
 app_name = 'forum'
 
@@ -21,6 +20,7 @@ urlpatterns = [
     path("delete-reply/<int:reply_id>/", delete_reply, name="delete_reply"),
     path("edit-reply/<int:reply_id>/", edit_reply, name="edit_reply"),
     path('toggle-vote/', toggle_vote, name='toggle_vote'),
+    path("get-top-posts-json/", get_top_posts_json, name="get_top_posts_json"),  # 🔥 tambahin ini
 
     # Admin URLs
     path('admin/posts/', admin_post_list, name='admin_post_list'),
@@ -29,4 +29,5 @@ urlpatterns = [
     path('admin/posts/<int:id>/delete/', admin_post_delete, name='admin_post_delete'),
     path('admin/replies/', admin_reply_list, name='admin_reply_list'),
     path('admin/replies/<int:id>/delete/', admin_reply_delete, name='admin_reply_delete'),
+    
 ]

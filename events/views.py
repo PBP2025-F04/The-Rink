@@ -35,7 +35,7 @@ def event_list(request):
         return render(request, 'events/partials/event_list_items.html', {
             'events': events,
         })
-    
+     
     return render(request, 'events/list.html', {
         'events': events,
         'selected_category': category,

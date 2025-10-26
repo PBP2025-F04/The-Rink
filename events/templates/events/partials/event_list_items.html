@@ -38,7 +38,7 @@
       <div class="flex justify-between items-center">
         <span class="text-xl font-bold text-blue-800">
           {% if event.price > 0 %}
-            Rp {{ event.price|floatformat:0 }}
+            $ {{ event.price|floatformat:0 }}
           {% else %}
             Free
           {% endif %}

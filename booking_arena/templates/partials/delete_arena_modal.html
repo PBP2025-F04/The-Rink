@@ -1,0 +1,19 @@
+{# File: booking_arena/templates/partials/delete_arena_modal.html #}
+<div class="modal fade" id="deleteArenaModal" tabindex="-1" aria-labelledby="deleteArenaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-xl">
+      <div class="modal-header bg-red-500 text-white border-b-0 rounded-t-xl">
+        <h5 class="modal-title font-semibold" id="deleteArenaModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-gray-700">
+        <p>Are you sure you want to delete the arena "<strong id="delete-arena-name"></strong>"?</p>
+        <p class="text-red-600 text-sm mt-2">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-t-0">
+        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition duration-200" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
