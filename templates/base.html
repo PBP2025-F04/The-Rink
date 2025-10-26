@@ -88,7 +88,7 @@
             >Community</a
           >
 
-          {% if user.is_authenticated or is_admin %}
+          {% if user.is_authenticated or is_admin_logged_in %}
           <!-- Cart Icon -->
           <a
             href="{% url 'rental_gear:view_cart' %}"
@@ -212,7 +212,7 @@
             </a>
           </div>
 
-          {% if user.is_authenticated or is_admin %}
+          {% if user.is_authenticated or is_admin_logged_in %}
           <!-- Cart Icon Mobile -->
           <a
             href="{% url 'rental_gear:view_cart' %}"
@@ -233,7 +233,8 @@
             <div class="flex items-center space-x-2 text-blue-900">
               <i class="fas fa-user-circle"></i>
               <span
-                >{% if is_admin %}Admin{% else %}{{ user.username }} 
+                >{% if is_admin %}Admin
+                {% else %} {{ user.username }} 
                 {% endif %}</span
               >
             </div>

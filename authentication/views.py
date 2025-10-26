@@ -39,14 +39,31 @@ def login_user(request):
         # Check for hardcoded admin credentials
         if username == 'cbkadal' and password == 'dikadalin':
             request.session['is_admin'] = True
-            # Create a dummy user object for admin
-            from django.contrib.auth.models import AnonymousUser
-            request.user = AnonymousUser()
+            # Create or get admin user in database
+            user, created = User.objects.get_or_create(
+                username='cbkadal',
+                defaults={
+                    'email': 'admin@therink.com',
+                    'first_name': 'Admin',
+                    'last_name': 'The Rink',
+                    'is_staff': True,
+                    'is_superuser': True
+                }
+            )
+            if created:
+                user.set_password('dikadalin')  # Set password for database
+                user.save()
+            # Login as the admin user
+            login(request, user)
+            # Set a flag to indicate admin is logged in
+            request.session['admin_logged_in'] = True
             return redirect('authentication:dashadmin')
 
         # Clear admin session for regular users
         if 'is_admin' in request.session:
             del request.session['is_admin']
+        if 'admin_logged_in' in request.session:
+            del request.session['admin_logged_in']
 
         form = AuthenticationForm(data=request.POST)
 
@@ -67,6 +84,15 @@ def logout_user(request):
     logout(request)
     request.session.flush()  # Clear all session data including admin session
     return redirect('authentication:login')
+
+def admin_middleware_check(request):
+    """
+    Middleware function to check if admin is logged in for protected views.
+    This should be called at the beginning of admin views.
+    """
+    if not request.session.get('admin_logged_in', False):
+        return redirect('authentication:login')
+    return None
 
 @login_required
 def profile(request):
@@ -113,6 +139,9 @@ def seller_profile(request):
     return render(request, 'sellerprofile.html', {'form': form, 'profile': seller_profile, 'user_products': user_products})
 
 def admin_user_list(request):
+    check = admin_middleware_check(request)
+    if check:
+        return check
     if not request.session.get('is_admin'):
         return redirect('authentication:login')
 
@@ -137,6 +166,9 @@ def admin_user_list(request):
     return render(request, 'authentication/admin_user_list.html', context)
 
 def admin_user_update(request, user_id):
+    check = admin_middleware_check(request)
+    if check:
+        return check
     if not request.session.get('is_admin'):
         return redirect('authentication:login')
 
@@ -202,6 +234,9 @@ def admin_user_update(request, user_id):
     return render(request, 'authentication/admin_user_form.html', context)
 
 def admin_user_delete(request, user_id):
+    check = admin_middleware_check(request)
+    if check:
+        return check
     if not request.session.get('is_admin'):
         return redirect('authentication:login')
 
@@ -219,6 +254,9 @@ def admin_user_delete(request, user_id):
     return render(request, 'authentication/admin_user_confirm_delete.html', context)
 
 def dashadmin(request):
+    check = admin_middleware_check(request)
+    if check:
+        return check
     if not request.session.get('is_admin'):
         return redirect('authentication:login')
 

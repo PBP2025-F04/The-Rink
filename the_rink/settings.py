@@ -79,6 +79,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'rental_gear.context_processors.cart_count',
                 'authentication.context_processors.is_admin',
+                'authentication.context_processors.is_admin_logged_in',
             ],
         },
     },
