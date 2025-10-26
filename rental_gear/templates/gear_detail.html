@@ -256,7 +256,7 @@
       <div class="price">$ {{ gear.price_per_day }}</div>
       <p class="short-desc">
         Size: {{ gear.size }} • Stock: {{ gear.stock }} • {% if gear.seller.username == 'system_admin' %} Created by Admin
-        {% else %}Created by {{ gear.seller.get_full_name|default:gear.seller.username }}
+        {% else %}Seller : {{ gear.seller.get_full_name|default:gear.seller.username }}
         {% endif %}
       </p>
 
@@ -264,6 +264,7 @@
         class="ajax-add-to-cart"
         method="post"
         action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}"
+        data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
       >
         {% csrf_token %}
         <input type="hidden" name="quantity" id="qty" value="1" />
@@ -301,6 +302,8 @@
     const qtyInput = document.getElementById('qty_input');
     const daysInput = document.getElementById('days_input');
     const totalEl = document.getElementById('total');
+    const form = document.querySelector('.ajax-add-to-cart');
+    const isAuthenticated = form ? form.dataset.userAuthenticated === 'true' : false;
 
     function update(){
       const q = parseInt(qtyInput.value)||1;
@@ -310,9 +313,42 @@
       document.getElementById('days').value = d;
     }
 
-    qtyInput.addEventListener('input', update);
-    daysInput.addEventListener('input', update);
-    update();
+    if (qtyInput && daysInput) {
+      qtyInput.addEventListener('input', update);
+      daysInput.addEventListener('input', update);
+      update();
+    }
+
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        if (!isAuthenticated) {
+          e.preventDefault();
+          window.location.href = '{% url "authentication:login" %}';
+          return;
+        }
+
+        e.preventDefault();
+        const action = this.action;
+        const formData = new FormData(this);
+
+        fetch(action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'x-requested-with': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          showToast('Success', data.message, 'success');
+        })
+        .catch(err => {
+          showToast('Error', 'Failed to add to cart', 'error');
+          console.error(err);
+        });
+      });
+    }
   })();
 </script>
 {% endblock extra_js %}
