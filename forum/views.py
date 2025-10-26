@@ -275,11 +275,9 @@ def toggle_vote(request):
                 vote.is_upvote = is_upvote
                 vote.save()
 
-            target.refresh_from_db()
-
             return JsonResponse({
-                "upvotes": target.upvotes.filter(is_upvote=True).count(),
-                "downvotes": target.upvotes.filter(is_upvote=False).count(),
+                "upvotes": UpVote.objects.filter(**vote_filter, is_upvote=True).count(),
+                "downvotes": UpVote.objects.filter(**vote_filter, is_upvote=False).count(),
             })
 
         except Exception as e:
