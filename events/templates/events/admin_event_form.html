@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% block title %}Admin - {{ action }} Event{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-blue-900">{{ action }} Event</h1>
+      <p class="text-blue-700 mt-2">
+        {% if action == 'Add' %}
+          Create a new event
+        {% else %}
+          Update event information
+        {% endif %}
+      </p>
+    </div>
+    <a
+      href="{% url 'events:admin_event_list' %}"
+      class="bg-gradient-to-r from-gray-500 to-gray-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-500 transition-all duration-300 font-medium"
+    >
+      <i class="fas fa-arrow-left mr-2"></i>Back to List
+    </a>
+  </div>
+
+  <!-- Form Card -->
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-green-500 to-emerald-400 p-6">
+        <h2 class="text-xl font-bold text-white flex items-center">
+          <i class="fas fa-calendar-alt mr-3"></i>Event Information
+        </h2>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" class="p-8">
+        {% csrf_token %}
+
+        <!-- Basic Information Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-blue-500"></i>Basic Information
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tag mr-1 text-blue-500"></i>Event Name *
+              </label>
+              <input
+                type="text"
+                name="{{ form.name.name }}"
+                value="{{ form.name.value|default:'' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter event name"
+                required
+              >
+              {% if form.name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-list mr-1 text-green-500"></i>Category *
+              </label>
+              <select
+                name="{{ form.category.name }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+                <option value="">Select category</option>
+                {% for value, label in form.category.field.choices %}
+                  <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% if form.category.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chart-line mr-1 text-purple-500"></i>Level *
+              </label>
+              <select
+                name="{{ form.level.name }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+                <option value="">Select level</option>
+                {% for value, label in form.level.field.choices %}
+                  <option value="{{ value }}" {% if form.level.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% if form.level.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.level.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-map-marker-alt mr-1 text-red-500"></i>Location *
+              </label>
+              <input
+                type="text"
+                name="{{ form.location.name }}"
+                value="{{ form.location.value|default:'' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter event location"
+                required
+              >
+              {% if form.location.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.location.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Date & Time Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-clock mr-2 text-blue-500"></i>Date & Time
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-calendar mr-1 text-blue-500"></i>Event Date *
+              </label>
+              <input
+                type="date"
+                name="{{ form.date.name }}"
+                value="{{ form.date.value|default:''|date:'Y-m-d' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+              {% if form.date.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.date.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.start_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-play mr-1 text-green-500"></i>Start Time *
+              </label>
+              <input
+                type="time"
+                name="{{ form.start_time.name }}"
+                value="{{ form.start_time.value|default:''|time:'H:i' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+              {% if form.start_time.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.start_time.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.end_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-stop mr-1 text-red-500"></i>End Time *
+              </label>
+              <input
+                type="time"
+                name="{{ form.end_time.name }}"
+                value="{{ form.end_time.value|default:''|time:'H:i' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+              {% if form.end_time.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.end_time.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing & Capacity Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-dollar-sign mr-2 text-green-500"></i>Pricing & Capacity
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-money-bill mr-1 text-green-500"></i>Price (Rp) *
+              </label>
+              <input
+                type="number"
+                name="{{ form.price.name }}"
+                value="{{ form.price.value|default:'' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                placeholder="0"
+                min="0"
+                required
+              >
+              {% if form.price.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.price.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.max_participants.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-users mr-1 text-blue-500"></i>Max Participants *
+              </label>
+              <input
+                type="number"
+                name="{{ form.max_participants.name }}"
+                value="{{ form.max_participants.value|default:'' }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="0"
+                min="1"
+                required
+              >
+              {% if form.max_participants.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.max_participants.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- People Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-user-friends mr-2 text-purple-500"></i>Organizers & Instructors
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.organizer.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user-tie mr-1 text-purple-500"></i>Organizer *
+              </label>
+              <select
+                name="{{ form.organizer.name }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+                <option value="">Select organizer</option>
+                {% for user in form.organizer.field.queryset %}
+                  <option value="{{ user.id }}" {% if form.organizer.value == user.id %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+              </select>
+              {% if form.organizer.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.organizer.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.instructor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chalkboard-teacher mr-1 text-indigo-500"></i>Instructor *
+              </label>
+              <select
+                name="{{ form.instructor.name }}"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                required
+              >
+                <option value="">Select instructor</option>
+                {% for user in form.instructor.field.queryset %}
+                  <option value="{{ user.id }}" {% if form.instructor.value == user.id %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+              </select>
+              {% if form.instructor.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.instructor.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Description & Requirements Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-file-alt mr-2 text-gray-500"></i>Description & Requirements
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-align-left mr-1 text-gray-500"></i>Description
+              </label>
+              <textarea
+                name="{{ form.description.name }}"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 resize-vertical"
+                placeholder="Describe the event..."
+              >{{ form.description.value|default:'' }}</textarea>
+              {% if form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.requirements.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-clipboard-list mr-1 text-orange-500"></i>Requirements
+              </label>
+              <textarea
+                name="{{ form.requirements.name }}"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 resize-vertical"
+                placeholder="List event requirements..."
+              >{{ form.requirements.value|default:'' }}</textarea>
+              {% if form.requirements.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.requirements.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Image & Status Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+            <i class="fas fa-image mr-2 text-indigo-500"></i>Image & Status
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-upload mr-1 text-indigo-500"></i>Event Image
+              </label>
+              <input
+                type="file"
+                name="{{ form.image.name }}"
+                accept="image/*"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              >
+              {% if form.image.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.image.errors.0 }}</p>
+              {% endif %}
+              <p class="mt-1 text-xs text-gray-500">Upload an image for the event (optional)</p>
+            </div>
+
+            <div class="flex items-center">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  name="{{ form.is_active.name }}"
+                  {% if form.is_active.value %}checked{% endif %}
+                  class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                >
+                <label for="{{ form.is_active.id_for_label }}" class="ml-3 block text-sm font-medium text-gray-700">
+                  <i class="fas fa-toggle-on mr-1 text-green-500"></i>Active Event
+                </label>
+              </div>
+              {% if form.is_active.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.is_active.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <a
+            href="{% url 'events:admin_event_list' %}"
+            class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+          >
+            <i class="fas fa-times mr-2"></i>Cancel
+          </a>
+          <button
+            type="submit"
+            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-lg hover:from-green-600 hover:to-emerald-500 transition-all duration-300 font-medium shadow-md"
+          >
+            <i class="fas fa-save mr-2"></i>{{ action }} Event
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %} {% block title %}Admin - Manage Gears{% endblock %} 
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-blue-900">Manage Rental Gears</h1>
+      <p class="text-blue-700 mt-2">View and manage all rental gear items</p>
+    </div>
+    <div class="flex space-x-3">
+      <a
+        href="{% url 'rental_gear:admin_gear_create' %}"
+        class="bg-gradient-to-r from-green-500 to-emerald-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-500 transition-all duration-300 font-medium"
+      >
+        <i class="fas fa-plus mr-2"></i>Add New Gear
+      </a>
+      <a
+        href="{% url 'authentication:dashadmin' %}"
+        class="bg-gradient-to-r from-gray-500 to-gray-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-500 transition-all duration-300 font-medium"
+      >
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Gears Grid -->
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+  >
+    {% for gear in gears %}
+    <div
+      class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <!-- Gear Image -->
+      <div class="relative">
+        {% if gear.image_url %}
+        <img
+          src="{{ gear.image_url }}"
+          class="w-full h-48 object-cover"
+          alt="{{ gear.name }}"
+        />
+        {% else %}
+        <div
+          class="w-full h-48 bg-gradient-to-br from-blue-100 to-sky-100 flex items-center justify-center"
+        >
+          <i class="fas fa-image text-blue-300 text-4xl"></i>
+        </div>
+        {% endif %}
+        <div class="absolute top-3 right-3">
+          <span
+            class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium"
+          >
+            {{ gear.category }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Gear Details -->
+      <div class="p-6">
+        <h5 class="text-xl font-bold text-blue-900 mb-2">{{ gear.name }}</h5>
+        <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+          {{ gear.description|truncatechars:100 }}
+        </p>
+
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-dollar-sign w-5 text-green-500"></i>
+            <span class="ml-3 text-sm font-medium"
+              >Rp{{ gear.price_per_day }}/day</span
+            >
+          </div>
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-boxes w-5 text-orange-500"></i>
+            <span class="ml-3 text-sm">Stock: {{ gear.stock }}</span>
+          </div>
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-user w-5 text-purple-500"></i>
+            <span class="ml-3 text-sm">{{ gear.seller.username }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-2">
+          <a
+            href="{% url 'rental_gear:admin_gear_update' gear.id %}"
+            class="flex-1 bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300 font-medium text-sm text-center"
+          >
+            <i class="fas fa-edit mr-2"></i>Edit
+          </a>
+          <a
+            href="{% url 'rental_gear:admin_gear_delete' gear.id %}"
+            class="flex-1 bg-gradient-to-r from-red-500 to-pink-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-red-600 hover:to-pink-500 transition-all duration-300 font-medium text-sm text-center"
+          >
+            <i class="fas fa-trash mr-2"></i>Delete
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full">
+      <div
+        class="bg-white rounded-xl shadow-lg p-12 text-center border border-blue-100"
+      >
+        <div
+          class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-tools text-blue-500 text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-900 mb-2">No Gears Found</h3>
+        <p class="text-gray-600 mb-6">
+          Start by adding your first rental gear item.
+        </p>
+        <a
+          href="{% url 'rental_gear:admin_gear_create' %}"
+          class="inline-block bg-gradient-to-r from-blue-500 to-sky-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-plus mr-2"></i>Add First Gear
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -3,7 +3,8 @@ from forum import views
 from rental_gear.views import (
     catalog, filter_gear, view_cart, add_to_cart, remove_from_cart,
     add_to_cart_ajax, remove_from_cart_ajax, checkout_ajax, gear_detail,
-    checkout, create_gear, update_gear, delete_gear, gear_json
+    checkout, create_gear, update_gear, delete_gear, gear_json,
+    admin_gear_list, admin_gear_create, admin_gear_update, admin_gear_delete
 )
 
 app_name = 'rental_gear'
@@ -13,6 +14,10 @@ urlpatterns = [
     path('api/gear/<int:id>/', gear_detail, name='gear_api_detail'),
     path('gear/<int:id>/json/', gear_json, name='gear_json'),
     # Admin CRUD URLs
+    path('admin/gear/', admin_gear_list, name='admin_gear_list'),
+    path('admin/gear/add/', admin_gear_create, name='admin_gear_create'),
+    path('admin/gear/<int:id>/edit/', admin_gear_update, name='admin_gear_update'),
+    path('admin/gear/<int:id>/delete/', admin_gear_delete, name='admin_gear_delete'),
     path('gear/add/', create_gear, name='create_gear'),
     path('gear/<int:id>/edit/', update_gear, name='update_gear'),
     path('gear/<int:id>/delete/', delete_gear, name='delete_gear'),

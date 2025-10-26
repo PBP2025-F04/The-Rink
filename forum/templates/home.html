@@ -2,252 +2,194 @@
 {% load static %}
 
 {% block content %}
-<div class="relative min-h-screen bg-gradient-to-b from-blue-200 via-cyan-20 to-blue-10">
-  <!-- Spacer kecil agar box gak nempel ke navbar -->
-  <div class="h-16"></div>  
-<section 
-  class="max-w-2xl mx-auto px-4 py-10 
-           bg-gradient-to-b from-blue-100 via-cyan-50 to-white 
-           rounded-3xl shadow-md relative overflow-hidden"> 
+<div class="relative min-h-screen bg-gradient-to-b from-blue-200 via-cyan-100 to-blue-200">
+  <!-- Spacer -->
+  <div class="h-16"></div>
+
   <!-- Header -->
-  <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
-    <div class="flex flex-col items-center justify-center mb-8 space-y-2">
-      <div class="flex items-center justify-center gap-4">
-       <div class="flex items-center justify-center w-8 h-8">
+  <div class="flex flex-col items-center justify-center mb-8 space-y-2">
+    <div class="flex items-center justify-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8">
         <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
+      </div>
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
+        Forum Community
+      </span>
+    </h1>
+
+    <p class="text-lg font-medium text-center mt-3 mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
+      Where ideas grow, and connections come alive
+    </p>
+
+    <!-- Refresh Button -->
+    <div class="flex justify-center mb-6">
+      <button onclick="refreshPost()" 
+        class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 
+               hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
+               rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+        <i class="fa-solid fa-rotate-right"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="flex justify-center mt-2">
+      <div class="relative w-full max-w-md transform transition-all duration-300 hover:scale-[1.03] focus-within:scale-[1.03]">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search posts by title..."
+          class="w-full pl-10 pr-4 py-2 rounded-xl border border-cyan-200 shadow-sm 
+                 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
+                 outline-none text-gray-700 placeholder-gray-400 transition-all duration-300 bg-white/70 backdrop-blur-sm"
+          oninput="filterBySearch()"
+        />
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Layout  === -->
+<div class="max-w-7xl mx-auto px-8 py-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10">
+
+  <!-- Leaderboard  -->
+  <aside class="lg:w-1/2 w-full rounded-3xl shadow-md border border-cyan-100 
+             bg-white/80 backdrop-blur-sm h-fit
+             lg:sticky lg:top-28
+             overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-cyan-300 scrollbar-track-transparent">
+
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
+    <div class="relative p-6">
+      <h3 class="text-xl font-extrabold text-cyan-700 mb-5 flex flex-col items-center justify-center gap-2 text-center">
+        <i class="fa-regular fa-snowflake text-cyan-400 animate-spin-slow text-2xl"></i>
+      <span class="bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
+        Top Posts This Week
+      </span>
+    </h3>
+      <div id="top-posts-container" class="pr-2">
+  <div id="top-posts-wrapper" class="space-y-6 transition-all duration-300"></div>
+</div>
+    </div>
+  </aside>
+
+    <!-- Forum utama  -->
+  <section class="lg:w-1/2 w-full px-6 py-10 bg-gradient-to-b from-blue-100 via-cyan-50 to-white 
+                 rounded-3xl shadow-md relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
+
+      <!-- Post Box -->
+      <div id="postBox" class="frosted rounded-2xl shadow-sm border border-purple-100 p-5 mb-6 relative z-10">
+        <div class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
+          <input
+            id="postInput"
+            type="text"
+            placeholder="What do you think?"
+            class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer transition-all duration-200"
+            readonly
+            onclick="toggleExpandBox()" 
+          />
+
+          <!-- Expanded Box -->
+          <div id="expandedBox"
+            class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
+            <input id="postTitle" type="text" placeholder="Enter post title..."
+              class="w-full px-4 py-3 border-b border-cyan-200 outline-none" />
+            <div id="thumbnailPreview" class="hidden p-4 flex justify-center">
+              <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
+            </div>
+            <textarea id="postContent" rows="4" placeholder="Insert a Content in here..."
+              class="w-full px-4 py-3 border-b border-cyan-200 outline-none"></textarea>
+
+            <div id="toolbar" class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
+              <div class="flex items-center gap-2 w-full mr-3">
+                <i class="fa-regular fa-image text-cyan-500"></i>
+                <input id="thumbnailUrl" type="url" placeholder="Paste image URL here (optional)"
+                  class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
+                  oninput="previewImageUrl()" />
+              </div>
+              <button id="postBtn"
+                class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8">
+        <button id="filter-all"
+          class="bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+          All Post
+        </button>
+        <button id="filter-my"
+          class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+          My Post
+        </button>
+      </div>
+
+      <!-- Wrapper  -->
+      <div id="post-container" class="flex flex-col gap-6">
+
+      <!-- Daftar Post -->
+      <div id="grid" class="flex flex-col gap-6"></div>
+
+      <!-- State Info -->
+      <div id="loading" class="hidden bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <p class="text-gray-600 mt-3">Loading replies...</p>
+      </div>
+
+      <div id="error" class="hidden"></div>
+
+      <div id="empty" class="hidden bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
+        <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination-container"
+          class="flex justify-center items-center gap-3 mt-8 bg-white/80 backdrop-blur-sm 
+                  border border-cyan-100 rounded-xl px-6 py-3 shadow-md text-gray-800 text-base
+                  transition-all duration-300">
+      <!-- Tombol Prev -->
+      <button id="prevBtn"
+        class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+              text-white font-semibold shadow-md hover:scale-[1.03] transition-all duration-300 
+              disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+        <i class="fa-solid fa-angle-left"></i> Prev
+      </button>
+
+      <!-- Info Pagination -->
+      <p id="pagination-info"
+        class="text-gray-700 font-medium bg-cyan-50 px-4 py-2 rounded-lg border border-cyan-100 shadow-sm">
+        1–10 of 50
+      </p>
+
+      <!-- Tombol Next -->
+      <button id="nextBtn"
+        class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+              text-white font-semibold shadow-md hover:scale-[1.03] transition-all duration-300 
+              disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+        Next <i class="fa-solid fa-angle-right"></i>
+      </button>
        </div>
       </div>
-
-  <!-- Title -->
-  <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
-   <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">  Forum  Community</span>
-  </h1>
-  </div>
-
-  <!-- ✨ Tagline -->
-  <p class="text-lg font-medium text-center mt-3 mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
-    Where ideas grow, and connections come alive
-  </p>
-  
-  <!-- Refresh Button -->
-  <div class="flex justify-center mb-6">
-    <button onclick="refreshPost()" 
-      class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 
-             hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
-             rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-      <i class="fa-solid fa-rotate-right"></i> Refresh
-    </button>
-  </div>
-
-<!-- 🔍 Search Filter -->
-<div class="flex justify-center mt-4 mb-8">
-  <div class="relative w-full max-w-md transform transition-all duration-300 hover:scale-[1.03] focus-within:scale-[1.03]">
-    <input
-      id="searchInput"
-      type="text"
-      placeholder="Search posts by title..."
-      class="w-full pl-10 pr-4 py-2 rounded-xl border border-cyan-200 shadow-sm 
-             focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
-             outline-none text-gray-700 placeholder-gray-400 transition-all duration-300 bg-white/70 backdrop-blur-sm"
-      oninput="filterBySearch()"
-    />
-    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500"></i>
+    </section>
   </div>
 </div>
 
-
-<!-- ❄️ Top Posts Leaderboard -->
-<section class="bg-gradient-to-b from-cyan-50 to-blue-50 backdrop-blur-md border border-cyan-100 rounded-2xl p-6 mt-10 mb-10 shadow-sm">
-  <h3 class="text-xl font-extrabold text-cyan-700 mb-5 flex items-center gap-2">
-    <i class="fa-regular fa-snowflake text-cyan-400 animate-spin-slow"></i>
-    Top Posts This Week
-  </h3>
-
-  <div id="top-posts-container"  class="space-y-4">
-    {% for post in top_posts %}
-    <div 
-      class="flex items-center gap-4 p-4 rounded-xl bg-white border border-cyan-100 
-             hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-pointer"
-      onclick="scrollToPost('{{ post.id }}')"
-    >
-      <!-- Thumbnail -->
-      {% if post.thumbnail_url %}
-        <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" 
-             class="w-16 h-16 object-cover rounded-lg shadow-sm border border-cyan-100">
-      {% else %}
-        <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400 text-sm border">
-          No Img
-        </div>
-      {% endif %}
-
-      <!-- Title & Meta -->
-      <div class="flex-1">
-        <h4 class="text-cyan-700 font-semibold leading-tight hover:underline">
-          {{ forloop.counter }}. {{ post.title }}
-        </h4>
-        <div class="flex items-center gap-4 text-sm mt-1">
-          <span class="flex items-center gap-1 text-cyan-600">
-            <i class="fa-regular fa-comment-dots"></i>
-            {{ post.replies.count }}
-          </span>
-          <span class="flex items-center gap-1 text-green-600">
-            <i class="fa-solid fa-thumbs-up"></i>
-            {{ post.total_upvotes }}
-          </span>
-          <span class="flex items-center gap-1 text-red-500">
-            <i class="fa-solid fa-thumbs-down"></i>
-            {{ post.total_downvotes }}
-          </span>
-        </div>
-      </div>
-    </div>
-    {% empty %}
-      <p class="text-gray-500 text-center py-4">No popular posts yet.</p>
-    {% endfor %}
-  </div>
-</section>
-
-
-
-  <!-- Post Box -->
-  <div id="postBox" class="frosted rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
-
-    <!-- Input utama -->
-    <div  class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
-      <input
-      id="postInput"
-      type="text"
-      placeholder="What do you think?"
-      class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
-      readonly
-      onclick="toggleExpandBox()" 
-      />
-
-      <!-- Expanded Box -->
-      <div id="expandedBox"
-        class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
-
-        <!-- Title input -->
-        <input
-        id="postTitle"
-        type="text"
-        placeholder="Enter post title..."
-        class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
-        />
-
-        <!-- Thumbnail preview -->
-        <div id="thumbnailPreview" class="hidden p-4 flex justify-center">
-          <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
-        </div>
-
-        <!-- Content -->
-        <textarea
-          id="postContent"
-          rows="4"
-          placeholder="Insert a Content in here..."
-          class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem] focus:text-[1.05rem]"
-        ></textarea>
-
-        <!-- Toolbar -->
-        <div id="toolbar" class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
-          <div class="flex items-center gap-2 w-full mr-3">
-            <i class="fa-regular fa-image text-cyan-500"></i>
-            <input
-              id="thumbnailUrl"
-              type="url"
-              placeholder="Paste image URL here (optional)"
-              class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
-              oninput="previewImageUrl()"
-            />
-          </div>
-
-          <!-- Tombol Post -->
-          <button
-            id="postBtn"
-            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-            Post
-          </button>
-        </div>
-      </div>
-    </div>
-  </div> 
-
-  <!-- Filter Buttons -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
-  
-  <button id="filter-all"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500
-           text-white font-semibold px-4 py-2 rounded-md shadow-md
-           transition-all duration-300 transform hover:scale-105 active:scale-95">
-    All Post
-  </button>
-
-  <button id="filter-my"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500
-           text-white font-semibold px-4 py-2 rounded-md shadow-md
-           transition-all duration-300 transform hover:scale-105 active:scale-95">
-    My Post
-  </button>
-
-</div>
-  <!-- Post List -->
-  <div id="grid" class="flex flex-col gap-6"></div>
-</section>
-</div>
-
-<!-- Pagination Controls -->
-<div class="flex justify-center items-center gap-3 mt-6 bg-white/70 backdrop-blur-sm border border-cyan-100 rounded-xl px-4 py-2 shadow-sm">
-
-  <!-- Tombol Prev -->
-  <button id="prevBtn"
-    class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
-           hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
-           shadow-md transition-all duration-300 transform hover:scale-105 
-           disabled:opacity-40 disabled:cursor-not-allowed">
-    ◀️ Prev
-  </button>
-
-  <!-- Info halaman -->
-  <p id="pagination-info"
-     class="text-gray-700 font-medium bg-cyan-50 px-3 py-1 rounded-md border border-cyan-100">
-     1–10 of 1000
-  </p>
-
-  <!-- Tombol Next -->
-  <button id="nextBtn"
-    class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
-           hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
-           shadow-md transition-all duration-300 transform hover:scale-105 
-           disabled:opacity-40 disabled:cursor-not-allowed">
-    Next ▶️
-  </button>
-</div>
-
-<!-- Loading State -->
-<div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-  <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
-  viewBox="0 0 24 24">
-  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-  <path class="opacity-75" fill="currentColor"
-  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-</svg>
-<p class="text-gray-600 mt-3">Loading replies...</p>
-</div>
-
-<div id="error" class="hidden"></div>
-<div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-  <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
-  <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
-</div>
-
-<!-- MODAL DETAIL POST -->
+<!-- Modal Detail Post -->
 <div id="postDetailModal"
   class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
   <div class="bg-white rounded-xl shadow-xl w-11/12 max-w-2xl p-6 relative">
     <button onclick="closePostModal()"
-      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">
-      ×
-    </button>
+      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
     <div id="postDetailContent" class="mt-2">
       <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading...</h2>
       <p class="text-gray-600 text-sm mb-4">Please wait...</p>
@@ -403,6 +345,50 @@
     }
   }
 
+  function toggleExpandBox() {
+  if (!CURRENT_USER_ID) {
+    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+    return;
+  }
+
+  const box = document.getElementById("expandedBox");
+  const toolbar = document.getElementById("toolbar");
+  const input = document.getElementById("postInput");
+  const isOpen = box.classList.contains("open");
+
+  if (isOpen) {
+    box.style.maxHeight = "0px";
+    box.style.opacity = "0";
+    toolbar.style.opacity = "0";
+    toolbar.style.transform = "translateY(8px)";
+    input.classList.remove("ring-2", "ring-cyan-300");
+
+    setTimeout(() => {
+      toolbar.classList.add("hidden");
+      box.classList.remove("open");
+    }, 400);
+  } else {
+    box.classList.remove("max-h-0", "opacity-0", "hidden");
+    box.style.display = "block";
+    void box.offsetHeight; 
+    box.style.maxHeight = box.scrollHeight + 150 + "px";
+    box.style.opacity = "1";
+    box.classList.add("open");
+    input.classList.add("ring-2", "ring-cyan-300");
+
+    toolbar.classList.remove("hidden");
+    toolbar.style.display = "flex";
+    setTimeout(() => {
+      toolbar.style.opacity = "1";
+      toolbar.style.transform = "translateY(0)";
+    }, 250);
+
+    setTimeout(() => {
+      box.style.maxHeight = box.scrollHeight + 150 + "px";
+    }, 350);
+  }
+}
+
   function getTimeAgo(createdAtStr) {
     const createdAt = new Date(createdAtStr);
     const now = new Date();
@@ -467,6 +453,13 @@
           <i class="fa-regular fa-thumbs-down"></i> 
           <span id="down-reply-${r.id}" class="font-medium">${r.downvotes_count || 0}</span>
         </button>
+
+        <button onclick="replyToUser('${r.author}', ${r.post_id}, window.event)"
+        class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md 
+               hover:bg-blue-100 transition">
+          <i class="fa-solid fa-reply text-xs"></i>
+          <span class="text-sm font-medium">Reply</span>
+        </button>
       </div>
 
       <!-- Tombol Edit/Delete hanya untuk author -->
@@ -530,6 +523,7 @@
 }
 
   async function sendReply(postId) {
+  if (event) event.stopPropagation();
   if (!CURRENT_USER_ID) {
     window.location.href = "{% url 'authentication:login' %}?next=/forum/";
     return;
@@ -590,6 +584,13 @@
           <i class="fa-regular fa-thumbs-down"></i> 
           <span id="down-reply-${newReply.id}" class="font-medium">0</span>
         </button>
+
+        <button onclick="replyToUser('${newReply.author}', ${postId}, event)"
+        class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md 
+               hover:bg-blue-100 transition">
+  <i class="fa-solid fa-reply text-xs"></i>
+  <span class="text-sm font-medium">Reply</span>
+</button>
       </div>
 
       ${
@@ -623,14 +624,42 @@
   }
 }
 
+async function replyToUser(username, postId, event) {
+  if (event) event.stopPropagation();
+
+  const mention = `@${username} `;
+
+  const replyBox = document.getElementById(`replyBox-${postId}`);
+  if (replyBox && replyBox.classList.contains("hidden")) {
+    toggleReplyBox(postId);
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  let input = document.getElementById(`replyInput-${postId}`);
+  if (!input) {
+    const expandContainer = document.getElementById(`expand-top-post-${postId}`);
+    input = expandContainer ? expandContainer.querySelector(`#replyInput-${postId}`) : null;
+  }
+
+  if (!input) return;
+
+  if (!input.value.includes(mention)) input.value = mention + input.value;
+  input.focus();
+  input.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    input.selectionStart = input.selectionEnd = input.value.length;
+  }, 10);
+}
+
   async function votePost(id, isUpvote) {
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+        "X-CSRFToken":  csrftoken,
       },
+      credentials: "include",
       body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
     });
 
@@ -642,16 +671,109 @@
   }
 }
 
-  function scrollToPost(postId) {
-  const target = document.querySelector(`[data-post-id="${postId}"]`);
-  if (target) {
-    target.scrollIntoView({ behavior: "smooth", block: "center" });
-    target.classList.add("ring-2", "ring-cyan-400", "bg-cyan-50", "transition");
-    setTimeout(() => {
-      target.classList.remove("ring-2", "ring-cyan-400", "bg-cyan-50");
-    }, 1500);
-  } else {
-    console.warn("Post not found in DOM:", postId);
+ async function openTopPost(postId, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const container = document.getElementById(`expand-top-post-${postId}`);
+  const isOpen = container.classList.contains("open");
+
+  document.querySelectorAll('[id^="expand-top-post-"]').forEach(div => {
+    if (div !== container) {
+      div.classList.remove("open");
+      div.classList.add("hidden");
+      div.innerHTML = "";
+      div.style.maxHeight = "";
+      div.style.opacity = "";
+      div.style.transition = "none";
+    }
+  });
+
+  if (isOpen) {
+    container.classList.remove("open");
+    container.classList.add("hidden");
+    container.innerHTML = "";
+    container.style.maxHeight = "";
+    container.style.opacity = "";
+    container.style.transition = "none";
+    return;
+  }
+
+  container.classList.remove("hidden");
+  container.classList.add("open");
+  container.style.transition = "none";
+  container.innerHTML = `<p class="text-gray-400 text-sm px-2">Loading post...</p>`;
+
+  try {
+    const res = await fetch(`/forum/get-post/${postId}/`);
+    if (!res.ok) throw new Error("Failed to fetch post details");
+    const post = await res.json();
+
+    container.innerHTML = `
+  <div class="border-t pt-3 mt-3 text-sm text-gray-700">
+    <div id="replies-${post.id}" 
+         class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+
+    <div class="flex gap-2 mt-3" onclick="event.stopPropagation()">
+      <input id="replyInput-${post.id}" type="text" placeholder="Create your reply" 
+        class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+      <button onclick="sendReply(${post.id})" 
+        class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
+               text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 
+               transform hover:scale-105">
+        Send
+      </button>
+    </div>
+  </div>
+`;
+
+    const resReplies = await fetch(`/forum/get-replies/${postId}/`);
+    const replies = await resReplies.json();
+    const replyBox = document.getElementById(`replies-${post.id}`);
+
+    replyBox.innerHTML = replies.length
+      ? replies.map(r => {
+          const initials = r.author ? r.author[0].toUpperCase() : "U";
+          return `
+            <div id="reply-${r.id}"
+              class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
+                     shadow-sm hover:shadow-md transition-all duration-300 ease-in-out mb-2">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white font-bold 
+                            bg-gradient-to-r from-cyan-400 to-blue-400 shadow-sm">${initials}</div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold text-cyan-700">${r.author}</span>
+                    <span class="text-xs text-gray-400">${getTimeAgo(r.created_at)}</span>
+                  </div>
+                  <p class="text-gray-800 text-sm mb-3 leading-relaxed">${r.content}</p>
+                  <div class="flex items-center gap-3">
+                    <button onclick="voteReply(${r.id}, true)" 
+                      class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                      <i class="fa-regular fa-thumbs-up"></i>
+                      <span id="up-reply-${r.id}" class="font-medium">${r.upvotes_count || 0}</span>
+                    </button>
+                    <button onclick="voteReply(${r.id}, false)" 
+                      class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                      <i class="fa-regular fa-thumbs-down"></i>
+                      <span id="down-reply-${r.id}" class="font-medium">${r.downvotes_count || 0}</span>
+                    </button>
+                    <button onclick="replyToUser('${r.author}', ${post.id}, event)"
+                      class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition">
+                      <i class="fa-solid fa-reply text-xs"></i> <span class="text-sm font-medium">Reply</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join("")
+      : `<p class="text-gray-500 text-sm">No response yet.</p>`;
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="text-red-500 text-sm px-2">Failed to load post.</p>`;
   }
 }
 
@@ -663,6 +785,7 @@
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       },
+      credentials: "include",
       body: JSON.stringify({ type: "reply", id, is_upvote: isUpvote }),
     });
 
@@ -684,7 +807,6 @@
     });
 
     if (res.ok) {
-      // Hapus reply dari tampilan langsung dengan animasi
       const replyEl = document.getElementById(`reply-${replyId}`);
       if (replyEl) {
         replyEl.classList.add("opacity-0", "scale-95", "transition", "duration-300");
@@ -744,7 +866,8 @@
   function filterPosts() {
   updateFilterButtonsAppearance();
   const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
-  
+  const paginationContainer = document.getElementById("pagination-container");
+
   let filtered = activeFilter === 'all'
     ? allPostData
     : allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
@@ -753,9 +876,22 @@
     filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
   }
 
-  if (!filtered.length) displayPageSection({ showEmpty: true });
-  else { renderPosts(filtered); displayPageSection({ showGrid: true }); }
+  currentPage = 1;
+
+  if (!filtered.length) {
+    displayPageSection({ showEmpty: true });
+    paginationContainer.classList.add("hidden");
+    document.getElementById("pagination-info").textContent = "0–0 of 0";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+    return;
+  }
+
+  displayPageSection({ showGrid: true });
+  paginationContainer.classList.remove("hidden");
+  renderPaginatedPostsFiltered(filtered);
 }
+
 
 
   function closePostModal() {
@@ -764,91 +900,101 @@
   
   function renderPosts(postItems) {
   postGridContainer.innerHTML = '';
-  postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
+  postItems.forEach(p => postGridContainer.appendChild(buildPost(p)));
 }
 
+
   async function refreshPost() {
-  showToast("Refreshing", "Showing latest posts...");
-  fetchPostFromServer();
-  refreshTopPosts()
+  showToast("Refreshing", "Loading latest posts...");
+  currentPage = 1;
+
+  const savedFilter = localStorage.getItem("activeFilter") || "all";
+  activeFilter = savedFilter;
+
+  await fetchPostFromServer();
+
+  updateFilterButtonsAppearance();
+  filterPosts();
+
+  refreshTopPosts();
 }
 
 async function refreshTopPosts() {
-  const res = await fetch("{% url 'forum:get_top_posts_json' %}");
-  const data = await res.json();
-  const container = document.querySelector("#top-posts-container");
+  const container = document.querySelector("#top-posts-wrapper");
+  container.innerHTML = `
+    <p class="text-gray-400 text-sm text-center py-3 animate-pulse">
+      Refreshing leaderboard...
+    </p>`;
 
-  container.innerHTML = data.map((p, i) => `
-    <div onclick="scrollToPost('${p.id}')"
-         class="flex items-center gap-4 p-3 rounded-xl bg-white border border-cyan-100 hover:shadow-md hover:scale-[1.02] transition">
-      ${p.thumbnail_url
-        ? `<img src="${p.thumbnail_url}" class="w-16 h-16 rounded-lg object-cover">`
-        : `<div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400">No Img</div>`}
-      <div>
-        <h4 class="text-cyan-700 font-semibold leading-tight hover:underline">${i+1}. ${p.title}</h4>
-        <p class="text-sm text-gray-500 flex items-center gap-3">
-  <span class="flex items-center gap-1 text-cyan-600">
-    <i class="fa-regular fa-comment-dots"></i> ${p.replies}
-  </span>
-  <span class="flex items-center gap-1 text-green-600">
-    <i class="fa-solid fa-thumbs-up"></i> ${p.total_up}
-  </span>
-  <span class="flex items-center gap-1 text-red-500">
-    <i class="fa-solid fa-thumbs-down"></i> ${p.total_down}
-  </span>
-</p>
+  try {
+    const res = await fetch("{% url 'forum:get_top_posts_json' %}");
+    if (!res.ok) throw new Error("Failed to fetch leaderboard");
+    const data = await res.json();
 
-      </div>
-    </div>
-  `).join('');
-}
+    container.innerHTML = "";
 
-  function toggleExpandBox() {
-  if (!CURRENT_USER_ID) {
-    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
-    return;
-  }
+    data.forEach((p, i) => {
+      const card = document.createElement("div");
+      card.className =
+        "bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 p-5";
 
-  const box = document.getElementById("expandedBox");
-  const toolbar = document.getElementById("toolbar");
-  const input = document.getElementById("postInput");
-  const isOpen = box.classList.contains("open");
+      const formattedDate = new Date(p.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
 
-  if (isOpen) {
-    // 🔻 Tutup smooth
-    box.style.maxHeight = "0px";
-    box.style.opacity = "0";
-    toolbar.style.opacity = "0";
-    toolbar.style.transform = "translateY(8px)";
-    input.classList.remove("ring-2", "ring-cyan-300");
+      card.innerHTML = `
+        <div class="flex flex-row gap-5 items-start">
+          ${
+            p.thumbnail_url
+              ? `<img src="${p.thumbnail_url}" class="w-24 h-24 object-cover rounded-lg border border-cyan-100">`
+              : `<div class="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400 text-sm border">No Img</div>`
+          }
 
-    // sembunyikan toolbar setelah transisi
-    setTimeout(() => {
-      toolbar.classList.add("hidden");
-      box.classList.remove("open");
-    }, 400);
-  } else {
-    // 🔹 Buka expand box
-    box.classList.remove("max-h-0", "opacity-0", "hidden");
-    box.style.display = "block";
-    void box.offsetHeight; // force reflow
-    box.style.maxHeight = box.scrollHeight + 150 + "px";
-    box.style.opacity = "1";
-    box.classList.add("open");
-    input.classList.add("ring-2", "ring-cyan-300");
+          <div class="flex-1">
+            <div class="flex justify-between text-sm text-gray-500 mb-1">
+              <time>${formattedDate}</time>
+            </div>
 
-    // 🔹 Tampilkan toolbar setelah delay
-    toolbar.classList.remove("hidden");
-    toolbar.style.display = "flex";
-    setTimeout(() => {
-      toolbar.style.opacity = "1";
-      toolbar.style.transform = "translateY(0)";
-    }, 250);
+            <h4 class="text-lg font-semibold text-gray-900 mb-1">${i + 1}. ${
+        p.title || "Untitled"
+      }</h4>
+            <p class="text-gray-700 text-sm leading-relaxed mb-2 line-clamp-2">
+              ${p.content || ""}
+            </p>
 
-    // Pastikan parent tinggi cukup besar untuk toolbar
-    setTimeout(() => {
-      box.style.maxHeight = box.scrollHeight + 150 + "px";
-    }, 350);
+            <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+              <button onclick="openTopPost(${p.id}, event); event.stopPropagation();"
+                class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+                <i class="fa-regular fa-comment-dots"></i> Reply
+              </button>
+
+              <div class="flex items-center gap-3">
+                <button onclick="votePost(${p.id}, true); event.stopPropagation();" 
+                  class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                  <i class="fa-regular fa-thumbs-up"></i> 
+                  <span id="up-${p.id}" class="font-medium">${p.total_up || 0}</span>
+                </button>
+
+                <button onclick="votePost(${p.id}, false); event.stopPropagation();" 
+                  class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                  <i class="fa-regular fa-thumbs-down"></i> 
+                  <span id="down-${p.id}" class="font-medium">${p.total_down || 0}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="expand-top-post-${p.id}" class="hidden mt-3 overflow-hidden transition-all duration-500 ease-in-out"></div>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="text-red-500 text-sm text-center py-3">Failed to load leaderboard.</p>`;
   }
 }
 
@@ -897,12 +1043,11 @@ async function refreshTopPosts() {
   const total = allPostData.length;
   const totalPages = Math.ceil(total / perPage);
 
-  // 🧩 kalau tidak ada post sama sekali
   if (total === 0) {
     document.getElementById("pagination-info").textContent = "0–0 of 0";
     document.getElementById("prevBtn").disabled = true;
     document.getElementById("nextBtn").disabled = true;
-    return; // keluar biar gak lanjut render
+    return;
   }
 
   const start = (currentPage - 1) * perPage;
@@ -917,20 +1062,70 @@ async function refreshTopPosts() {
   document.getElementById("nextBtn").disabled = currentPage === totalPages;
 }
 
+function renderPaginatedPostsFiltered(filteredData) {
+  const total = filteredData.length;
+  const totalPages = Math.ceil(total / perPage);
+
+  const start = (currentPage - 1) * perPage;
+  const end = Math.min(start + perPage, total);
+  const visiblePosts = filteredData.slice(start, end);
+
+  postGridContainer.innerHTML = '';
+  visiblePosts.forEach(p => postGridContainer.appendChild(buildPost(p)));
+
+  document.getElementById("pagination-info").textContent = `${start + 1}–${end} of ${total}`;
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
+}
+
+
   function nextPage() {
-  const totalPages = Math.ceil(allPostData.length / perPage);
+  let filtered;
+  if (activeFilter === "my") {
+    filtered = allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+  } else {
+    filtered = allPostData;
+  }
+
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+  }
+
+  const totalPages = Math.ceil(filtered.length / perPage);
   if (currentPage < totalPages) {
     currentPage++;
-    renderPaginatedPosts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderPaginatedPostsFiltered(filtered);
+
+    setTimeout(() => {
+      const postsOnPage = document.querySelectorAll("#grid > div").length;
+      if (postsOnPage < perPage) {
+        const lastPost = document.querySelector("#grid > div:last-child");
+        if (lastPost) {
+          lastPost.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+      }
+    }, 100);
   }
 }
 
-  function prevPage() {
+function prevPage() {
+  let filtered;
+
+  if (activeFilter === "my") {
+    filtered = allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+  } else {
+    filtered = allPostData;
+  }
+
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+  }
+
   if (currentPage > 1) {
     currentPage--;
-    renderPaginatedPosts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderPaginatedPostsFiltered(filtered);
   }
 }
 
@@ -994,7 +1189,7 @@ async function refreshTopPosts() {
   
   document.getElementById("searchInput").addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    e.preventDefault(); // biar gak reload halaman
+    e.preventDefault(); 
     jumpToSearchedPost();
   }
 });
@@ -1010,6 +1205,7 @@ async function refreshTopPosts() {
 
   // Refresh post list when post added, edited, or deleted
   document.addEventListener('postAdded', fetchPostFromServer);
+  document.addEventListener("DOMContentLoaded", refreshTopPosts);
 
   // ==== FILTER BUTTON EVENT LISTENERS ====
   showAllPostButton.addEventListener('click', e => {
@@ -1030,11 +1226,14 @@ async function refreshTopPosts() {
   if (savedFilter) {
     activeFilter = savedFilter;
   }
-  
-  // Load Post
-  updateFilterButtonsAppearance();
+
+  document.getElementById("nextBtn").addEventListener("click", nextPage);
+  document.getElementById("prevBtn").addEventListener("click", prevPage);
+
+  // Load Post sesuai filter terakhir
   fetchPostFromServer().then(() => {
-    renderPaginatedPosts();
+    updateFilterButtonsAppearance();
+    filterPosts();
   });
 </script>
 

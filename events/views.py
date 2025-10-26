@@ -149,16 +149,66 @@ def cancel_registration(request, slug):
 def my_events(request):
     """Display user's registered events"""
     registrations = request.user.event_registrations.select_related('event').all()
-    
+
     upcoming_regs = registrations.filter(
         event__date__gte=timezone.now().date()
     ).order_by('event__date', 'event__start_time')
-    
+
     past_regs = registrations.filter(
         event__date__lt=timezone.now().date()
     ).order_by('-event__date', '-event__start_time')
-    
+
     return render(request, 'events/my_events.html', {
         'upcoming_registrations': upcoming_regs,
         'past_registrations': past_regs
     })
+
+# Admin views for events
+def admin_event_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    events = Event.objects.all()
+    return render(request, 'events/admin_event_list.html', {'events': events})
+
+def admin_event_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import EventForm
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.slug = slugify(event.name)
+            event.save()
+            messages.success(request, 'Event created successfully!')
+            return redirect('events:admin_event_list')
+    else:
+        form = EventForm()
+    return render(request, 'events/admin_event_form.html', {'form': form, 'action': 'Create'})
+
+def admin_event_update(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import EventForm
+    event = get_object_or_404(Event, id=id)
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES, instance=event)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.slug = slugify(event.name)
+            event.save()
+            messages.success(request, 'Event updated successfully!')
+            return redirect('events:admin_event_list')
+    else:
+        form = EventForm(instance=event)
+    return render(request, 'events/admin_event_form.html', {'form': form, 'action': 'Update'})
+
+def admin_event_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    event = get_object_or_404(Event, id=id)
+    if request.method == 'POST':
+        event.delete()
+        messages.success(request, 'Event deleted successfully!')
+        return redirect('events:admin_event_list')
+    return render(request, 'events/admin_event_confirm_delete.html', {'event': event})

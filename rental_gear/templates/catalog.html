@@ -87,6 +87,7 @@
               <div class="flex gap-3 mt-4">
                 <a href="{% url 'rental_gear:gear_detail' gear.id %}"
                    class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
+                {% if user.is_authenticated %}
                 <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
                   {% csrf_token %}
                   <input type="hidden" name="quantity" value="1">
@@ -94,6 +95,10 @@
                   <button type="submit"
                           class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
                 </form>
+                {% else %}
+                <a href="{% url 'authentication:login' %}"
+                   class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</a>
+                {% endif %}
               </div>
             </div>
           </article>
@@ -131,6 +136,7 @@
             </div>
             <div class="flex gap-3 mt-4">
               <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
+              {% if user.is_authenticated %}
               <form class="ajax-add-to-cart inline" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
@@ -138,6 +144,10 @@
                 <button type="submit"
                         class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</button>
               </form>
+              {% else %}
+              <a href="{% url 'authentication:login' %}"
+                 class="bg-sky-100 text-sky-700 px-4 py-2 rounded-lg text-sm hover:bg-sky-200 transition">Add To Cart</a>
+              {% endif %}
             </div>
             {% if user.is_superuser %}
             <div class="flex gap-3 mt-2">

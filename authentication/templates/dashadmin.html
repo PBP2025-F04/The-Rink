@@ -1,0 +1,209 @@
+{% extends 'base.html' %} {% block title %}Admin Dashboard{% endblock %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-blue-900 mb-2">Admin Dashboard</h1>
+    <p class="text-lg text-blue-700">
+      Welcome, Superuser! You have full control over the system.
+    </p>
+  </div>
+
+  <!-- Management Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Rental Gear Management -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-blue-500 to-sky-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-cogs text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Rental Gear</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">
+          Manage rental gear items, categories, and inventory.
+        </p>
+        <a
+          href="{% url 'rental_gear:admin_gear_list' %}"
+          class="inline-block bg-gradient-to-r from-blue-500 to-sky-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-tools mr-2"></i>Manage Gear
+        </a>
+      </div>
+    </div>
+
+    <!-- Events Management -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-green-500 to-emerald-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-calendar-alt text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Events</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">
+          Manage events, registrations, and categories.
+        </p>
+        <a
+          href="{% url 'events:admin_event_list' %}"
+          class="inline-block bg-gradient-to-r from-green-500 to-emerald-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-calendar-check mr-2"></i>Manage Events
+        </a>
+      </div>
+    </div>
+
+    <!-- Forum Management -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-purple-500 to-violet-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-comments text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Forum</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">
+          Manage forum posts, replies, and users.
+        </p>
+        <a
+          href="{% url 'forum:admin_post_list' %}"
+          class="inline-block bg-gradient-to-r from-purple-500 to-violet-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-purple-600 hover:to-violet-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-comment-dots mr-2"></i>Manage Forum
+        </a>
+      </div>
+    </div>
+
+    <!-- Booking Arena Management -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-orange-500 to-red-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-building text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Booking Arena</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">Manage arenas, slots, and bookings.</p>
+        <div class="space-y-2">
+          <a
+            href="{% url 'booking_arena:admin_arena_list' %}"
+            class="inline-block bg-gradient-to-r from-orange-500 to-red-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-orange-600 hover:to-red-500 transition-all duration-300 font-medium"
+          >
+            <i class="fas fa-map-marker-alt mr-2"></i>Manage Arenas
+          </a>
+          <a
+            href="{% url 'booking_arena:admin_booking_list' %}"
+            class="inline-block bg-gradient-to-r from-red-500 to-pink-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-red-600 hover:to-pink-500 transition-all duration-300 font-medium ml-2"
+          >
+            <i class="fas fa-calendar-plus mr-2"></i>Manage Bookings
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Management -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-users text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Users</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">
+          Manage user accounts, profiles, and types.
+        </p>
+        <a
+          href="{% url 'authentication:admin_user_list' %}"
+          class="inline-block bg-gradient-to-r from-indigo-500 to-purple-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-purple-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-user-cog mr-2"></i>Manage Users
+        </a>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div
+      class="card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-red-500 to-pink-400 p-4">
+        <div class="flex items-center">
+          <i class="fas fa-sign-out-alt text-white text-2xl mr-3"></i>
+          <h5 class="text-white font-bold text-lg">Logout</h5>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">Logout from admin dashboard.</p>
+        <a
+          href="{% url 'authentication:logout' %}"
+          class="inline-block bg-gradient-to-r from-red-500 to-pink-400 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-red-600 hover:to-pink-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-sign-out-alt mr-2"></i>Logout
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats Section -->
+  <div class="mt-12 bg-white rounded-xl shadow-lg p-6 border border-blue-100">
+    <h3 class="text-2xl font-bold text-blue-900 mb-6 text-center">
+      System Overview
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div
+        class="text-center cursor-pointer hover:bg-blue-50 p-4 rounded-lg transition-colors"
+      >
+        <div class="text-3xl font-bold text-blue-600 mb-2">
+          <i class="fas fa-cogs"></i>
+        </div>
+        <p class="text-sm text-gray-600">Gear Items</p>
+        <p class="text-lg font-semibold text-blue-600">
+          {{ gear_count|default:0 }}
+        </p>
+      </div>
+      <div
+        class="text-center cursor-pointer hover:bg-green-50 p-4 rounded-lg transition-colors"
+      >
+        <div class="text-3xl font-bold text-green-600 mb-2">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <p class="text-sm text-gray-600">Active Events</p>
+        <p class="text-lg font-semibold text-green-600">
+          {{ event_count|default:0 }}
+        </p>
+      </div>
+      <div
+        class="text-center cursor-pointer hover:bg-purple-50 p-4 rounded-lg transition-colors"
+      >
+        <div class="text-3xl font-bold text-purple-600 mb-2">
+          <i class="fas fa-comments"></i>
+        </div>
+        <p class="text-sm text-gray-600">Forum Posts</p>
+        <p class="text-lg font-semibold text-purple-600">
+          {{ post_count|default:0 }}
+        </p>
+      </div>
+      <div
+        class="text-center cursor-pointer hover:bg-orange-50 p-4 rounded-lg transition-colors"
+      >
+        <div class="text-3xl font-bold text-orange-600 mb-2">
+          <i class="fas fa-users"></i>
+        </div>
+        <p class="text-sm text-gray-600">Total Users</p>
+        <p class="text-lg font-semibold text-orange-600">
+          {{ user_count|default:0 }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
