@@ -300,7 +300,7 @@
         </div>
 
         <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
-          <button onclick="toggleReplyBox(${postItem.id})" 
+          <button onclick="toggleReplyBox(${postItem.id}, event)" 
             class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
             <i class="fa-regular fa-comment-dots"></i> Reply
           </button>
@@ -325,16 +325,26 @@
 }
 
 
-  function toggleReplyBox(postId) {
-    const box = document.getElementById(`replyBox-${postId}`);
-    if (box.classList.contains('hidden')) {
-      box.classList.remove('hidden');
-      loadReplies(postId);
-    } 
-    else {
-      box.classList.add('hidden');
-    }
+  function toggleReplyBox(postId, event) {
+  if (event) event.stopPropagation();
+
+  const box = document.getElementById(`replyBox-${postId}`);
+  if (!box) return;
+
+  const isHidden = box.classList.contains("hidden");
+
+  if (isHidden) {
+    box.classList.remove("hidden");
+    box.style.maxHeight = box.scrollHeight + "px";
+    box.style.opacity = "1";
+    loadReplies(postId);
+  } else {
+    box.style.maxHeight = "0px";
+    box.style.opacity = "0";
+    setTimeout(() => box.classList.add("hidden"), 300);
   }
+}
+
 
   function toggleExpandBox() {
   if (!CURRENT_USER_ID) {
