@@ -202,7 +202,6 @@
   // Configuration
   const POST_API_ENDPOINT = "{% url 'forum:show_json' %}";
   const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
-  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   
   // DOM Elements
   const loadingSpinner = document.getElementById('loading');
@@ -660,13 +659,13 @@ async function replyToUser(username, postId, event) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": csrftoken,
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       },
       credentials: "include",
       body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
     });
 
-    if (!res.ok) throw new Error("Vote failed");
+    if (!res.ok) throw new Error("Failed to vote");
 
     const data = await res.json();
 
@@ -678,12 +677,12 @@ async function replyToUser(username, postId, event) {
       allPostData[index].upvotes_count = data.upvotes;
       allPostData[index].downvotes_count = data.downvotes;
     }
-  } catch (err) {
-    console.error(err);
+
+  } catch (error) {
+    console.error(error);
     showToast("Error", "Gagal vote", "error");
   }
 }
-
 
  async function openTopPost(postId, event) {
   if (event) {
