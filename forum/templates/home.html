@@ -299,6 +299,7 @@
           <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
         </div>
 
+        <!-- Buttons -->
         <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
           <button onclick="toggleReplyBox(${postItem.id}, event)" 
             class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
@@ -318,11 +319,12 @@
           </div>
         </div>
 
-        <!-- Reply section -->
+        <!-- Reply Section -->
         <div id="replyBox-${postItem.id}" 
-             class="hidden mt-3 border-t pt-3 text-sm text-gray-700 transition-all duration-500 ease-in-out overflow-hidden">
+             class="hidden border-t mt-3 pt-3 text-sm text-gray-700 transition-all duration-500 ease-in-out overflow-hidden">
           <div id="replies-${postItem.id}" 
                class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+
           <div class="flex gap-2 mt-3">
             <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
               class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
@@ -332,11 +334,13 @@
               Send
             </button>
           </div>
-        </div>
-
+        </div> 
+      </div>
+    </div> 
   `;
   return postElement;
 }
+
 
 
 
