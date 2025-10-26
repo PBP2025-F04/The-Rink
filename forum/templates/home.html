@@ -651,25 +651,53 @@ async function replyToUser(username, postId, event) {
   }, 10);
 }
 
-  async function votePost(id, isUpvote) {
+  async function votePost(id, isUpvote, event) {
+  const upEl = document.getElementById(`up-${id}`);
+  const downEl = document.getElementById(`down-${id}`);
+
+  let prevUp = Number(upEl.textContent);
+  let prevDown = Number(downEl.textContent);
+  if (isUpvote) {
+    upEl.textContent = prevUp + 1;
+  } else {
+    downEl.textContent = prevDown + 1;
+  }
+
+  const btn = event?.currentTarget || event?.target?.closest("button");
+  if (btn) {
+    btn.classList.add("scale-110");
+    btn.style.transition = "transform 0.15s ease";
+    setTimeout(() => btn.classList.remove("scale-110"), 150);
+  }
+
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken":  csrftoken,
+        "X-CSRFToken": csrftoken,
       },
       credentials: "include",
       body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
     });
 
-    const data = await res.json();
-    document.getElementById(`up-${id}`).textContent = data.upvotes;
-    document.getElementById(`down-${id}`).textContent = data.downvotes;
-  } catch {
-    showToast("Error", "Gagal vote", "error");
+    if (res.ok) {
+      const data = await res.json();
+      upEl.textContent = data.upvotes;
+      downEl.textContent = data.downvotes;
+    } else {
+      upEl.textContent = prevUp;
+      downEl.textContent = prevDown;
+      showToast("Error", "Failed to vote", "error");
+    }
+  } catch (err) {
+    upEl.textContent = prevUp;
+    downEl.textContent = prevDown;
+    console.error("Vote error:", err);
+    showToast("Error", "Failed to vote", "error");
   }
 }
+
 
  async function openTopPost(postId, event) {
   if (event) {
