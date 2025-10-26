@@ -263,14 +263,11 @@ def toggle_vote(request):
             else:
                 return JsonResponse({"error": "Invalid target type"}, status=400)
 
-            try:
-                if user:
-                    vote, created = UpVote.objects.get_or_create(user=user, **vote_filter)
-                else:
-                    vote, created = UpVote.objects.get_or_create(session_key=session_key, **vote_filter)
-            except Exception as e:
-                print("Vote creation error:", e)
-                return JsonResponse({"error": "Database constraint error"}, status=400)
+            # 🟩 Toggle logic
+            if user:
+                vote, created = UpVote.objects.get_or_create(user=user, **vote_filter)
+            else:
+                vote, created = UpVote.objects.get_or_create(session_key=session_key, **vote_filter)
 
             if not created and vote.is_upvote == is_upvote:
                 vote.delete()
@@ -278,15 +275,19 @@ def toggle_vote(request):
                 vote.is_upvote = is_upvote
                 vote.save()
 
+            target.refresh_from_db()
+
             return JsonResponse({
-                "upvotes": target.total_upvotes(),
-                "downvotes": target.total_downvotes(),
+                "upvotes": target.upvotes.filter(is_upvote=True).count(),
+                "downvotes": target.upvotes.filter(is_upvote=False).count(),
             })
+
         except Exception as e:
             print("Vote toggle error:", e)
             return JsonResponse({"error": "Vote failed"}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 
 def get_top_posts_json(request):
