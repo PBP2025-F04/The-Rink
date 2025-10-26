@@ -344,7 +344,19 @@ def admin_gear_create(request):
     if request.method == 'POST':
         form = GearForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            gear = form.save(commit=False)
+            # If no seller selected, create system admin user
+            if not gear.seller:
+                from django.contrib.auth.models import User
+                from authentication.models import UserType
+                system_user, created = User.objects.get_or_create(
+                    username='system_admin',
+                    defaults={'email': 'admin@therink.com', 'first_name': 'System', 'last_name': 'Admin'}
+                )
+                if created:
+                    UserType.objects.create(user=system_user, user_type='seller')
+                gear.seller = system_user
+            gear.save()
             messages.success(request, 'Gear created successfully!')
             return redirect('rental_gear:admin_gear_list')
     else:

@@ -39,7 +39,14 @@ def login_user(request):
         # Check for hardcoded admin credentials
         if username == 'cbkadal' and password == 'dikadalin':
             request.session['is_admin'] = True
+            # Create a dummy user object for admin
+            from django.contrib.auth.models import AnonymousUser
+            request.user = AnonymousUser()
             return redirect('authentication:dashadmin')
+
+        # Clear admin session for regular users
+        if 'is_admin' in request.session:
+            del request.session['is_admin']
 
         form = AuthenticationForm(data=request.POST)
 
@@ -58,6 +65,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
+    request.session.flush()  # Clear all session data including admin session
     return redirect('authentication:login')
 
 @login_required

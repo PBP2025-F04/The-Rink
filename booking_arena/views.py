@@ -234,8 +234,9 @@ def cancel_booking(request, booking_id):
 # ADMIN CRUD VIEWS
 # ======================================================
 
-@user_passes_test(is_superuser)
 def admin_arena_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
     arenas = Arena.objects.all()
     return render(request, 'booking_arena/admin_arena_list.html', {'arenas': arenas})
 
@@ -270,8 +271,9 @@ def admin_arena_delete(request, id):
         return redirect('booking_arena:admin_arena_list')
     return render(request, 'booking_arena/admin_arena_confirm_delete.html', {'arena': arena})
 
-@user_passes_test(is_superuser)
 def admin_booking_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
     bookings = Booking.objects.all().select_related('user', 'arena')
     return render(request, 'booking_arena/admin_booking_list.html', {'bookings': bookings})
 
