@@ -1170,11 +1170,10 @@ function prevPage() {
 
       toggleExpandBox();
       allPostData.unshift(data);
-      if (activeFilter === "my") {
-        filterPosts(); 
-      } else {
-        renderPosts(allPostData);
-      }
+
+      filterPosts();
+      
+      refreshTopPosts();
     } else {
       showToast("Failed to Post", "Please try again later.", "error");
     }
