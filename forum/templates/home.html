@@ -268,7 +268,8 @@
   function buildPost(postItem) {
   const postElement = document.createElement('div');
   postElement.dataset.postId = postItem.id;
-  postElement.className = 'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4';
+  postElement.className =
+    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
 
   const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric'
@@ -299,48 +300,49 @@
         </div>
 
         <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
-          <button onclick="toggleReplyBox(${postItem.id}, event)"
+          <button onclick="toggleReplyBox(${postItem.id}, event)" 
             class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
             <i class="fa-regular fa-comment-dots"></i> Reply
           </button>
+
           <div class="flex items-center gap-3">
-            <button onclick="votePost(${postItem.id}, true, event, 'post')"
+            <button onclick="votePost(${postItem.id}, true, event, 'post')" 
               class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
-              <i class="fa-regular fa-thumbs-up"></i>  
-              <span id="post-up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+                <i class="fa-regular fa-thumbs-up"></i>  
+                <span id="post-up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
             </button>
-            <button onclick="votePost(${postItem.id}, false, event, 'post')"
+
+            <button onclick="votePost(${postItem.id}, false, event, 'post')" 
               class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
-              <i class="fa-regular fa-thumbs-down"></i>  
-              <span id="post-down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
+                <i class="fa-regular fa-thumbs-down"></i>  
+                <span id="post-down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
             </button>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- ✅ Tambahkan Reply Box di bawah tiap post -->
-    <div id="replyBox-${postItem.id}" 
-         class="hidden overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-4">
-      <div id="replies-${postItem.id}" class="space-y-3 mb-3">
-        <p class="text-gray-500 text-sm">No response yet.</p>
-      </div>
-      <div class="flex gap-2 mt-3">
-        <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
-               class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
-        <button onclick="sendReply(${postItem.id})"
-          class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
-                 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 
-                 transform hover:scale-105">
-          Send
-        </button>
-      </div>
-    </div>
   `;
+  postElement.innerHTML += `
+  <div id="replyBox-${postItem.id}" 
+       class="hidden overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-4">
+    <div id="replies-${postItem.id}" class="space-y-3 mb-3">
+      <p class="text-gray-500 text-sm">No response yet.</p>
+    </div>
+    <div class="flex gap-2 mt-2">
+      <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply"
+             class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+      <button onclick="sendReply(${postItem.id})"
+              class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
+                     text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 
+                     transform hover:scale-105">
+        Send
+      </button>
+    </div>
+  </div>
+`;
+
   return postElement;
 }
-
-
 
 
   function toggleReplyBox(postId, event) {
