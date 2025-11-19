@@ -10,6 +10,444 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.template.loader import render_to_string
+from django.core import serializers
+
+
+# ============ Flutter JSON Endpoints ============
+
+@csrf_exempt
+def get_gears_json(request):
+    """Get all gears for Flutter - JSON format with proper data types"""
+    gears = Gear.objects.all()
+    data = []
+    for gear in gears:
+        data.append({
+            'id': gear.id,
+            'name': gear.name,
+            'category': gear.category,
+            'price_per_day': float(gear.price_per_day),  # Decimal to float
+            'stock': gear.stock,  # int
+            'description': gear.description or '',  # Ensure string, not null
+            'image_url': gear.image_url or '',  # Ensure string, not null
+            'seller_id': gear.seller.id,  # int
+            'seller_username': gear.seller.username,  # string
+            'is_featured': gear.is_featured,  # bool
+        })
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def get_gear_detail_json(request, id):
+    """Get single gear detail for Flutter - JSON format"""
+    try:
+        gear = get_object_or_404(Gear, id=id)
+        data = {
+            'id': gear.id,
+            'name': gear.name,
+            'category': gear.category,
+            'price_per_day': float(gear.price_per_day),
+            'stock': gear.stock,
+            'description': gear.description or '',
+            'image_url': gear.image_url or '',
+            'seller_id': gear.seller.id,
+            'seller_username': gear.seller.username,
+            'is_featured': gear.is_featured,
+        }
+        return JsonResponse(data)
+    except Gear.DoesNotExist:
+        return JsonResponse({'error': 'Gear not found'}, status=404)
+
+
+@csrf_exempt
+@login_required
+def get_cart_json(request):
+    """Get user's cart items for Flutter"""
+    cart_items = CartItem.objects.filter(user=request.user).select_related('gear')
+    data = []
+    total_price = 0
+    
+    for item in cart_items:
+        item_total = float(item.get_total_price())
+        total_price += item_total
+        data.append({
+            'id': item.id,
+            'gear_id': item.gear.id,
+            'gear_name': item.gear.name,
+            'gear_image_url': item.gear.image_url or '',
+            'price_per_day': float(item.gear.price_per_day),
+            'quantity': item.quantity,
+            'days': item.days,
+            'subtotal': item_total,
+            'stock_available': item.gear.stock,
+        })
+    
+    return JsonResponse({
+        'cart_items': data,
+        'total_price': total_price,
+        'total_items': len(data)
+    })
+
+
+@csrf_exempt
+@login_required
+def add_to_cart_flutter(request):
+    """Add item to cart from Flutter"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        gear_id = int(data.get('gear_id'))
+        quantity = int(data.get('quantity', 1))
+        days = int(data.get('days', 1))
+        
+        if quantity < 1:
+            return JsonResponse({'success': False, 'message': 'Quantity must be at least 1'}, status=400)
+        
+        if days < 1 or days > 30:
+            return JsonResponse({'success': False, 'message': 'Days must be between 1-30'}, status=400)
+        
+        gear = get_object_or_404(Gear, id=gear_id)
+        
+        if quantity > gear.stock:
+            return JsonResponse({
+                'success': False, 
+                'message': f'Stock not available. Only {gear.stock} items left'
+            }, status=400)
+        
+        item, created = CartItem.objects.get_or_create(
+            user=request.user, 
+            gear=gear,
+            defaults={'quantity': quantity, 'days': days}
+        )
+        
+        if not created:
+            item.quantity = quantity
+            item.days = days
+            item.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{gear.name} added to cart',
+            'cart_item_id': item.id
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+def update_cart_item_flutter(request, item_id):
+    """Update cart item quantity/days from Flutter"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        item = get_object_or_404(CartItem, id=item_id, user=request.user)
+        
+        if 'quantity' in data:
+            quantity = int(data['quantity'])
+            if quantity < 1:
+                return JsonResponse({'success': False, 'message': 'Quantity must be at least 1'}, status=400)
+            if quantity > item.gear.stock:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Stock not available. Only {item.gear.stock} items left'
+                }, status=400)
+            item.quantity = quantity
+        
+        if 'days' in data:
+            days = int(data['days'])
+            if days < 1 or days > 30:
+                return JsonResponse({'success': False, 'message': 'Days must be between 1-30'}, status=400)
+            item.days = days
+        
+        item.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Cart updated',
+            'subtotal': float(item.get_total_price())
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+def remove_from_cart_flutter(request, item_id):
+    """Remove item from cart for Flutter"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        item = get_object_or_404(CartItem, id=item_id, user=request.user)
+        gear_name = item.gear.name
+        item.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{gear_name} removed from cart'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+@transaction.atomic
+def checkout_flutter(request):
+    """Checkout cart items for Flutter"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        cart_items = CartItem.objects.filter(user=request.user).select_related('gear')
+        
+        if not cart_items.exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Cart is empty'
+            }, status=400)
+        
+        # Calculate total and max days
+        total = 0
+        max_days = 0
+        rental_items_data = []
+        
+        for item in cart_items:
+            if item.quantity > item.gear.stock:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Insufficient stock for {item.gear.name}'
+                }, status=400)
+            
+            subtotal = float(item.get_total_price())
+            total += subtotal
+            max_days = max(max_days, item.days)
+            
+            rental_items_data.append({
+                'gear_name': item.gear.name,
+                'quantity': item.quantity,
+                'days': item.days,
+                'price_per_day': float(item.gear.price_per_day),
+                'subtotal': subtotal
+            })
+        
+        # Create rental
+        from datetime import timedelta
+        rental = Rental.objects.create(
+            customer_name=request.user.username,
+            user=request.user,
+            return_date=timezone.now().date() + timedelta(days=max_days),
+            total_cost=total
+        )
+        
+        # Create rental items
+        for item in cart_items:
+            RentalItem.objects.create(
+                rental=rental,
+                gear_name=item.gear.name,
+                quantity=item.quantity,
+                price_per_day_at_checkout=item.gear.price_per_day
+            )
+            
+            # Reduce stock
+            item.gear.stock -= item.quantity
+            item.gear.save()
+        
+        # Clear cart
+        cart_items.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Checkout successful',
+            'rental_id': rental.id,
+            'total_cost': total,
+            'return_date': rental.return_date.isoformat(),
+            'items': rental_items_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+def get_rentals_json(request):
+    """Get user's rental history for Flutter"""
+    rentals = Rental.objects.filter(user=request.user).prefetch_related('items').order_by('-rental_date')
+    data = []
+    
+    for rental in rentals:
+        items = []
+        for item in rental.items.all():
+            items.append({
+                'gear_name': item.gear_name,
+                'quantity': item.quantity,
+                'price_per_day': float(item.price_per_day_at_checkout),
+                'subtotal': float(item.get_subtotal())
+            })
+        
+        data.append({
+            'id': rental.id,
+            'customer_name': rental.customer_name,
+            'rental_date': rental.rental_date.isoformat(),
+            'return_date': rental.return_date.isoformat(),
+            'total_cost': float(rental.total_cost),
+            'items': items
+        })
+    
+    return JsonResponse({'rentals': data})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
+def create_gear_flutter(request):
+    """Create gear from Flutter (seller only)"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['name', 'category', 'price_per_day', 'stock']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Missing required field: {field}'
+                }, status=400)
+        
+        # Validate category
+        valid_categories = ['hockey', 'curling', 'ice_skating', 'apparel', 'accessories', 'protective_gear', 'other']
+        if data['category'] not in valid_categories:
+            return JsonResponse({
+                'success': False,
+                'message': f'Invalid category. Must be one of: {", ".join(valid_categories)}'
+            }, status=400)
+        
+        gear = Gear.objects.create(
+            name=data['name'],
+            category=data['category'],
+            price_per_day=float(data['price_per_day']),
+            stock=int(data['stock']),
+            description=data.get('description', ''),
+            image_url=data.get('image_url', ''),
+            seller=request.user,
+            is_featured=data.get('is_featured', False)
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Gear created successfully',
+            'gear_id': gear.id
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
+def update_gear_flutter(request, id):
+    """Update gear from Flutter (seller only)"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        gear = get_object_or_404(Gear, id=id, seller=request.user)
+        data = json.loads(request.body)
+        
+        # Update fields if provided
+        if 'name' in data:
+            gear.name = data['name']
+        if 'category' in data:
+            valid_categories = ['hockey', 'curling', 'ice_skating', 'apparel', 'accessories', 'protective_gear', 'other']
+            if data['category'] not in valid_categories:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Invalid category. Must be one of: {", ".join(valid_categories)}'
+                }, status=400)
+            gear.category = data['category']
+        if 'price_per_day' in data:
+            gear.price_per_day = float(data['price_per_day'])
+        if 'stock' in data:
+            gear.stock = int(data['stock'])
+        if 'description' in data:
+            gear.description = data['description']
+        if 'image_url' in data:
+            gear.image_url = data['image_url']
+        if 'is_featured' in data:
+            gear.is_featured = bool(data['is_featured'])
+        
+        gear.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Gear updated successfully'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
+def delete_gear_flutter(request, id):
+    """Delete gear from Flutter (seller only)"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        gear = get_object_or_404(Gear, id=id, seller=request.user)
+        gear_name = gear.name
+        gear.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{gear_name} deleted successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
+def get_seller_gears_json(request):
+    """Get seller's own gears for Flutter"""
+    gears = Gear.objects.filter(seller=request.user)
+    data = []
+    
+    for gear in gears:
+        data.append({
+            'id': gear.id,
+            'name': gear.name,
+            'category': gear.category,
+            'price_per_day': float(gear.price_per_day),
+            'stock': gear.stock,
+            'description': gear.description or '',
+            'image_url': gear.image_url or '',
+            'is_featured': gear.is_featured,
+        })
+    
+    return JsonResponse({'gears': data})
 
 
 def gear_json(request, id):
