@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    # CORS support for Flutter/web client
+    'corsheaders',
     'authentication',
     'rental_gear',
     'booking_arena',
@@ -58,6 +60,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CORS middleware must be placed as high as possible, before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -171,3 +175,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS configuration (development)
+# Allow Flutter web dev origin (dynamic port). If port changes, add it or set allow all.
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:65133',  # Flutter web debug origin from error log
+    'http://localhost:8000',   # Django self-origin (harmless)
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# If you prefer to allow all origins during early development, comment out the
+# list above and uncomment the following line:
+# CORS_ALLOW_ALL_ORIGINS = True

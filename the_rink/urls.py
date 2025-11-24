@@ -24,6 +24,8 @@ urlpatterns = [
     path('', views.main_page, name='main'),
     path('admin/', admin.site.urls),
     path('rental/', include('rental_gear.urls')),
+    # Legacy alias for Flutter client. Use a distinct namespace to avoid W005.
+    path('rental_gear/', include(('rental_gear.urls', 'rental_gear_legacy'), namespace='rental_gear_legacy')),
     path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
     path('forum/', include('forum.urls')),  
