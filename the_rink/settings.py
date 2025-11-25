@@ -31,7 +31,7 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
 CSRF_TRUSTED_ORIGINS = [
     "https://angga-tri41-therink.pbp.cs.ui.ac.id"
 ]
@@ -177,13 +177,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS configuration (development)
-# Allow Flutter web dev origin (dynamic port). If port changes, add it or set allow all.
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:65133',  # Flutter web debug origin from error log
-    'http://localhost:8000',   # Django self-origin (harmless)
-]
+# Allow all origins for Flutter development (web, Android emulator, iOS simulator)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-# If you prefer to allow all origins during early development, comment out the
-# list above and uncomment the following line:
-# CORS_ALLOW_ALL_ORIGINS = True
+# For production, use specific origins:
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:65133',  # Flutter web
+#     'https://your-production-domain.com',
+# ]
