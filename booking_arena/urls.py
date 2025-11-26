@@ -1,5 +1,3 @@
-# File: booking_arena/urls.py
-
 from django.urls import path
 from booking_arena.views import *
 
@@ -14,7 +12,4 @@ urlpatterns = [
     path('arena/<uuid:arena_id>/book-hourly/', create_booking_hourly, name='create_booking_hourly'),
     path('add-ajax/', add_arena_ajax, name='add_arena_ajax'),
     path('delete-ajax/<uuid:arena_id>/', delete_arena_ajax, name='delete_arena_ajax'),
-    
-    # View lama lu yg pake JSON (kalo masih dipake di tempat lain)
-    # path('create-multiple/', create_multiple_bookings, name='create_multiple_bookings'),
 ]
