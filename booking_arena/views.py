@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.dateparse import parse_date
 from django.utils import timezone
@@ -335,75 +336,46 @@ def delete_arena_ajax(request, arena_id):
 # ======================================================
 # ADMIN CRUD VIEWS
 # ======================================================
-
-def admin_arena_list(request):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
-    if not request.session.get('is_admin'):
-        return redirect('authentication:login')
-    arenas = Arena.objects.all()
-    return render(request, 'booking_arena/admin_arena_list.html', {'arenas': arenas})
-
-def admin_arena_create(request):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
+@user_passes_test(is_superuser)
+@transaction.atomic
+def add_arena_ajax(request):
     if request.method == 'POST':
         form = ArenaForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('booking_arena:admin_arena_list')
-    else:
-        form = ArenaForm()
-    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Create'})
+        formset = ArenaOpeningHoursFormSet(request.POST, instance=Arena(), prefix='hours')
 
-def admin_arena_update(request, id):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
-    arena = get_object_or_404(Arena, id=id)
+        if form.is_valid() and formset.is_valid():
+            new_arena = form.save()
+            formset.instance = new_arena
+            formset.save()
+            arena_data = {
+                'id': str(new_arena.id),
+                'name': new_arena.name,
+                'location': new_arena.location,
+                'img_url': new_arena.img_url if new_arena.img_url else None,
+                'detail_url': reverse('booking_arena:arena_detail', args=[new_arena.id]),
+                'delete_url': reverse('booking_arena:delete_arena_ajax', args=[new_arena.id])
+            }
+            return JsonResponse({'status': 'success', 'message': 'Arena berhasil ditambah!', 'arena': arena_data})
+        
+        else:
+            errors = form.errors.as_json()
+            errors_formset = [f.errors.as_json() for f in formset if f.errors]
+            print("Form errors:", errors)
+            print("Formset errors:", errors_formset)
+            return JsonResponse({'status': 'error', 'message': 'Validasi gagal. Cek input Anda.', 'errors': errors, 'formset_errors': errors_formset}, status=400)
+    
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@user_passes_test(is_superuser)
+def delete_arena_ajax(request, arena_id):
     if request.method == 'POST':
-        form = ArenaForm(request.POST, request.FILES, instance=arena)
-        if form.is_valid():
-            form.save()
-            return redirect('booking_arena:admin_arena_list')
-    else:
-        form = ArenaForm(instance=arena)
-    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Update'})
-
-def admin_arena_delete(request, id):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
-    arena = get_object_or_404(Arena, id=id)
-    if request.method == 'POST':
-        arena.delete()
-        return redirect('booking_arena:admin_arena_list')
-    return render(request, 'booking_arena/admin_arena_confirm_delete.html', {'arena': arena})
-
-def admin_booking_list(request):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
-    if not request.session.get('is_admin'):
-        return redirect('authentication:login')
-    bookings = Booking.objects.all().select_related('user', 'arena')
-    return render(request, 'booking_arena/admin_booking_list.html', {'bookings': bookings})
-
-def admin_booking_delete(request, id):
-    from authentication.views import admin_middleware_check
-    check = admin_middleware_check(request)
-    if check:
-        return check
-    booking = get_object_or_404(Booking, id=id)
-    if request.method == 'POST':
-        booking.delete()
-        return redirect('booking_arena:admin_booking_list')
-    return render(request, 'booking_arena/admin_booking_confirm_delete.html', {'booking': booking})
-
+        try:
+            arena = Arena.objects.get(pk=arena_id)
+            arena_name = arena.name
+            arena.delete()
+            return JsonResponse({'status': 'success', 'message': f'Arena "{arena_name}" deleted successfully!'})
+        except Arena.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Arena not found.'}, status=404)
+        except Exception as e:
+             return JsonResponse({'status': 'error', 'message': f'Error deleting arena: {e}'}, status=500)
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
