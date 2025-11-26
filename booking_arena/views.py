@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.dateparse import parse_date
 from django.utils import timezone
@@ -287,6 +288,50 @@ def cancel_booking(request, booking_id):
         response = render(request, 'partials/slot_list.html', context)
         response['HX-Trigger'] = headers['HX-Trigger']
         return response
+
+@user_passes_test(is_superuser)
+@transaction.atomic
+def add_arena_ajax(request):
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES)
+        formset = ArenaOpeningHoursFormSet(request.POST, instance=Arena(), prefix='hours')
+
+        if form.is_valid() and formset.is_valid():
+            new_arena = form.save()
+            formset.instance = new_arena
+            formset.save()
+            arena_data = {
+                'id': str(new_arena.id),
+                'name': new_arena.name,
+                'location': new_arena.location,
+                'img_url': new_arena.img_url if new_arena.img_url else None,
+                'detail_url': reverse('booking_arena:arena_detail', args=[new_arena.id]),
+                'delete_url': reverse('booking_arena:delete_arena_ajax', args=[new_arena.id])
+            }
+            return JsonResponse({'status': 'success', 'message': 'Arena berhasil ditambah!', 'arena': arena_data})
+        
+        else:
+            errors = form.errors.as_json()
+            errors_formset = [f.errors.as_json() for f in formset if f.errors]
+            print("Form errors:", errors)
+            print("Formset errors:", errors_formset)
+            return JsonResponse({'status': 'error', 'message': 'Validasi gagal. Cek input Anda.', 'errors': errors, 'formset_errors': errors_formset}, status=400)
+    
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@user_passes_test(is_superuser)
+def delete_arena_ajax(request, arena_id):
+    if request.method == 'POST':
+        try:
+            arena = Arena.objects.get(pk=arena_id)
+            arena_name = arena.name
+            arena.delete()
+            return JsonResponse({'status': 'success', 'message': f'Arena "{arena_name}" deleted successfully!'})
+        except Arena.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Arena not found.'}, status=404)
+        except Exception as e:
+             return JsonResponse({'status': 'error', 'message': f'Error deleting arena: {e}'}, status=500)
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
 # ======================================================
 # ADMIN CRUD VIEWS

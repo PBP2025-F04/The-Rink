@@ -31,10 +31,10 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
-# CSRF_TRUSTED_ORIGINS = [
-#     "angga-tri41-therink.pbp.cs.ui.ac.id/"
-# ]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://angga-tri41-therink.pbp.cs.ui.ac.id"
+]
 
 
 # Application definition
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    # CORS support for Flutter/web client
+    'corsheaders',
     'authentication',
     'rental_gear',
     'booking_arena',
@@ -56,7 +58,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CORS middleware must be placed as high as possible, before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,6 +83,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'rental_gear.context_processors.cart_count',
+                'authentication.context_processors.is_admin',
+                'authentication.context_processors.is_admin_logged_in',
             ],
         },
     },
@@ -155,10 +162,11 @@ TIME_FORMAT = 'H:i'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static"
+    BASE_DIR / "static",
+    BASE_DIR / "statics",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / "media"
@@ -167,3 +175,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS configuration (development)
+# Allow all origins for Flutter development (web, Android emulator, iOS simulator)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# For production, use specific origins:
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:65133',  # Flutter web
+#     'https://your-production-domain.com',
+# ]
