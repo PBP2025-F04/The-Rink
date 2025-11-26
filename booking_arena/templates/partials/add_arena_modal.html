@@ -3,7 +3,6 @@
 <div class="modal fade" id="addArenaModal" tabindex="-1" aria-labelledby="addArenaModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content rounded-xl">
-<<<<<<< HEAD
       
       <form id="add-arena-form" action="{% url 'booking_arena:add_arena_ajax' %}" method="POST">
         {% csrf_token %}
@@ -81,28 +80,6 @@
         </div>
       </form>
       
-=======
-      <div class="modal-header border-b-0">
-        <h5 class="modal-title text-sky-800 font-semibold" id="addArenaModalLabel">Add New Arena</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      {# Ganti action ke URL AJAX #}
-      <form id="add-arena-form" ...>
-  {% csrf_token %}
-  <div class="modal-body ...">
-      {{ form.as_p }} {# Ini udah otomatis dapet class dari forms.py #}
-      
-      {# Atau kalo mau looping manual (tetep dapet class): #}
-      {# {% for field in form %}
-          <div class="mb-3">
-              <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-              {{ field }} {# Class udah nempel dari forms.py #}
-              {% for error in field.errors %} <p class="text-red-500 text-xs mt-1">{{ error }}</p> {% endfor %}
-              {% if field.help_text %}<small class="text-gray-500 text-xs">{{ field.help_text }}</small>{% endif %}
-          </div>
-      {% endfor %} #}
-  </div>
->>>>>>> dev
     </div>
   </div>
 </div>
