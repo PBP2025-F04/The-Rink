@@ -202,11 +202,17 @@
   if (response.ok) {
     hideModal();
     showToast(successMsg, '', 'success');
-    document.dispatchEvent(new CustomEvent('postAdded'));
-  } else {
+    if (mode === "create") {
+      document.dispatchEvent(new CustomEvent('postAdded'));
+    } 
+    else {
+      document.dispatchEvent(new CustomEvent('postEdited'));
+    }
+  } 
+  else {
     showToast("Failed to submit post 😢", '', 'error');
   }
-});
+  });
 
 
   let postToDelete = null;
@@ -233,7 +239,6 @@
   });
 
   if (response.ok) {
-      // ✅ Hapus langsung dari array tanpa refresh server
     allPostData = allPostData.filter(p => p.id !== Number(postToDelete));
   if (postCard) {
     postCard.classList.add('opacity-0', 'translate-y-2');
@@ -242,15 +247,23 @@
   hideDeleteModal();
   showToast("Post deleted successfully!", '', 'success');
 
-  // ✅ Render ulang sesuai filter aktif
   if (activeFilter === 'my') {
-    filterPosts(); // tetap di My Post
+    filterPosts(); 
   } else {
-    fetchPostFromServer(); // kalau lagi di All Post, refresh semua
+    fetchPostFromServer(); 
   }
+  document.dispatchEvent(new CustomEvent('postDeleted'));
 } else {
   showToast("Failed to delete post 😢", '', 'error');
 }
 });
+document.addEventListener("postAdded", refreshTopPosts);
+document.addEventListener("postEdited", refreshTopPosts);
+document.addEventListener("postDeleted", refreshTopPosts);
 
+document.addEventListener("postEdited", async () => {
+  await fetchPostFromServer();
+  filterPosts();
+  refreshTopPosts();
+});
 </script>

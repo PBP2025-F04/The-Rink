@@ -31,10 +31,10 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver", "10.0.2.2"]
-# CSRF_TRUSTED_ORIGINS = [
-#     "angga-tri41-therink.pbp.cs.ui.ac.id/"
-# ]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://angga-tri41-therink.pbp.cs.ui.ac.id"
+]
 
 
 # Application definition
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    # CORS support for Flutter/web client
+    'corsheaders',
     'authentication',
     'rental_gear',
     'booking_arena',
@@ -57,7 +59,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CORS middleware must be placed as high as possible, before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -159,10 +164,11 @@ TIME_FORMAT = 'H:i'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static"
+    BASE_DIR / "static",
+    BASE_DIR / "statics",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / "media"
@@ -172,9 +178,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SAMESITE = 'None'
+# CORS configuration (development)
+# Allow all origins for Flutter development (web, Android emulator, iOS simulator)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# For production, use specific origins:
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:65133',  # Flutter web
+#     'https://your-production-domain.com',
+# ]
