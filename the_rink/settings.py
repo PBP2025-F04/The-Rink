@@ -48,13 +48,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     # CORS support for Flutter/web client
-    'corsheaders',
     'authentication',
     'rental_gear',
     'booking_arena',
     'events',
     'forum',
     'corsheaders',
+    'auth_mob',
 ]
 
 MIDDLEWARE = [
