@@ -189,6 +189,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # For production, use specific origins:
 # CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:65133',  # Flutter web
+#     'http://localhost:54295',  # Flutter web
 #     'https://your-production-domain.com',
 # ]
