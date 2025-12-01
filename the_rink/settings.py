@@ -33,7 +33,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://angga-tri41-therink.pbp.cs.ui.ac.id"
+    "https://angga-tri41-therink.pbp.cs.ui.ac.id",
+    
 ]
 
 
