@@ -88,3 +88,18 @@ def logout(request):
             "status": False,
             "message": "Logout failed."
         }, status=401)
+
+@csrf_exempt
+def get_user_data(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "username": request.user.username,
+            "email": request.user.email,
+            "status": True,
+            "message": "User data retrieved successfully!"
+        }, status=200)
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "User not authenticated."
+        }, status=401)
