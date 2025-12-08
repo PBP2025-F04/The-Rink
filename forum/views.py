@@ -1,16 +1,17 @@
-from django.utils.html import strip_tags
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.db.models import Count, Q
+from django.db.models import F
+from django.db.models import Prefetch
+from forum.models import Reply, Post, UpVote
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-from django.http import HttpResponse
+from django.utils.html import strip_tags
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
-from forum.models import Reply, Post, UpVote
 from django.utils.timezone import localtime
-from django.db.models import Count, Q
-from django.db.models import F
+import requests
 import json
 
 def show_forum(request):
@@ -27,7 +28,6 @@ def show_forum(request):
     )
 
     return render(request, "home.html", {"posts": posts, "top_posts": top_posts})
-
 
 @csrf_exempt
 @require_POST
@@ -95,7 +95,6 @@ def edit_post(request, id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
-
 @login_required
 @csrf_exempt
 def delete_post(request, id):
@@ -114,38 +113,55 @@ def show_xml(request):
     xml_data = serializers.serialize("xml", post_list)
     return HttpResponse(xml_data, content_type="application/xml")
 
+
 def show_json(request):
     post_list = (
         Post.objects
-        .all()
-        .order_by("-created_at", "-id") 
+        .select_related('author')
+        .prefetch_related(
+            'upvotes', 
+            Prefetch(
+                'replies',
+                queryset=Reply.objects
+                    .select_related('author')
+                    .prefetch_related('upvotes') 
+                    .order_by('created_at', 'id')
+            )
+        )
+        .order_by("-created_at", "-id")
     )
 
-    data = [
-        {
-            'id': post.id, 
-            'author': post.author.username if post.author else None,
-            'title': post.title,
-            'content': post.content,
+    data = []
+    for post in post_list:
+        replies_data = [
+            {
+                "id": reply.id,
+                "author": reply.author.username if reply.author else None,
+                "content": reply.content,
+                "created_at": localtime(reply.created_at).isoformat(),
+                "updated_at": localtime(reply.updated_at).isoformat(),
+                "upvotes_count": reply.total_upvotes(),
+                "downvotes_count": reply.total_downvotes(),
+            }
+            for reply in post.replies.all()
+        ]
+
+        data.append({
+            "id": post.id,
+            "author": post.author.username if post.author else None,
+            "title": post.title,
+            "content": post.content,
             "created_at": localtime(post.created_at).isoformat(),
+            "updated_at": localtime(post.updated_at).isoformat(),
             "thumbnail_url": post.thumbnail_url,
-            'updated_at': post.updated_at,
-            'user_id': post.author.id if post.author else None,
-            'upvotes_count': post.total_upvotes(),
-            'downvotes_count': post.total_downvotes(), 
-        }
-        for post in post_list
-    ]
+            "user_id": post.author.id if post.author else None,
+            "upvotes_count": post.total_upvotes(),
+            "downvotes_count": post.total_downvotes(),
+            "replies": replies_data,    
+            "replies_count": len(replies_data),
+        })
 
     return JsonResponse(data, safe=False)
-
-def show_xml_by_id(request, post_id):
-    try:   
-        post_item = Post.objects.filter(pk=post_id)
-        xml_data = serializers.serialize("xml", post_item)
-        return HttpResponse(xml_data, content_type="application/xml")
-    except Post.DoesNotExist:
-        return HttpResponse(status=404)
 
 def show_json_by_id(request, post_id):
     try:
@@ -161,6 +177,14 @@ def show_json_by_id(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({'detail': 'Not found'}, status=404)
+
+def show_xml_by_id(request, post_id):
+    try:   
+        post_item = Post.objects.filter(pk=post_id)
+        xml_data = serializers.serialize("xml", post_item)
+        return HttpResponse(xml_data, content_type="application/xml")
+    except Post.DoesNotExist:
+        return HttpResponse(status=404)
 
 @login_required
 @csrf_exempt
@@ -286,8 +310,6 @@ def toggle_vote(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-
-
 def get_top_posts_json(request):
     posts = (
         Post.objects
@@ -333,7 +355,6 @@ def get_post_detail(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found"}, status=404)
-
 
 # Admin views for forum
 from django.contrib import messages
@@ -405,3 +426,153 @@ def admin_reply_delete(request, id):
         messages.success(request, 'Reply deleted successfully!')
         return redirect('forum:admin_reply_list')
     return render(request, 'forum/admin_reply_confirm_delete.html', {'reply': reply})
+
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Fetch image from external source
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Return the image with proper content type
+        return HttpResponse(
+            response.content,
+            content_type=response.headers.get('Content-Type', 'image/jpeg')
+        )
+    except requests.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+    
+@csrf_exempt
+def add_post_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        author = request.user
+        title = strip_tags(data.get("title", ""))  # Strip HTML tags
+        content = strip_tags(data.get("content", ""))  # Strip HTML tags
+        thumbnail_url = data.get("thumbnail_url", "")
+        created_at = data.get("created_at", "")
+        updated_at = data.get("updated_at", "")
+        
+        new_post = Post(
+            author=author,
+            title=title, 
+            content=content,
+            thumbnail=thumbnail_url,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        new_post.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+    
+@login_required
+@csrf_exempt
+def edit_post_flutter(request, id):
+    try:
+        post = get_object_or_404(Post, pk=id, author=request.user)
+
+        if request.POST:
+            title = request.POST.get("title", post.title)
+            content = request.POST.get("content", post.content)
+            thumbnail_url = request.POST.get("thumbnail_url", post.thumbnail_url)
+        else:
+            data = json.loads(request.body.decode('utf-8'))
+            title = data.get("title", post.title)
+            content = data.get("content", post.content)
+            thumbnail_url = data.get("thumbnail_url", post.thumbnail_url)
+
+        post.title = title
+        post.content = content
+        post.thumbnail_url = thumbnail_url 
+        post.save()
+
+        return JsonResponse({
+            "success": True,
+            "message": "Post updated successfully!"
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+@login_required
+@csrf_exempt
+def delete_post_flutter(request, id):
+    if request.method == "DELETE":
+        try:
+            post = Post.objects.get(pk=id, author=request.user)
+            post.delete()
+            return JsonResponse({"success": True, "message": "Post deleted successfully!"})
+        except Post.DoesNotExist:
+            return JsonResponse({"success": True, "message": "Post already deleted."})
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+    
+@csrf_exempt
+def add_reply_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        author = request.user
+        post = data.get("post", "")
+        content = strip_tags(data.get("content", ""))  # Strip HTML tags
+        created_at = data.get("created_at", "")
+        updated_at = data.get("updated_at", "")
+        
+        new_reply = Reply(
+            author=author,
+            post=post,
+            content=content,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        new_reply.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+    
+@csrf_exempt
+@login_required
+def delete_reply_flutter(request, reply_id):
+    if request.method == "DELETE":
+        try:
+            reply = Reply.objects.get(pk=reply_id)
+
+            if reply.author != request.user:
+                return JsonResponse({"error": "Unauthorized"}, status=403)
+
+            reply.delete()
+            return JsonResponse({"success": True}, status=200)
+
+        except Reply.DoesNotExist:
+            return JsonResponse({"error": "Reply not found"}, status=404)
+
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+@login_required
+@require_POST
+def edit_reply_flutter(request, reply_id):
+    reply = get_object_or_404(Reply, pk=reply_id)
+
+    if reply.author != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    data = json.loads(request.body)
+    new_content = data.get("content", "").strip()
+
+    if not new_content:
+        return JsonResponse({"error": "Empty content"}, status=400)
+
+    reply.content = new_content
+    reply.save()
+
+    return JsonResponse({
+        "id": reply.id,
+        "content": reply.content,
+        "updated_at": reply.updated_at.isoformat()
+    })
