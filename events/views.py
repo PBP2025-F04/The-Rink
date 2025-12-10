@@ -7,29 +7,33 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Event, EventRegistration
 from django.template.loader import render_to_string
-import json
+# events/views.py
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from .models import Event
 
 @csrf_exempt
 def get_events_json(request):
     events = Event.objects.filter(is_active=True)
     data = []
     for event in events:
+        is_registered = False
+        if request.user.is_authenticated:
+            is_registered = event.is_registered(request.user)
+
         data.append({
             'id': event.id,
             'name': event.name,
-            'slug': event.slug,
             'description': event.description,
             'date': str(event.date),
-            'start_time': str(event.start_time),
-            'end_time': str(event.end_time),
+            'time': f"{event.start_time} - {event.end_time}",
             'location': event.location,
-            'image_url': event.image.url if event.image else '',
             'price': float(event.price),
             'category': event.category,
-            'is_full': event.is_full,
+            'image_url': event.image.url if event.image else '',
+            'participant_count': event.current_participants,
+            'max_participants': event.max_participants,
+            'is_registered': is_registered,
         })
     return JsonResponse(data, safe=False)
 
