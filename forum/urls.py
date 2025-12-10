@@ -28,6 +28,9 @@ from forum.views import (
     add_reply_flutter,
     edit_reply_flutter,
     delete_reply_flutter,
+    toggle_vote_flutter,
+    get_top_posts_json_flutter,
+    get_post_detail_flutter,
 )
 
 app_name = 'forum'
@@ -77,4 +80,9 @@ urlpatterns = [
     path('add-reply-flutter/<int:post_id>/', add_reply_flutter, name='add_reply_flutter'),
     path('edit-reply-flutter/<int:reply_id>/', edit_reply_flutter, name='edit_reply_flutter'),
     path('delete-reply-flutter/<int:reply_id>/', delete_reply_flutter, name='delete_reply_flutter'),
+
+     # Voting & top posts Flutter
+    path('toggle-vote-flutter/', toggle_vote_flutter, name='toggle_vote_flutter'),
+    path("get-top-posts-json-flutter/", get_top_posts_json_flutter, name="get_top_posts_json_flutter"),
+    path("get-post-flutter/<int:post_id>/", get_post_detail_flutter, name="get_post_detail_flutter"),
 ]

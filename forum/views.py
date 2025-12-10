@@ -513,28 +513,39 @@ def delete_post_flutter(request, id):
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
     
 @csrf_exempt
-def add_reply_flutter(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
+@login_required
+def add_reply_flutter(request, post_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
-        author = request.user
-        post = data.get("post", "")
-        content = strip_tags(data.get("content", ""))  # Strip HTML tags
-        created_at = data.get("created_at", "")
-        updated_at = data.get("updated_at", "")
-        
-        new_reply = Reply(
-            author=author,
-            post=post,
-            content=content,
-            created_at=created_at,
-            updated_at=updated_at,
-        )
-        new_reply.save()
-        
-        return JsonResponse({"status": "success"}, status=200)
-    else:
-        return JsonResponse({"status": "error"}, status=401)
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    content = data.get("content", "").strip()
+    if not content:
+        return JsonResponse({"error": "Content cannot be empty"}, status=400)
+
+    # ambil Post dari post_id URL
+    post = get_object_or_404(Post, pk=post_id)
+
+    reply = Reply.objects.create(
+        post=post,
+        author=request.user,
+        content=content,
+    )
+
+    return JsonResponse({
+        "id": reply.id,
+        "author": reply.author.username,
+        "author_id": reply.author.id,
+        "content": reply.content,
+        "created_at": localtime(reply.created_at).isoformat(),
+        "upvotes_count": reply.total_upvotes(),
+        "downvotes_count": reply.total_downvotes(),
+    })
+
     
 @csrf_exempt
 @login_required
@@ -576,3 +587,95 @@ def edit_reply_flutter(request, reply_id):
         "content": reply.content,
         "updated_at": reply.updated_at.isoformat()
     })
+
+@csrf_exempt
+def toggle_vote_flutter(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user = request.user if request.user.is_authenticated else None
+            target_type = data.get("type")
+            target_id = data.get("id")
+            is_upvote = data.get("is_upvote", True)
+
+            if not request.session.session_key:
+                request.session.save()
+            session_key = request.session.session_key
+
+            if target_type == "post":
+                target = Post.objects.get(pk=target_id)
+                vote_filter = {"post": target}
+            elif target_type == "reply":
+                target = Reply.objects.get(pk=target_id)
+                vote_filter = {"reply": target}
+            else:
+                return JsonResponse({"error": "Invalid target type"}, status=400)
+
+            # 🟩 Toggle logic
+            if user:
+                vote, created = UpVote.objects.get_or_create(user=user, **vote_filter)
+            else:
+                vote, created = UpVote.objects.get_or_create(session_key=session_key, **vote_filter)
+
+            if not created and vote.is_upvote == is_upvote:
+                vote.delete()
+            else:
+                vote.is_upvote = is_upvote
+                vote.save()
+
+            return JsonResponse({
+                "upvotes": UpVote.objects.filter(**vote_filter, is_upvote=True).count(),
+                "downvotes": UpVote.objects.filter(**vote_filter, is_upvote=False).count(),
+            })
+
+        except Exception as e:
+            print("Vote toggle error:", e)
+            return JsonResponse({"error": "Vote failed"}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def get_top_posts_json_flutter(request):
+    posts = (
+        Post.objects
+        .annotate(
+            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)),
+            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
+        )
+        .annotate(score=F('total_up') - F('total_down'))
+        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:3]
+    )
+
+    data = [
+        {
+            "id": p.id,
+            "title": p.title,
+            "content": strip_tags(p.content)[:120],
+            "total_up": p.total_up,
+            "total_down": p.total_down,
+            "replies": p.replies.count(),
+            "thumbnail_url": p.thumbnail_url,
+            "created_at": localtime(p.created_at).isoformat() if p.created_at else None,
+        }
+        for p in posts
+    ]
+
+    return JsonResponse(data, safe=False)
+
+def get_post_detail_flutter(request, post_id):
+    try:
+        post = Post.objects.select_related("author").get(pk=post_id)
+        data = {
+            "id": post.id,
+            "title": post.title,
+            "content": post.content,
+            "thumbnail_url": post.thumbnail_url,
+            "created_at": localtime(post.created_at).isoformat() if post.created_at else None,
+            "author": post.author.username if post.author else "Anonymous",
+            "user_id": post.author.id if post.author else None,
+            "upvotes_count": post.total_upvotes(),
+            "downvotes_count": post.total_downvotes(),
+            "replies_count": post.replies.count(),
+        }
+        return JsonResponse(data)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
