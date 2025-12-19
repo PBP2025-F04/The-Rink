@@ -13,6 +13,12 @@ from django.urls import reverse
 from .models import Arena, Booking, ArenaOpeningHours
 from .forms import ArenaForm, ArenaOpeningHoursFormSet
 
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import ArenaSerializer, BookingSerializer
+
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
@@ -379,3 +385,56 @@ def delete_arena_ajax(request, arena_id):
         except Exception as e:
              return JsonResponse({'status': 'error', 'message': f'Error deleting arena: {e}'}, status=500)
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+
+##########################################################################
+class ArenaViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Endpoint buat list Arena & Detail Arena.
+    Cuma bisa dibaca (ReadOnly), user gak bisa bikin Arena lewat API mobile.
+    """
+    queryset = Arena.objects.all()
+    serializer_class = ArenaSerializer
+    permission_classes = [permissions.AllowAny] # Bisa diakses tanpa login
+
+class BookingViewSet(viewsets.ModelViewSet):
+    """
+    Endpoint utama buat Booking.
+    Support filter by: Arena & Date (PENTING buat UI Schedule)
+    """
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly] # Harus login buat booking
+    
+    # Setup Filtering
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['arena', 'date', 'user'] # Field yang bisa difilter di URL
+
+    # Otomatis isi field 'user' dengan user yang lagi login saat Create
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    # Custom Action: List bookingan punya user yang lagi login (My History)
+    # URL: /api/bookings/my_history/
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def my_history(self, request):
+        my_bookings = Booking.objects.filter(user=request.user).order_by('-date', '-start_hour')
+        serializer = self.get_serializer(my_bookings, many=True)
+        return Response(serializer.data)
+
+    # Custom Action: Cancel Booking
+    # URL: /api/bookings/{id}/cancel/
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def cancel(self, request, pk=None):
+        booking = self.get_object()
+        
+        # Validasi: Cuma pemilik booking yang boleh cancel
+        if booking.user != request.user:
+            return Response(
+                {'error': 'Woy, ini bukan bookingan lu!'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        booking.status = 'Cancelled'
+        booking.save()
+        return Response({'status': 'Booking cancelled successfully'})

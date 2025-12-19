@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
+    'django_filters',
     # CORS support for Flutter/web client
     'corsheaders',
     'authentication',
@@ -186,3 +188,8 @@ CORS_ALLOW_CREDENTIALS = True
 #     'http://localhost:65133',  # Flutter web
 #     'https://your-production-domain.com',
 # ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DATE_INPUT_FORMATS': ['%Y-%m-%d'],
+}
