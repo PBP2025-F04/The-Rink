@@ -21,6 +21,16 @@ from forum.views import (
     admin_post_delete,
     admin_reply_list,
     admin_reply_delete,
+    proxy_image,
+    add_post_flutter,
+    edit_post_flutter,
+    delete_post_flutter,
+    add_reply_flutter,
+    edit_reply_flutter,
+    delete_reply_flutter,
+    toggle_vote_flutter,
+    get_top_posts_json_flutter,
+    get_post_detail_flutter,
 )
 
 app_name = 'forum'
@@ -28,7 +38,7 @@ app_name = 'forum'
 urlpatterns = [
     path('', show_forum, name='show_forum'),
 
-    # Post CRUD
+    # Django Post CRUD
     path('add-post', add_post, name='add_post'),
     path('edit-post/<int:id>/', edit_post, name='edit_post'),
     path('delete-post/<int:id>/', delete_post, name='delete_post'),
@@ -39,11 +49,11 @@ urlpatterns = [
     path('json/', show_json, name='show_json'),
     path('xml/', show_xml, name='show_xml'),
 
-    # Replies
+    # Django Replies CRUD
     path('add-reply/<int:post_id>/', add_reply, name='add_reply'),
     path('get-replies/<int:post_id>/', get_replies, name='get_replies'),
-    path("delete-reply/<int:reply_id>/", delete_reply, name="delete_reply"),
     path("edit-reply/<int:reply_id>/", edit_reply, name="edit_reply"),
+    path("delete-reply/<int:reply_id>/", delete_reply, name="delete_reply"),
 
     # Voting & top posts
     path('toggle-vote/', toggle_vote, name='toggle_vote'),
@@ -57,4 +67,22 @@ urlpatterns = [
     path('admin/posts/<int:id>/delete/', admin_post_delete, name='admin_post_delete'),
     path('admin/replies/', admin_reply_list, name='admin_reply_list'),
     path('admin/replies/<int:id>/delete/', admin_reply_delete, name='admin_reply_delete'),
+    
+    # Flutter Thumbnail
+    path('proxy-image/', proxy_image, name='proxy_image'),
+
+    # Flutter Post CRUD
+    path('add-post-flutter/', add_post_flutter, name='add_post_flutter'),
+    path('edit-post-flutter/<int:id>/', edit_post_flutter, name='edit_post_flutter'),
+    path('delete-post-flutter/<int:id>/', delete_post_flutter, name='delete_post_flutter'),
+
+    # Flutter Replies CRUD
+    path('add-reply-flutter/<int:post_id>/', add_reply_flutter, name='add_reply_flutter'),
+    path('edit-reply-flutter/<int:reply_id>/', edit_reply_flutter, name='edit_reply_flutter'),
+    path('delete-reply-flutter/<int:reply_id>/', delete_reply_flutter, name='delete_reply_flutter'),
+
+     # Voting & top posts Flutter
+    path('toggle-vote-flutter/', toggle_vote_flutter, name='toggle_vote_flutter'),
+    path("get-top-posts-json-flutter/", get_top_posts_json_flutter, name="get_top_posts_json_flutter"),
+    path("get-post-flutter/<int:post_id>/", get_post_detail_flutter, name="get_post_detail_flutter"),
 ]

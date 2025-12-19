@@ -256,7 +256,11 @@
       <div class="price">$ {{ gear.price_per_day }}</div>
       <p class="short-desc">
         Size: {{ gear.size }} • Stock: {{ gear.stock }} • {% if gear.seller.username == 'system_admin' %} Created by Admin
+<<<<<<< HEAD
         {% else %}Seller : {{ gear.seller.get_full_name|default:gear.seller.username }}
+=======
+        {% else %}Created by {{ gear.seller.get_full_name|default:gear.seller.username }}
+>>>>>>> c909e650f03757b134194838efb173a46b863ae3
         {% endif %}
       </p>
 
@@ -264,7 +268,10 @@
         class="ajax-add-to-cart"
         method="post"
         action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}"
+<<<<<<< HEAD
         data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+=======
+>>>>>>> c909e650f03757b134194838efb173a46b863ae3
       >
         {% csrf_token %}
         <input type="hidden" name="quantity" id="qty" value="1" />
