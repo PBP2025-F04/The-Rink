@@ -1,7 +1,7 @@
 from django.urls import path
 from auth_mob.views import login, register, logout, get_user_data, update_profile, get_user_type, get_seller_profile, update_seller_profile
 
-app_name = 'authentication'
+app_name = 'auth_mob'
 
 urlpatterns = [
     path('login/', login, name='login'),

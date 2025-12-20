@@ -172,27 +172,22 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_CREDENTIALS = True  
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
-
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_HTTPONLY = True
-
-CSRF_USE_SESSIONS = False
-
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
-# CORS configuration (development)
-CORS_ALLOW_CREDENTIALS = True
-
-# For production, use specific origins:
-CORS_ALLOWED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://10.0.2.2:8000",
+    "https://angga-tri41-therink.pbp.cs.ui.ac.id",
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
