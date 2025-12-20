@@ -69,4 +69,23 @@
 {% endblock content %}
 
 {% block extra_js %}
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+      if (event.detail.requestConfig.verb === 'post'){
+        setTimeout(() => {
+          const tbody = document.getElementById('booking-list-body');
+          const remainingRows = tbody.querySelectorAll('tr.booking-row');
+          if (remainingRows.length === 0) {
+            tbody.innerHTML = `
+                <tr id="no-booking-msg">
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        You have no bookings yet.
+                    </td>
+                </tr>
+            `;
+          }
+        }, 400);
+      }
+    });
+</script>
 {% endblock extra_js %}
