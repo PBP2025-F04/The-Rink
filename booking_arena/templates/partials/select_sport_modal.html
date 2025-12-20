@@ -1,8 +1,3 @@
-{# File: booking_arena/templates/partials/_select_sport_modal.html #}
-{# File ini HANYA berisi HTML modal, tidak ada extend/block #}
-
-{# CSS-nya udah di-include di arena_detail.html #}
-
 <div id="sport-selection-modal" class="modal">
     <div class="modal-content">
         <h3 class="text-3xl font-bold text-sky-900 mb-5">Pilih Aktivitas</h3>
@@ -12,19 +7,16 @@
             </span>
         </p>
         
-        {# Form ini nge-POST ke view 'create_booking_hourly' BARU lu #}
+        {# Form Bersih - Tanpa hx-on aneh-aneh #}
         <form hx-post="{% url 'booking_arena:create_booking_hourly' arena_id=arena.id %}"
               hx-target="#slot-list-target" 
-              hx-swap="innerHTML"
-              hx-on::after-request="closeModal()"> {# Panggil JS close #}
+              hx-swap="innerHTML">
             
             {% csrf_token %}
             <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
             <input type="hidden" name="hour" value="{{ hour }}">
 
             <div class="space-y-4 mb-10">
-                
-                {# Loop ini ngambil data dari model Booking.ACTIVITY_CHOICES #}
                 {% if booking_model_meta.activity.field.choices %}
                     {% for value, display in booking_model_meta.activity.field.choices %}
                         {% if value %}
@@ -36,8 +28,6 @@
                         </label>
                         {% endif %}
                     {% endfor %}
-                {% else %}
-                    <p class="text-red-500">Error: booking_model_meta not provided.</p>
                 {% endif %}
             </div>
 
@@ -45,7 +35,6 @@
                 <button type="button" onclick="closeModal()" class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-300 font-medium">
                     Batal
                 </button>
-                {# Pakai style 'gradient-btn' dari CSS light theme asli lu #}
                 <button type="submit" class="gradient-btn">
                     Konfirmasi Booking
                 </button>

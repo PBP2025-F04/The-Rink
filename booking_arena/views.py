@@ -1,6 +1,5 @@
 # File: booking_arena/views.py
-
-import json
+import json  # <--- INI PENTING
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -9,13 +8,14 @@ from django.utils import timezone
 from django.db.models import Q
 from django.db import transaction
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt # <--- JIMAT UTAMA
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Arena, Booking, ArenaOpeningHours
 from .forms import ArenaForm, ArenaOpeningHoursFormSet
+import traceback
 
 # ============================================
-# HELPER FUNCTIONS (Biarin aja)
+# HELPER FUNCTIONS
 # ============================================
 
 def is_superuser(user):
@@ -85,7 +85,7 @@ def _get_arena_slots_context(request, arena_id, date_str):
     return context
 
 # ============================================
-# VIEWS WEB / HTMX (JANGAN DIUBAH)
+# VIEWS WEB / HTMX
 # ============================================
 
 @login_required
@@ -110,8 +110,22 @@ def arena_detail(request, arena_id):
 
 @login_required
 def user_booking_list(request):
-    user_bookings = Booking.objects.filter(user=request.user).order_by('-date', 'start_hour')
-    return render(request, 'user_bookings.html', {'bookings': user_bookings, 'today': timezone.now().date()})
+    now = timezone.now()
+    current_date = now.date()
+    current_hour = now.hour
+
+    user_bookings = Booking.objects.filter(
+        user=request.user, 
+        status='Booked'
+    ).filter(
+        Q(date__gt=current_date) | 
+        Q(date=current_date, start_hour__gt=current_hour)
+    ).order_by('date', 'start_hour')
+
+    return render(request, 'user_bookings.html', {
+        'bookings': user_bookings, 
+        'today': current_date
+    })
 
 def get_available_slots(request, arena_id):
     date_str = request.GET.get('date')
@@ -162,9 +176,20 @@ def create_booking_hourly(request, arena_id):
                 Booking.objects.create(user=request.user, arena=arena, date=selected_date, start_hour=selected_hour, status='Booked', activity=activity)
     except Exception as e: return HttpResponse(f"Failed: {e}", status=500)
 
+    # === BAGIAN INI YANG GW UPDATE ===
     context = _get_arena_slots_context(request, arena_id, date_str)
     response = render(request, 'partials/slot_list.html', context)
-    response['HX-Trigger'] = '{"showToast": {"message": "Booking sukses!", "type": "success"}}'
+    
+    # Kirim sinyal JSON biar Modal nutup
+    trigger_data = {
+        "showToast": {
+            "message": "Booking sukses!", 
+            "type": "success"
+        },
+        "closeModal": True 
+    }
+    response['HX-Trigger'] = json.dumps(trigger_data)
+    
     return response
 
 @login_required
@@ -182,7 +207,7 @@ def cancel_booking(request, booking_id):
     
     headers = {'HX-Trigger': '{"showToast": {"message": "Booking dibatalkan.", "type": "success"}}'}
     if source_page == 'my_bookings':
-        return render(request, 'partials/_booking_row.html', {'booking': booking, 'today': timezone.now().date()}, headers=headers)
+        return HttpResponse("", headers=headers)
     else:
         context = _get_arena_slots_context(request, booking.arena.id, booking.date.strftime('%Y-%m-%d'))
         response = render(request, 'partials/slot_list.html', context)
@@ -211,15 +236,12 @@ def delete_arena_ajax(request, arena_id):
         except: return JsonResponse({'status': 'error'}, status=500)
     return JsonResponse({"status": "error"}, status=405)
 
-
 # =================================================================
-# FLUTTER API SECTION (NEW & IMPROVED)
-# Tanpa ViewSet, Tanpa Serializer Ribet, Full @csrf_exempt
+# FLUTTER API SECTION 
 # =================================================================
 
 @csrf_exempt
 def get_arenas_flutter(request):
-    """API buat list Arena"""
     arenas = Arena.objects.all()
     data = []
     for arena in arenas:
@@ -235,7 +257,6 @@ def get_arenas_flutter(request):
 
 @csrf_exempt
 def get_bookings_flutter(request):
-    """API buat cek slot (Filter by Arena & Date)"""
     arena_id = request.GET.get('arena')
     date_str = request.GET.get('date')
     
@@ -252,82 +273,39 @@ def get_bookings_flutter(request):
         })
     return JsonResponse(data, safe=False)
 
-import traceback # Tambahin import ini di paling atas file!
-
 @csrf_exempt
 def create_booking_flutter(request):
-    # 1. Cek Login Manual (Biar gak redirect ke HTML)
     if not request.user.is_authenticated:
-        return JsonResponse({
-            "status": False, 
-            "message": "Anda belum login. Silakan login ulang."
-        }, status=401)
+        return JsonResponse({"status": False, "message": "Anda belum login. Silakan login ulang."}, status=401)
 
     if request.method == 'POST':
         try:
-            # 2. Print Data Mentah (Buat ngintip Flutter kirim apa)
-            print("=== DEBUG FLUTTER PAYLOAD ===")
-            print(request.body) 
-            
             data = json.loads(request.body)
-            print("Parsed Data:", data) # Liat hasil json.loads
-
-            # 3. Ambil Data dengan "Safety Net" (Biar gak crash)
-            # Jaga-jaga kalau lu pake key 'arena' ATAU 'arena_id'
             arena_id = data.get('arena_id') or data.get('arena') 
-            
             date_str = data.get('date')
             start_hour_raw = data.get('start_hour')
             activity = data.get('activity', 'Badminton')
 
-            # Validasi Manual (Balikin pesan error JELAS, jangan 500)
-            if not arena_id:
-                return JsonResponse({"status": False, "message": "Arena ID tidak ditemukan/salah key!"}, status=400)
-            if not date_str:
-                return JsonResponse({"status": False, "message": "Tanggal (date) kosong!"}, status=400)
-            if start_hour_raw is None: # Cek None karena jam 0 itu valid
-                return JsonResponse({"status": False, "message": "Jam (start_hour) kosong!"}, status=400)
+            if not arena_id: return JsonResponse({"status": False, "message": "Arena ID tidak ditemukan!"}, status=400)
+            if not date_str: return JsonResponse({"status": False, "message": "Tanggal kosong!"}, status=400)
+            if start_hour_raw is None: return JsonResponse({"status": False, "message": "Jam kosong!"}, status=400)
 
-            # Baru konversi ke int setelah yakin datanya ada
             start_hour = int(start_hour_raw)
             booking_date = parse_date(date_str)
-            
-            if not booking_date:
-                return JsonResponse({"status": False, "message": "Format tanggal salah!"}, status=400)
+            if not booking_date: return JsonResponse({"status": False, "message": "Format tanggal salah!"}, status=400)
 
             arena = get_object_or_404(Arena, pk=arena_id)
+            existing = Booking.objects.filter(arena=arena, date=booking_date, start_hour=start_hour, status='Booked').exists()
 
-            # Cek Slot
-            existing = Booking.objects.filter(
-                arena=arena, 
-                date=booking_date, 
-                start_hour=start_hour, 
-                status='Booked'
-            ).exists()
+            if existing: return JsonResponse({"status": False, "message": "Slot penuh!"}, status=409)
 
-            if existing:
-                return JsonResponse({"status": False, "message": "Waduh, slot jam segitu udah penuh!"}, status=409)
-
-            # Create
             booking = Booking.objects.create(
-                user=request.user,
-                arena=arena,
-                date=booking_date,
-                start_hour=start_hour,
-                activity=activity,
-                status='Booked'
+                user=request.user, arena=arena, date=booking_date, start_hour=start_hour, activity=activity, status='Booked'
             )
-
-            return JsonResponse({
-                "status": True, 
-                "message": "Booking Berhasil!",
-                "booking_id": str(booking.id)
-            })
+            return JsonResponse({"status": True, "message": "Booking Berhasil!", "booking_id": str(booking.id)})
 
         except Exception as e:
-            # KALAU MASIH 500, LIAT TERMINAL! KITA PRINT ERRORNYA DISINI
-            print("!!! ERROR SERVER MELEDAK !!!")
-            traceback.print_exc() # <--- Ini bakal nampilin baris errornya
+            traceback.print_exc()
             return JsonResponse({"status": False, "message": f"Server Error: {str(e)}"}, status=500)
             
     return JsonResponse({"status": False, "message": "Method not allowed"}, status=405)
@@ -339,17 +317,11 @@ def cancel_booking_flutter(request):
         try:
             data = json.loads(request.body)
             booking_id = data.get('booking_id')
-            
             booking = get_object_or_404(Booking, pk=booking_id)
-            
-            # Validasi Pemilik
-            if booking.user != request.user:
-                 return JsonResponse({"status": False, "message": "Bukan punya lu woy!"}, status=403)
-            
+            if booking.user != request.user: return JsonResponse({"status": False, "message": "Bukan punya lu!"}, status=403)
             booking.status = 'Cancelled'
             booking.save()
             return JsonResponse({"status": True, "message": "Booking dibatalkan"})
-            
         except Exception as e:
             return JsonResponse({"status": False, "message": str(e)}, status=500)
     return JsonResponse({"status": False, "message": "Method not allowed"}, status=405)
@@ -357,7 +329,6 @@ def cancel_booking_flutter(request):
 @csrf_exempt
 @login_required
 def my_history_flutter(request):
-    """History Booking User"""
     bookings = Booking.objects.filter(user=request.user).order_by('-date')
     data = []
     for b in bookings:

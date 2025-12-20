@@ -96,11 +96,32 @@ def admin_middleware_check(request):
 
 @login_required
 def profile(request):
+    # Get user type
+    user_type_obj = UserType.objects.get(user=request.user)
+    user_type = user_type_obj.user_type
+
+    # Get user profile (customer data)
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    # Get seller profile and products if user is a seller
+    seller_profile = None
+    user_products = None
+    if user_type == 'seller':
+        seller_profile, seller_created = SellerProfile.objects.get_or_create(user=request.user)
+        user_products = Gear.objects.filter(seller=request.user)
+
     if request.method == 'POST':
+        # Handle user profile form
         form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
         if form.is_valid():
             form.save()
+
+            # Handle seller profile if user is a seller
+            if user_type == 'seller' and seller_profile:
+                seller_form = SellerProfileForm(request.POST, instance=seller_profile)
+                if seller_form.is_valid():
+                    seller_form.save()
+
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
             else:
@@ -109,34 +130,36 @@ def profile(request):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'errors': form.errors})
             else:
-                return render(request, 'userprofile.html', {'form': form, 'profile': user_profile})
+                context = {
+                    'form': form,
+                    'profile': user_profile,
+                    'seller_profile': seller_profile,
+                    'user_products': user_products,
+                    'user_type': user_type,
+                    'full_name_display': user_profile.full_name.strip() if user_profile.full_name else ''
+                }
+                return render(request, 'userprofile.html', context)
     else:
         form = UserProfileForm(instance=user_profile)
+        seller_form = SellerProfileForm(instance=seller_profile) if seller_profile else None
+
     # Add cleaned full_name for display
     full_name_display = user_profile.full_name.strip() if user_profile.full_name else ''
-    context = {'form': form, 'profile': user_profile, 'full_name_display': full_name_display}
+    context = {
+        'form': form,
+        'seller_form': seller_form,
+        'profile': user_profile,
+        'seller_profile': seller_profile,
+        'user_products': user_products,
+        'user_type': user_type,
+        'full_name_display': full_name_display
+    }
     return render(request, 'userprofile.html', context)
 
 @login_required
 def seller_profile(request):
-    seller_profile, created = SellerProfile.objects.get_or_create(user=request.user)
-    user_products = Gear.objects.filter(seller=request.user)
-    if request.method == 'POST':
-        form = SellerProfileForm(request.POST, instance=seller_profile)
-        if form.is_valid():
-            form.save()
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
-            else:
-                return redirect('authentication:seller_profile')
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'errors': form.errors})
-            else:
-                return render(request, 'sellerprofile.html', {'form': form, 'profile': seller_profile, 'user_products': user_products})
-    else:
-        form = SellerProfileForm(instance=seller_profile)
-    return render(request, 'sellerprofile.html', {'form': form, 'profile': seller_profile, 'user_products': user_products})
+    # Redirect to unified profile view
+    return redirect('authentication:profile')
 
 def admin_user_list(request):
     check = admin_middleware_check(request)
