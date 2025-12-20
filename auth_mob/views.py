@@ -95,9 +95,17 @@ def logout(request):
 def get_user_data(request):
     if request.user.is_authenticated:
         try:
-            profile = UserProfile.objects.get(user=request.user)
-            return JsonResponse({
+            # Get user type
+            user_type_obj = UserType.objects.get(user=request.user)
+            user_type = user_type_obj.user_type
+
+            # Get user profile (customer data)
+            profile, created = UserProfile.objects.get_or_create(user=request.user, defaults={'email': request.user.email})
+
+            # Base response data
+            response_data = {
                 "username": request.user.username,
+                "user_type": user_type,
                 "email": profile.email or request.user.email,
                 "full_name": profile.full_name,
                 "phone_number": profile.phone_number,
@@ -105,17 +113,36 @@ def get_user_data(request):
                 "address": profile.address,
                 "status": True,
                 "message": "User data retrieved successfully!"
-            }, status=200)
-        except UserProfile.DoesNotExist:
-            # Create profile if it doesn't exist
-            profile = UserProfile.objects.create(user=request.user, email=request.user.email)
+            }
+
+            # Add seller-specific data if user is a seller
+            if user_type == 'seller':
+                try:
+                    seller_profile, seller_created = SellerProfile.objects.get_or_create(user=request.user)
+                    response_data.update({
+                        "business_name": seller_profile.business_name,
+                        "business_address": seller_profile.business_address,
+                    })
+                except Exception as e:
+                    # If seller profile fails, still return basic data
+                    response_data.update({
+                        "business_name": "",
+                        "business_address": "",
+                    })
+
+            return JsonResponse(response_data, status=200)
+
+        except UserType.DoesNotExist:
+            # Default to customer if no type is set
+            profile, created = UserProfile.objects.get_or_create(user=request.user, defaults={'email': request.user.email})
             return JsonResponse({
                 "username": request.user.username,
-                "email": request.user.email,
-                "full_name": "",
-                "phone_number": "",
-                "date_of_birth": None,
-                "address": "",
+                "user_type": "customer",
+                "email": profile.email or request.user.email,
+                "full_name": profile.full_name,
+                "phone_number": profile.phone_number,
+                "date_of_birth": profile.date_of_birth.isoformat() if profile.date_of_birth else None,
+                "address": profile.address,
                 "status": True,
                 "message": "User data retrieved successfully!"
             }, status=200)
