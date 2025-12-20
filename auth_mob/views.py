@@ -1,28 +1,47 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login as auth_login
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
 from django.contrib.auth.models import User
 from django.contrib.auth import logout as auth_logout
-from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from authentication.models import UserProfile, SellerProfile, UserType
 
+@ensure_csrf_cookie
 @csrf_exempt
 def login(request):
-    username = request.POST['username']
-    password = request.POST['password']
+    username = ""
+    password = ""
+    
+    # ini coba baca dari JSON (FLUTTER)
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+    except:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+    if not username or not password:
+         return JsonResponse({
+            "status": False, 
+            "message": "Username atau Password tidak boleh kosong."
+        }, status=400)
+
     user = authenticate(username=username, password=password)
     if user is not None:
         if user.is_active:
             auth_login(request, user)
+            csrf_token = get_token(request)
             # Login status successful.
             return JsonResponse({
                 "username": user.username,
                 "status": True,
-                "message": "Login successful!"
+                "message": "Login successful!",
+                "csrf_token": csrf_token
                 # Add other data if you want to send data to Flutter.
             }, status=200)
         else:

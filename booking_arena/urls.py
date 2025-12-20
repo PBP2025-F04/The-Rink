@@ -1,17 +1,11 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from booking_arena.views import * 
-
 app_name = 'booking_arena'
 
-# --- 1. SETUP ROUTER API (Buat Flutter) ---
-# Ini bakal otomatis generate URL kayak /arenas/ dan /bookings/
-router = DefaultRouter()
-router.register(r'arenas', ArenaViewSet)
-router.register(r'bookings', BookingViewSet)
-
 urlpatterns = [
-    # --- JALUR WEBSITE ---
+    # =================================================
+    # 1. JALUR WEBSITE (HTMX & Template) - JANGAN DIUBAH
+    # =================================================
     path('', show_arena, name='show_arena'),
     path('arena/<uuid:arena_id>/', arena_detail, name="arena_detail"), 
     path('<uuid:arena_id>/get-slots/', get_available_slots, name='get_available_slots'),
@@ -22,7 +16,12 @@ urlpatterns = [
     path('add-ajax/', add_arena_ajax, name='add_arena_ajax'),
     path('delete-ajax/<uuid:arena_id>/', delete_arena_ajax, name='delete_arena_ajax'),
 
-    # --- JALUR API (BUAT FLUTTER) ---
-    # Nanti aksesnya jadi: localhost:8000/booking_arena/api/arenas/
-    path('api/', include(router.urls)), 
+    # =================================================
+    # 2. JALUR API FLUTTER (BARU & SEDERHANA)
+    # =================================================
+    path('api/arenas/', get_arenas_flutter, name='get_arenas_flutter'),
+    path('api/bookings/', get_bookings_flutter, name='get_bookings_flutter'),
+    path('api/booking/create/', create_booking_flutter, name='create_booking_flutter'),
+    path('api/booking/cancel/', cancel_booking_flutter, name='cancel_booking_flutter'),
+    path('api/my-history/', my_history_flutter, name='my_history_flutter'),
 ]
