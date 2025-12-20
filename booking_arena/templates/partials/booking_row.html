@@ -1,44 +1,22 @@
 {# File: booking_arena/templates/partials/_booking_row.html #}
 
-<<<<<<< HEAD
 <tr class="booking-row" id="booking-row-{{ booking.id }}">
-=======
-{# Ini adalah barisnya. ID-nya penting #}
-<tr class="booking-row" id="booking-row-{{ booking.id }}">
-
->>>>>>> dev
   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
     {{ booking.date|date:"l, d M Y" }}
   </td>
   
-<<<<<<< HEAD
-=======
-  {# FIX: Pake start_hour, bukan time_slot #}
->>>>>>> dev
   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
     {{ booking.start_hour }}:00 - {{ booking.start_hour | add:"1" }}:00
   </td>
   
-<<<<<<< HEAD
-=======
-  {# FIX: Pake arena.name, bukan time_slot.arena.name #}
->>>>>>> dev
   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
     {{ booking.arena.name }}
   </td>
   
-<<<<<<< HEAD
-=======
-  {# TAMBAH: Nampilin activity #}
->>>>>>> dev
   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
     {{ booking.get_activity_display }}
   </td>
   
-<<<<<<< HEAD
-=======
-  {# Status (CSS badge lu udah oke) #}
->>>>>>> dev
   <td class="px-6 py-4 whitespace-nowrap">
     {% if booking.status == 'Booked' %}
       <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -49,17 +27,12 @@
         {{ booking.status }}
       </span>
     {% else %}
-<<<<<<< HEAD
        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-=======
-       <span class.="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
->>>>>>> dev
         {{ booking.status }}
       </span>
     {% endif %}
   </td>
   
-<<<<<<< HEAD
   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
     {% if booking.status == 'Booked' and booking.date >= today %}
       <button
@@ -69,18 +42,6 @@
         hx-swap="outerHTML"
         hx-confirm="Anda yakin ingin membatalkan booking ini?"
         class="btn-cancel" style="color: #DC3545; font-weight: 600;">
-=======
-  {# Action Button #}
-  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-    {# FIX: Cek tanggalnya pake var 'today' dari view #}
-    {% if booking.status == 'Booked' and booking.date >= today %}
-      <button
-        hx-post="{% url 'booking_arena:cancel_booking' booking.id %}"
-        hx-target="#booking-row-{{ booking.id }}" {# Target baris ini #}
-        hx-swap="outerHTML" {# Ganti seluruh baris #}
-        hx-confirm="Anda yakin ingin membatalkan booking ini?"
-        class="btn-cancel">
->>>>>>> dev
           Cancel
       </button>
     {% else %}

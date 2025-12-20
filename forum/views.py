@@ -14,6 +14,17 @@ from django.utils.timezone import localtime
 import requests
 import json
 
+from functools import wraps
+from django.http import JsonResponse
+
+def login_required_json(view_func):
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
 def show_forum(request):
     posts = Post.objects.order_by("-created_at", "-id")
 
@@ -446,6 +457,7 @@ def proxy_image(request):
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
     
 @csrf_exempt
+@login_required_json
 def add_post_flutter(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -461,15 +473,15 @@ def add_post_flutter(request):
             author=author,
             title=title, 
             content=content,
-            thumbnail=thumbnail_url,
+            thumbnail_url=thumbnail_url,
             created_at=created_at,
             updated_at=updated_at,
         )
         new_post.save()
         
         return JsonResponse({"status": "success"}, status=200)
-    else:
-        return JsonResponse({"status": "error"}, status=401)
+    
+    return JsonResponse({"status": "error", "detail": "Method not allowed"}, status=405)
     
 @login_required
 @csrf_exempt
@@ -500,20 +512,28 @@ def edit_post_flutter(request, id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
-@login_required
 @csrf_exempt
+@login_required_json
 def delete_post_flutter(request, id):
-    if request.method == "DELETE":
-        try:
-            post = Post.objects.get(pk=id, author=request.user)
-            post.delete()
-            return JsonResponse({"success": True, "message": "Post deleted successfully!"})
-        except Post.DoesNotExist:
-            return JsonResponse({"success": True, "message": "Post already deleted."})
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
-    
+    if request.method not in ["POST", "DELETE"]:
+        return JsonResponse(
+            {"status": "error", "message": "Method not allowed"},
+            status=405,
+        )
+
+    try:
+        post = Post.objects.get(pk=id, author=request.user)
+        post.delete()
+        return JsonResponse(
+            {"status": "success", "message": "Post deleted successfully!"}
+        )
+    except Post.DoesNotExist:
+        return JsonResponse(
+            {"status": "success", "message": "Post already deleted."}
+        )
+
 @csrf_exempt
-@login_required
+@login_required_json
 def add_reply_flutter(request, post_id):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
@@ -527,7 +547,6 @@ def add_reply_flutter(request, post_id):
     if not content:
         return JsonResponse({"error": "Content cannot be empty"}, status=400)
 
-    # ambil Post dari post_id URL
     post = get_object_or_404(Post, pk=post_id)
 
     reply = Reply.objects.create(
@@ -538,13 +557,16 @@ def add_reply_flutter(request, post_id):
 
     return JsonResponse({
         "id": reply.id,
-        "author": reply.author.username,
-        "author_id": reply.author.id,
+        "author": reply.author.username if reply.author else None,
+        "author_id": reply.author.id if reply.author else None,
+        "post_id": reply.post.id,
         "content": reply.content,
-        "created_at": localtime(reply.created_at).isoformat(),
+        "created_at": reply.created_at.isoformat().replace("+00:00", "Z"),
+        "updated_at": localtime(reply.updated_at).isoformat() if reply.updated_at else None,
         "upvotes_count": reply.total_upvotes(),
         "downvotes_count": reply.total_downvotes(),
     })
+
 
     
 @csrf_exempt

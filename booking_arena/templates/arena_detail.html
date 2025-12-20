@@ -110,7 +110,7 @@
         background-color: rgba(15, 23, 42, 0.5); 
         backdrop-filter: blur(5px); /* Efek blur di background */
         display: flex; justify-content: center; align-items: center;
-        z-index: 1000; opacity: 0; visibility: hidden;
+        z-index: 9999; opacity: 0; visibility: hidden;
         transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
     }
     .modal.is-active { opacity: 1; visibility: visible; }
@@ -204,24 +204,25 @@
 <script>
 // === FUNGSI MODAL BARU (Diambil dari main.html) ===
 function showModal() {
-    setTimeout(() => {
-        const modal = document.getElementById('sport-selection-modal'); 
-        if (modal) {
+    const modal = document.getElementById('sport-selection-modal');
+    if (modal) {
+        setTimeout(() => {
             modal.classList.add('is-active');
-        } else {
-            console.error("showModal() dipanggil, tapi #sport-selection-modal gak ada di DOM.");
-        }
-    }, 50); 
+        }, 10);
+    } else {
+        console.error("Error: Elemen #sport-selection-modal gak ketemu! Cek file select_sport_modal.html");
+    }
 }
 
 function closeModal() {
     const modal = document.getElementById('sport-selection-modal');
+    
     if (modal) {
-        modal.classList.remove('is-active');
+        modal.classList.remove('is-active'); 
         setTimeout(() => {
-            const modalContainer = document.getElementById('modal-container');
-            if (modalContainer) modalContainer.innerHTML = ''; 
-        }, 400); 
+            const container = document.getElementById('modal-container');
+            if (container) container.innerHTML = ''; 
+        }, 400);
     }
 }
 // === AKHIR FUNGSI MODAL BARU ===
@@ -230,6 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateInputPicker = document.getElementById('booking_date_picker');
     const scheduleDateDisplay = document.getElementById('slot-schedule-date');
 
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'modal-container') {
+            console.log("HTMX selesai loading modal. Membuka sekarang...");
+            showModal(); 
+        }
+    });
+    
     // === Inisialisasi Kalender JS (Flatpickr - Sama kayak lama) ===
     if (dateInputPicker) {
         const calendar = flatpickr(dateInputPicker, {
@@ -249,13 +257,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('htmx:afterOnLoad', function(event) {
         const xhr = event.detail.xhr;
         const triggerInfo = xhr.getResponseHeader("HX-Trigger");
+        
+        console.log("Server Header:", triggerInfo);
+
         if (triggerInfo) {
             try {
                 const triggers = JSON.parse(triggerInfo);
+                
                 if (triggers.showToast) {
                     showToast(triggers.showToast.message, triggers.showToast.type);
                 }
-            } catch (e) { console.error("Error parsing HX-Trigger:", e); }
+
+                if (triggers.closeModal) {
+                    console.log("Sinyal closeModal diterima! Menutup modal...");
+                    closeModal();
+                }
+
+            } catch (e) { 
+                console.error("Error parsing HX-Trigger:", e); 
+            }
         }
     });
 

@@ -1,130 +1,153 @@
-# File: booking_arena/management/commands/import_arenas.py
-
-import json
-import re
-from datetime import datetime, time
 from django.core.management.base import BaseCommand
 from booking_arena.models import Arena, ArenaOpeningHours
-
-# === HELPER FUNCTION PARSING JAM (VERSI SIMPLE) ===
-def parse_opening_hours_simple(text_lines, day_of_week):
-    day_name_map = {0: 'Senin', 1: 'Selasa', 2: 'Rabu', 3: 'Kamis', 4: 'Jumat', 5: 'Sabtu', 6: 'Minggu'}
-    target_day_name = day_name_map.get(day_of_week)
-    if not text_lines or not target_day_name: return None, None
-    open_time, close_time = None, None
-    for line in text_lines.splitlines():
-        line_stripped = line.strip()
-        if line_stripped.startswith(target_day_name):
-            if "Tutup" in line_stripped or "Closed" in line_stripped: return None, None
-            match = re.search(r'(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})', line_stripped)
-            if match:
-                open_str = match.group(1).replace('.', ':')
-                close_str = match.group(2).replace('.', ':')
-                try:
-                    open_time = datetime.strptime(open_str, '%H:%M').time()
-                    close_time = datetime.strptime(close_str, '%H:%M').time()
-                    break # Berhasil, keluar loop
-                except ValueError:
-                    print(f"Warning: Could not parse time format in line: '{line_stripped}'")
-                    return None, None # Gagal parse, anggap tutup/error
-            else: # Format jam tidak cocok
-                 return None, None
-    # Jika loop selesai tanpa break (misal hari ga ada di teks), return None
-    return open_time, close_time
-# === AKHIR HELPER FUNCTION ===
+from datetime import datetime
 
 class Command(BaseCommand):
-    help = 'Loads arena data from a JSON file, including parsing and saving opening hours to ArenaOpeningHours model.'
+    help = 'Import arena & generate opening hours otomatis'
 
-    def add_arguments(self, parser):
-        parser.add_argument('json_file', type=str, help='Path to the JSON file containing arena data')
+    def handle(self, *args, **kwargs):
+        # Mapping nama hari Indo ke angka database (0=Senin, 6=Minggu)
+        day_map = {
+            'Senin': 0, 'Selasa': 1, 'Rabu': 2, 'Kamis': 3,
+            'Jumat': 4, 'Sabtu': 5, 'Minggu': 6
+        }
 
-    def handle(self, *args, **options):
-        file_path = options['json_file']
-        self.stdout.write(f"Starting import from: {file_path}")
+        # DATASET LENGKAP (Sesuai JSON lu)
+        arenas_data = [
+            {
+                "nama": "Skyrink Jakarta - Mall Taman Anggrek",
+                "lokasi": "Mall, Taman Anggrek, Lantai 3, RT.12/RW.1, Tj. Duren Sel., Kec. Grogol petamburan, Kota Jakarta Barat, Daerah Khusus Ibukota Jakarta 11470, Indonesia",
+                "url_gambar": "/static/images/arena/SkyrinkMTA.jpg", 
+                "deskripsi": "Sky Rink di Mall Taman Anggrek (MTA) adalah arena ice skating indoor terbesar di Jakarta, menawarkan tempat rekreasi seru untuk semua usia dan keahlian, dilengkapi fasilitas penyewaan sepatu seluncur, loker, toilet, dan area makanan ringan, menjadikannya pilihan tepat untuk bersenang-senang di atas es kapan saja, baik untuk pemula maupun profesional. ",
+                "kapasitas": 165,
+                "opt_hours": "Senin: 10.00–22.00\nSelasa: 10.00–22.00\nRabu: 10.00–22.00\nKamis: 10.00–22.00\nJumat: 10.00–22.00\nSabtu: 10.00–22.00\nMinggu: 10.00–22.00",
+                "map_url": "https://maps.google.com/?cid=18161721649650554379"
+            },
+            {
+                "nama": "Oasis Centre Arena GC",
+                "lokasi": "Aeon Mall, Jl. Jkt Garden City Boulevard No.1, RT.1/RW.6, Cakung Tim., Kec. Cakung, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13910, Indonesia",
+                "url_gambar": "/static/images/arena/OasisCentre.jpg",
+                "deskripsi": "Oasis Centre Arena adalah arena ice skating indoor di AEON Mall Jakarta Garden City yang menawarkan gelanggang es berstandar Olimpiade (60x30m) pertama di Indonesia, cocok untuk segala usia untuk rekreasi atau belajar, dilengkapi fasilitas modern seperti ruang gym, shower, locker, dan program pelatihan OCA Skating Academy. Arena ini menyediakan lingkungan aman dan terawat untuk bersenang-senang, meluncur di atas es, dan menciptakan pengalaman unik bersama keluarga atau teman di Jakarta. ",
+                "kapasitas": 150,
+                "opt_hours": "Senin: 10.00–22.00\nSelasa: 10.00–22.00\nRabu: 10.00–22.00\nKamis: 10.00–22.00\nJumat: 10.00–22.00\nSabtu: 10.00–22.00\nMinggu: 10.00–22.00",
+                "map_url": "https://maps.google.com/?cid=13730110732181601120"
+            },
+            {
+                "nama": "BXRink Ice Skating",
+                "lokasi": "Bintaro Jaya Xchange Mall Lantai UG No.3A, CBD, Jl. Boulevard Bintaro Jaya Jl. Sektor VII No.2, Pd. Jaya, Kec. Pd. Aren, Kota Tangerang Selatan, Banten 15227, Indonesia",
+                "url_gambar": "/static/images/arena/BXRink.png",
+                "deskripsi": "BX Rink adalah arena seluncur es (ice skating) profesional yang terletak di Bintaro Xchange Mall, Tangerang Selatan, menawarkan pengalaman bermain dan belajar ice skating untuk segala usia dengan fasilitas lengkap, termasuk pelatih profesional, penyewaan alat, hingga program akademi skating, menjadikannya destinasi hiburan dan olahraga yang populer. ",
+                "kapasitas": 200,
+                "opt_hours": "Senin: 12.00–20.00\nSelasa: 12.00–20.00\nRabu: 12.00–20.00\nKamis: 12.00–20.00\nJumat: 12.00–20.00\nSabtu: 10.00–20.00\nMinggu: 10.00–20.00",
+                "map_url": "https://maps.google.com/?cid=9226340998914266139"
+            },
+            {
+                "nama": "Gardenice Rink",
+                "lokasi": "Lantai SL- 08, Jalan Sukajadi No.137-139 Paris Van Java Sky Level, Paris Van Java, Cipedes, Kec. Sukajadi, Kota Bandung, Jawa Barat 40162, Indonesia",
+                "url_gambar": "/static/images/arena/Gardenice.jpg",
+                "deskripsi": "Rasakan pengalaman menyenangkan berselancar es bersama teman dan keluarga di Gardenice Rink! Merupakan satu-satunya arena seluncur es di Bandung yang memiliki konsep semi-outdoor. Kamu akan merasakan berselancar es di tengah-tengah taman yang indah. Anak-anak dan peselancar es yang baru pertama kali akan dipandu oleh pelatih yang ada di sekitar arena.",
+                "kapasitas": 100,
+                "opt_hours": "Senin: 10.00–21.45\nSelasa: 10.00–21.45\nRabu: 10.00–21.45\nKamis: 10.00–21.45\nJumat: 10.00–21.45\nSabtu: 10.00–21.45\nMinggu: 10.00–21.45",
+                "map_url": "https://maps.google.com/?cid=12487965101572432879"
+            },
+            {
+                "nama": "SCH Ice Skating Arena",
+                "lokasi": "79H6+XPV, Jl. Gito Gati, Penggung, Tridadi, Kec. Sleman, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55511, Indonesia",
+                "url_gambar": "/static/images/arena/SCH.png",
+                "deskripsi": "Bersiaplah untuk meluncur dan bersenang-senang di SCH Ice Skating Arena bersama teman dan keluarga! Baik Anda sudah ahli atau baru pertama kali mencoba, keseruan di atas es tak akan berhenti. Jangan khawatir jika ini pertama kalinya Anda bermain skating, karena petugas arena selalu siap membantu dan memastikan Anda menikmati pengalaman ini dengan aman. Rasakan keseruan bermain ice skating sambil menciptakan kenangan tak terlupakan bersama orang-orang tercinta. Ini adalah cara sempurna untuk menghabiskan hari yang penuh tawa, kegembiraan, dan momen seru di atas es!",
+                "kapasitas": 100,
+                "opt_hours": "Senin: 10.00–21.00\nSelasa: 10.00–21.00\nRabu: 10.00–21.00\nKamis: 10.00–21.00\nJumat: 10.00–21.00\nSabtu: 10.00–21.00\nMinggu: 10.00–21.00",
+                "map_url": "https://maps.google.com/?cid=6838677488608956973"
+            },
+            {
+                "nama": "Bali Ice Skating Arena",
+                "lokasi": "Mal Bali Galeria, Jl. Bypass Ngurah Rai, Kuta, Kec. Kuta, Kabupaten Badung, Bali 80361, Indonesia",
+                "url_gambar": "/static/images/arena/BaliIceSkatingArena.jpg",
+                "deskripsi": "Bali Ice Skating adalah arena seluncur es satu-satunya di Bali yang berada di Mall Bali Galeria, menawarkan sensasi olahraga musim dingin di pulau tropis, cocok untuk semua kalangan dengan fasilitas seperti skating aid, loker, pelatih profesional, dan program akademi khusus, menjadikannya tempat hiburan yang unik dengan pengalaman seluncur yang aman dan menyenangkan di atas es sungguhan. ",
+                "kapasitas": 175,
+                "opt_hours": "Senin: 10.00–21.30\nSelasa: 10.00–21.30\nRabu: 10.00–21.30\nKamis: 10.00–21.30\nJumat: 10.00–21.30\nSabtu: 10.00–21.30\nMinggu: 10.00–21.30",
+                "map_url": "https://maps.google.com/?cid=11989374234095711337"
+            },
+            {
+                "nama": "OCA Ice Skating Arena - Embong Malang",
+                "lokasi": "Jl. Embong Malang No.39, Kedungdoro, Kec. Tegalsari, Surabaya, Jawa Timur 60261, Indonesia",
+                "url_gambar": "/static/images/arena/OCA.jpeg", 
+                "deskripsi": "OCA Ice Skating adalah arena seluncur es yang menawarkan pengalaman bermain skate di atas es dengan fasilitas lengkap seperti sewa sepatu, skating aid (alat bantu), sarung tangan, dan kaus kaki, ideal untuk keluarga, teman, atau pemula yang ingin belajar seluncur dengan pelatih bersertifikat, menawarkan program reguler dan paket pembelajaran di lokasi seperti Maspion Square Surabaya. ",
+                "kapasitas": 150,
+                "opt_hours": "Senin: 10.00–22.00\nSelasa: 10.00–22.00\nRabu: 10.00–22.00\nKamis: 10.00–22.00\nJumat: 10.00–22.00\nSabtu: 10.00–22.00\nMinggu: 10.00–22.00",
+                "map_url": "https://maps.google.com/?cid=17659429666310569509"
+            },
+            {
+                "nama": "Medan Ice Skating Arena",
+                "lokasi": "Cambridge City Square, Jl. S. Parman No.217 lantai 2, Petisah Tengah, Kec. Medan Petisah, Kota Medan, Sumatera Utara 20151, Indonesia",
+                "url_gambar": "/static/images/arena/MedanISA.jpg",
+                "deskripsi": "Temukan keseruan bermain ice skating di Playtopia Sports, inovasi terbaru yang menghadirkan pengalaman seru bermain ice skating di dalam ruangan! Berlokasi di Sun Plaza Medan, Playtopia Sports memiliki arena ice skating indoor terbesar — tempat yang sempurna untuk bersenang-senang bersama teman dan orang tercinta. Tak hanya seru, Playtopia Sports juga menjamin pengalaman bermain ice skating yang aman untuk semua usia. Jadi, ajak semua orang untuk menikmati hari penuh tawa dan kebahagiaan di atas es! Jadi, tunggu apa lagi? Ajak teman-temanmu dan rasakan sensasi seru bermain ice skating di Playtopia Sports hari ini!",
+                "kapasitas": 50,
+                "opt_hours": "Senin: 10.00–21.45\nSelasa: 10.00–21.45\nRabu: 10.00–21.45\nKamis: 10.00–21.45\nJumat: 10.00–21.45\nSabtu: 10.00–21.45\nMinggu: 10.00–21.45",
+                "map_url": "https://maps.google.com/?cid=10833321253440318490"
+            },
+            {
+                "nama": "Snowy Happyland",
+                "lokasi": "QJ5H+G9X, Jl. Gading Serpong Boulevard, Pakulonan Barat, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810, Indonesia",
+                "url_gambar": "/static/images/arena/Snowy.jpg",
+                "deskripsi": "Snowy Happyland adalah acara tematik musim dingin yang sering diadakan di Summarecon Mall Serpong (SMS) saat liburan sekolah, menawarkan pengalaman bermain salju dan ice skating di dalam mall, lengkap dengan area Snow Playground dan Ice Rink, serta pertunjukan bertema Kutub Utara dan karakter seperti Polar Bear, menjadikannya destinasi hiburan keluarga yang populer di Tangerang. ",
+                "kapasitas": 50,
+                "opt_hours": "Senin: 10.00–22.00\nSelasa: 10.00–22.00\nRabu: 10.00–22.00\nKamis: 10.00–22.00\nJumat: 10.00–22.00\nSabtu: 10.00–22.00\nMinggu: 10.00–22.00",
+                "map_url": "https://maps.google.com/?cid=16326125140928726294"
+            },
+            {
+                "nama": "OPI Ice Skating arena",
+                "lokasi": "Jl. Gubernur H. A Bastari No.16, Sungai Kedukan, Kec. Rambutan, Kota Palembang, Sumatera Selatan 30257, Indonesia",
+                "url_gambar": "/static/images/arena/OPI.jpeg",
+                "deskripsi": "Rasakan keseruan bermain seluncur es di OPI Ice Rink Palembang, tempat di mana kesenangan bertemu dengan kegembiraan. Meluncur dan menari di sekitar arena es, menikmati seluncuran berbentuk penguin, anjing laut, dan lumba-lumba yang menambah sentuhan keajaiban pada petualangan seluncur es Anda. Cocok untuk segala usia, arena seluncur es ini menjanjikan rekreasi yang menyenangkan dan berkesan bagi seluruh keluarga. Baik Anda pemain seluncur berpengalaman atau pemula, OPI Ice Rink Palembang menawarkan lingkungan yang aman dan menyenangkan untuk semua orang. Habiskan hari penuh kegembiraan di atas es, menciptakan momen tak terlupakan bersama orang-orang tercinta. Datang dan rasakan keajaiban bermain seluncur es seperti belum pernah ada sebelumnya!",
+                "kapasitas": 125,
+                "opt_hours": "Senin: 10.15–21.45\nSelasa: 10.15–21.45\nRabu: 10.15–21.45\nKamis: 10.15–21.45\nJumat: 10.15–21.45\nSabtu: 10.15–21.45\nMinggu: 10.15–21.45",
+                "map_url": "https://maps.google.com/?cid=5818206029982477525"
+            }
+        ]
 
-        self.stdout.write(self.style.WARNING('Deleting existing Arena data...'))
-        Arena.objects.all().delete()
+        self.stdout.write("Mulai import data arena & jadwal...")
 
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            self.stderr.write(self.style.ERROR(f"Error: File not found at {file_path}"))
-            return
-        except json.JSONDecodeError:
-            self.stderr.write(self.style.ERROR(f"Error: Could not decode JSON from {file_path}"))
-            return
-        except Exception as e:
-            self.stderr.write(self.style.ERROR(f"An unexpected error occurred opening the file: {e}"))
-            return
+        for data in arenas_data:
+            # 1. Bikin/Update Arenanya dulu
+            arena, created = Arena.objects.update_or_create(
+                name=data['nama'],
+                defaults={
+                    'location': data['lokasi'],
+                    'img_url': data['url_gambar'], # URL Static
+                    'description': data['deskripsi'],
+                    'capacity': data['kapasitas'],
+                    'opening_hours_text': data['opt_hours'], # Text asli buat display
+                    'google_maps_url': data['map_url'],
+                }
+            )
+            
+            status_msg = "Dibuat" if created else "Diupdate"
+            self.stdout.write(f"{status_msg}: {arena.name}")
 
-        arenas_created_count = 0
-        arenas_updated_count = 0
-        hours_rules_processed = 0 # Counter for processed hour rules
+            # 2. PARSING JAM BUKA (Biar statusnya ga 'Tutup')
+            # Hapus jadwal lama biar ga duplikat pas di-run ulang
+            ArenaOpeningHours.objects.filter(arena=arena).delete()
 
-        # Looping setiap item data di file JSON
-        for item in data:
-            arena_name = item.get('nama')
-            if not arena_name:
-                self.stderr.write(self.style.WARNING(f"Skipping item due to missing 'nama': {item}"))
-                continue
-
-            try:
-                # 1. Update atau Create Arena dulu
-                arena_obj, created = Arena.objects.update_or_create(
-                    name=arena_name, # Kunci pencarian adalah nama arena
-                    defaults={
-                        # Mapping key JSON ke field Model Arena
-                        'location': item.get('lokasi', ''),
-                        'description': item.get('deskripsi', ''),
-                        'capacity': item.get('kapasitas') if item.get('kapasitas') is not None else 0,
-                        'img_url': item.get('url_gambar'),
-                        'opening_hours_text': item.get('opt hours'), # Simpan teks asli
-                        'google_maps_url': item.get('link_gmaps'),
-                    }
-                )
-                if created:
-                    arenas_created_count += 1
-                    self.stdout.write(f"Created Arena: {arena_name}")
-                else:
-                    arenas_updated_count += 1
-                    # self.stdout.write(f"Updated Arena: {arena_name}") # Uncomment jika ingin log update
-
-                # 2. Parsing dan Simpan Jam Buka per Hari ke ArenaOpeningHours
-                opening_hours_text = item.get('opt hours')
-                if opening_hours_text:
-                    self.stdout.write(f"  Processing opening hours for {arena_name}...")
-                    for day_index in range(7): # Loop dari 0 (Senin) sampai 6 (Minggu)
-                        open_t, close_t = parse_opening_hours_simple(opening_hours_text, day_index)
-
-                        # Update atau create aturan jam buka untuk hari ini
-                        hour_rule, rule_created_or_updated = ArenaOpeningHours.objects.update_or_create(
-                            arena=arena_obj, # Link ke Arena yang baru dibuat/diupdate
-                            day=day_index,   # Hari ke- (0-6)
-                            defaults={       # Data jamnya
-                                'open_time': open_t,
-                                'close_time': close_t
-                            }
+            lines = data['opt_hours'].split('\n')
+            for line in lines:
+                try:
+                    # Format: "Senin: 10.00–22.00"
+                    if ': ' not in line: continue
+                    
+                    day_str, time_range = line.split(': ', 1)
+                    start_str, end_str = time_range.replace('.', ':').split('–') # Perhatiin dash-nya beda
+                    
+                    if day_str in day_map:
+                        ArenaOpeningHours.objects.create(
+                            arena=arena,
+                            day=day_map[day_str],
+                            open_time=datetime.strptime(start_str.strip(), "%H:%M").time(),
+                            close_time=datetime.strptime(end_str.strip(), "%H:%M").time()
                         )
-                        hours_rules_processed += 1 # Hitung setiap rule yang diproses
-                        # Opsi: Print detail per hari
-                        # day_name = dict(ArenaOpeningHours.DAY_CHOICES).get(day_index)
-                        # self.stdout.write(f"    - {day_name}: Open={open_t}, Close={close_t}")
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f"  - Gagal parsing jam '{line}': {e}"))
+            
+            self.stdout.write(f"  - Jadwal buka berhasil di-generate.")
 
-                else:
-                    self.stdout.write(self.style.WARNING(f"  No opening hours text found for {arena_name}, skipping hours rules."))
-
-
-            except Exception as e:
-                # Tangani error lain saat save Arena atau ArenaOpeningHours
-                self.stderr.write(self.style.ERROR(f"Error processing item '{arena_name}': {e}"))
-                # Lanjut ke item berikutnya
-                continue
-
-        # Tampilkan ringkasan hasil
-        self.stdout.write(self.style.SUCCESS(
-            f"\nImport finished. "
-            f"Arenas Created: {arenas_created_count}, Arenas Updated: {arenas_updated_count}. "
-            f"Total Opening Hours Rules processed: {hours_rules_processed}."
-        ))
+        self.stdout.write(self.style.SUCCESS('SEMUA BERES BOS!'))
