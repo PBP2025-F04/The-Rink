@@ -7,6 +7,59 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Event, EventRegistration
 from django.template.loader import render_to_string
+# events/views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Event
+
+@csrf_exempt
+def get_events_json(request):
+    events = Event.objects.filter(is_active=True)
+    data = []
+    for event in events:
+        is_registered = False
+        if request.user.is_authenticated:
+            is_registered = event.is_registered(request.user)
+
+        data.append({
+            'id': event.id,
+            'name': event.name,
+            'description': event.description,
+            'date': str(event.date),
+            'time': f"{event.start_time} - {event.end_time}",
+            'location': event.location,
+            'price': float(event.price),
+            'category': event.category,
+            'image_url': event.image.url if event.image else '',
+            'participant_count': event.current_participants,
+            'max_participants': event.max_participants,
+            'is_registered': is_registered,
+        })
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
+@login_required
+def join_event_flutter(request, event_id):
+    if request.method == 'POST':
+        try:
+            event = Event.objects.get(id=event_id)
+            
+            # Check conditions
+            if event.is_full:
+                return JsonResponse({'status': False, 'message': 'Event is full'}, status=400)
+            if event.is_registered(request.user):
+                return JsonResponse({'status': False, 'message': 'Already registered'}, status=400)
+            if event.is_past:
+                return JsonResponse({'status': False, 'message': 'Event has passed'}, status=400)
+
+            # Register user
+            EventRegistration.objects.create(event=event, user=request.user)
+            
+            return JsonResponse({'status': True, 'message': 'Successfully joined!'})
+        except Event.DoesNotExist:
+            return JsonResponse({'status': False, 'message': 'Event not found'}, status=404)
+            
+    return JsonResponse({'status': False, 'message': 'Invalid method'}, status=405)
 
 def event_list(request):
     """Display all events with optional filtering"""
