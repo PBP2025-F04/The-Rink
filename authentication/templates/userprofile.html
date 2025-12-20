@@ -154,8 +154,8 @@ User Profile - The Rink
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
-                      {% if full_name_display %} {{ full_name_display }} {% else
-                      %}
+                      {% if full_name_display %} {{ full_name_display }} 
+                      {% else %}
                       <strong>Not Provided</strong>
                       {% endif %}
                     </p>
@@ -199,8 +199,9 @@ User Profile - The Rink
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
-                      {% if profile.date_of_birth %} {{
-                      profile.date_of_birth|date:"M d, Y" }} {% else %}
+                      {% if profile.date_of_birth %} 
+                      {{ profile.date_of_birth|date:"M d, Y" }} 
+                      {% else %}
                       <strong>Not Provided</strong>
                       {% endif %}
                     </p>
