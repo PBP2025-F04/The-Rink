@@ -21,13 +21,13 @@ class Arena(models.Model):
     
 class ArenaOpeningHours(models.Model):
     arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='opening_hours_rules')
-    DAY_CHOICES = ((0, 'Senin'), 
-                   (1, 'Selasa'), 
-                   (2, 'Rabu'), 
-                   (3, 'Kamis'),
-                   (4, 'Jumat'), 
-                   (5, 'Sabtu'), 
-                   (6, 'Minggu')
+    DAY_CHOICES = ((0, 'Monday'), 
+                   (1, 'Tuesday'), 
+                   (2, 'Wednesday'), 
+                   (3, 'Thursday'),
+                   (4, 'Friday'), 
+                   (5, 'Saturday'), 
+                   (6, 'Sunday')
     )
     day = models.IntegerField(choices=DAY_CHOICES)
     open_time = models.TimeField(null=True, blank=True)
