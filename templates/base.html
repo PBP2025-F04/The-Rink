@@ -135,14 +135,6 @@
               >
                 <i class="fas fa-user mr-2"></i>My Profile
               </a>
-              {% if user.usertype.user_type == 'seller' %}
-              <a
-                href="{% url 'authentication:seller_profile' %}"
-                class="block px-4 py-2 text-blue-900 hover:bg-sky-50 transition-colors"
-              >
-                <i class="fas fa-store mr-2"></i>Seller Profile
-              </a>
-              {% endif %}
               <a
                 href="{% url 'booking_arena:user_booking_list' %}"
                 class="block px-4 py-2 text-blue-900 hover:bg-sky-50 transition-colors"
@@ -233,9 +225,9 @@
             <div class="flex items-center space-x-2 text-blue-900">
               <i class="fas fa-user-circle"></i>
               <span
-                >{% if is_admin %}Admin
-                {% else %} {{ user.username }} 
-                {% endif %}</span
+                >{% if is_admin %}Admin {% else %} {{ user.username }} 
+                {% endif %}
+              </span
               >
             </div>
 
@@ -253,14 +245,6 @@
             >
               <i class="fas fa-user mr-2"></i>My Profile
             </a>
-            {% if user.usertype.user_type == 'seller' %}
-            <a
-              href="{% url 'authentication:seller_profile' %}"
-              class="block text-blue-900 hover:text-sky-600 transition-colors py-2"
-            >
-              <i class="fas fa-store mr-2"></i>Seller Profile
-            </a>
-            {% endif %}
             <a
               href="{% url 'booking_arena:user_booking_list' %}"
               class="block text-blue-900 hover:text-sky-600 transition-colors py-2"
