@@ -16,7 +16,6 @@ from django.db import transaction
 @csrf_exempt
 def get_events_json(request):
     events = Event.objects.filter(is_active=True)
-    
     # OPTIMISASI: Ambil semua ID event yang user sudah daftar dalam SATU query
     registered_event_ids = set()
     if request.user.is_authenticated:
@@ -43,6 +42,7 @@ def get_events_json(request):
             'participant_count': event.current_participants,
             'max_participants': event.max_participants,
             'is_registered': is_registered, # Menggunakan hasil lookup di atas
+            "is_joined": is_joined,
         })
     return JsonResponse(data, safe=False)
 
