@@ -9,13 +9,11 @@ from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.timezone import localtime
 import requests
 import json
-
 from functools import wraps
-from django.http import JsonResponse
 
 def login_required_json(view_func):
     @wraps(view_func)
