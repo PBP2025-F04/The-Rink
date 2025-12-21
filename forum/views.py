@@ -713,8 +713,6 @@ def get_top_posts_json_flutter(request):
 
     return JsonResponse(data, safe=False)
 
-
-
 def get_post_detail_flutter(request, post_id):
     try:
         post = Post.objects.select_related("author").get(pk=post_id)
@@ -744,3 +742,64 @@ def auth_person_forum(request):
         "username": request.user.username if request.user.is_authenticated else None,
     })
 
+# Admin Flutter endpoints
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_posts_flutter(request):
+    posts = Post.objects.all().select_related('author').order_by('-created_at')
+    data = []
+    for post in posts:
+        data.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content,
+            'author_username': post.author.username,
+            'total_upvotes': post.total_upvotes(),
+            'total_downvotes': post.total_downvotes(),
+            'replies_count': post.replies.count(),
+        })
+    return JsonResponse({'status': True, 'posts': data})
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_replies_flutter(request):
+    replies = Reply.objects.all().select_related('author', 'post').order_by('-created_at')
+    data = []
+    for reply in replies:
+        data.append({
+            'id': reply.id,
+            'content': reply.content,
+            'author_username': reply.author.username,
+            'post_title': reply.post.title,
+            'total_upvotes': reply.total_upvotes(),
+            'total_downvotes': reply.total_downvotes(),
+        })
+    return JsonResponse({'status': True, 'replies': data})
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_post_flutter(request, post_id):
+    if request.method == 'POST':
+        try:
+            post = get_object_or_404(Post, id=post_id)
+            post.delete()
+            return JsonResponse({'status': True, 'message': 'Post deleted'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_reply_flutter(request, reply_id):
+    if request.method == 'POST':
+        try:
+            reply = get_object_or_404(Reply, id=reply_id)
+            reply.delete()
+            return JsonResponse({'status': True, 'message': 'Reply deleted'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)

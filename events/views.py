@@ -17,7 +17,6 @@ from django.db import transaction
 def get_events_json(request):
     events = Event.objects.filter(is_active=True)
     
-    # OPTIMISASI: Ambil semua ID event yang user sudah daftar dalam SATU query
     registered_event_ids = set()
     if request.user.is_authenticated:
         registered_event_ids = set(
@@ -27,7 +26,7 @@ def get_events_json(request):
 
     data = []
     for event in events:
-        # Cek status registrasi cukup dengan melihat apakah ID ada di set (O(1) lookup)
+        # Logika is_registered: True jika ID event ada di daftar pendaftaran user
         is_registered = event.id in registered_event_ids
 
         data.append({
@@ -47,8 +46,10 @@ def get_events_json(request):
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
-@login_required
 def join_event_flutter(request, event_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'Unauthorized'}, status=401)
+    
     if request.method == 'POST':
         try:
             event = Event.objects.get(id=event_id)

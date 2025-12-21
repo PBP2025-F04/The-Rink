@@ -432,22 +432,25 @@ def delete_gear_flutter(request, id):
 @user_passes_test(lambda u: hasattr(u, 'usertype') and u.usertype.user_type == 'seller')
 def get_seller_gears_json(request):
     """Get seller's own gears for Flutter"""
-    gears = Gear.objects.filter(seller=request.user)
-    data = []
-    
-    for gear in gears:
-        data.append({
-            'id': gear.id,
-            'name': gear.name,
-            'category': gear.category,
-            'price_per_day': float(gear.price_per_day),
-            'stock': gear.stock,
-            'description': gear.description or '',
-            'image_url': gear.image_url or '',
-            'is_featured': gear.is_featured,
-        })
-    
-    return JsonResponse({'gears': data})
+    try:
+        gears = Gear.objects.filter(seller=request.user)
+        data = []
+
+        for gear in gears:
+            data.append({
+                'id': gear.id,
+                'name': gear.name,
+                'category': gear.category,
+                'price_per_day': float(gear.price_per_day),
+                'stock': gear.stock,
+                'description': gear.description or '',
+                'image_url': gear.image_url or '',
+                'is_featured': gear.is_featured,
+            })
+
+        return JsonResponse({'gears': data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 def gear_json(request, id):
@@ -770,6 +773,70 @@ def checkout_ajax(request):
         'total': total,
         'rental_id': rental.id
     })
+
+# =================================================================
+# FLUTTER ADMIN API SECTION
+# =================================================================
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_gears_flutter(request):
+    """Get all gears for admin Flutter"""
+    try:
+        gears = Gear.objects.all().select_related('seller')
+        data = []
+        for gear in gears:
+            data.append({
+                'id': gear.id,
+                'name': gear.name,
+                'category': gear.category,
+                'price_per_day': float(gear.price_per_day),
+                'stock': gear.stock,
+                'description': gear.description or '',
+                'image_url': gear.image_url or '',
+                'seller_username': gear.seller.username,
+                'is_featured': gear.is_featured,
+            })
+        return JsonResponse({'status': True, 'gears': data})
+    except Exception as e:
+        return JsonResponse({'status': False, 'message': str(e)}, status=500)
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def update_gear_admin_flutter(request, gear_id):
+    """Update gear for admin Flutter"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            gear = get_object_or_404(Gear, id=gear_id)
+            gear.name = data.get('name', gear.name)
+            gear.category = data.get('category', gear.category)
+            gear.price_per_day = data.get('price_per_day', gear.price_per_day)
+            gear.stock = data.get('stock', gear.stock)
+            gear.description = data.get('description', gear.description)
+            gear.image_url = data.get('image_url', gear.image_url)
+            gear.save()
+            return JsonResponse({'status': True, 'message': 'Gear updated successfully'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def delete_gear_flutter(request, gear_id):
+    """Delete gear for admin Flutter"""
+    if request.method == 'POST':
+        try:
+            gear = get_object_or_404(Gear, id=gear_id)
+            gear_name = gear.name
+            gear.delete()
+            return JsonResponse({'status': True, 'message': f'Gear "{gear_name}" deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
 
 # Admin views for rental gear
 def admin_gear_list(request):
