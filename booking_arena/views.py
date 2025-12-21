@@ -355,3 +355,17 @@ def my_history_flutter(request):
             "activity": b.activity
         })
     return JsonResponse(data, safe=False)
+
+# ============================================
+# ADMIN VIEWS
+# ============================================
+
+@user_passes_test(is_superuser)
+def admin_arena_list(request):
+    arenas = Arena.objects.all()
+    return render(request, 'booking_arena/admin_arena_list.html', {'arenas': arenas})
+
+@user_passes_test(is_superuser)
+def admin_booking_list(request):
+    bookings = Booking.objects.all().select_related('arena', 'user').order_by('-date', '-start_hour')
+    return render(request, 'booking_arena/admin_booking_list.html', {'bookings': bookings})

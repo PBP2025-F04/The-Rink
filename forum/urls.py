@@ -31,6 +31,7 @@ from forum.views import (
     toggle_vote_flutter,
     get_top_posts_json_flutter,
     get_post_detail_flutter,
+    auth_person_forum,
     admin_posts_flutter,
     admin_replies_flutter,
     admin_delete_post_flutter,
