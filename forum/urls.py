@@ -35,6 +35,7 @@ from forum.views import (
     admin_replies_flutter,
     admin_delete_post_flutter,
     admin_delete_reply_flutter,
+    auth_person_forum,
 )
 
 app_name = 'forum'
@@ -89,5 +90,7 @@ urlpatterns = [
     path('toggle-vote-flutter/', toggle_vote_flutter, name='toggle_vote_flutter'),
     path("get-top-posts-json-flutter/", get_top_posts_json_flutter, name="get_top_posts_json_flutter"),
     path("get-post-flutter/<int:post_id>/", get_post_detail_flutter, name="get_post_detail_flutter"),
+
+    # Session Login Flutter & Django
     path("auth-person-forum/", auth_person_forum, name="auth_person_forum"),
 ]

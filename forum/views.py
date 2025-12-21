@@ -731,9 +731,6 @@ def get_post_detail_flutter(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found"}, status=404)
-    
-# authentication/views.py atau app mana aja
-from django.http import JsonResponse
 
 def auth_person_forum(request):
     return JsonResponse({
