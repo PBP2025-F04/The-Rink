@@ -255,6 +255,20 @@ def get_arenas_flutter(request):
         })
     return JsonResponse(data, safe=False)
 
+# Admin Flutter endpoints
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def delete_arena_flutter(request, arena_id):
+    if request.method == 'POST':
+        try:
+            arena = get_object_or_404(Arena, id=arena_id)
+            arena.delete()
+            return JsonResponse({'status': True, 'message': 'Arena deleted'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
 @csrf_exempt
 def get_bookings_flutter(request):
     arena_id = request.GET.get('arena')

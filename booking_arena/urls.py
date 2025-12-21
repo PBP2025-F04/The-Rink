@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/booking/create/', create_booking_flutter, name='create_booking_flutter'),
     path('api/booking/cancel/', cancel_booking_flutter, name='cancel_booking_flutter'),
     path('api/my-history/', my_history_flutter, name='my_history_flutter'),
+    path('api/delete/<uuid:arena_id>/', delete_arena_flutter, name='delete_arena_flutter'),
 ]
