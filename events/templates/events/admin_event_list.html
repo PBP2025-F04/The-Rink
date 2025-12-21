@@ -1,0 +1,130 @@
+{% extends 'base.html' %} {% block title %}Admin - Manage Events{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-blue-900">Manage Events</h1>
+      <p class="text-blue-700 mt-2">View and manage all events</p>
+    </div>
+    <div class="flex space-x-3">
+      <a
+        href="{% url 'events:admin_event_create' %}"
+        class="bg-gradient-to-r from-green-500 to-emerald-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-500 transition-all duration-300 font-medium"
+      >
+        <i class="fas fa-plus mr-2"></i>Add New Event
+      </a>
+      <a
+        href="{% url 'authentication:dashadmin' %}"
+        class="bg-gradient-to-r from-gray-500 to-gray-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-500 transition-all duration-300 font-medium"
+      >
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Events Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for event in events %}
+    <div
+      class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 overflow-hidden"
+    >
+      <!-- Event Header -->
+      <div class="bg-gradient-to-r from-green-500 to-emerald-400 p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-alt text-white text-2xl mr-3"></i>
+            <div>
+              <h5 class="text-white font-bold text-lg">{{ event.name }}</h5>
+              <p class="text-green-100 text-sm">
+                {{ event.date|date:"M d, Y" }}
+              </p>
+            </div>
+          </div>
+          {% if event.is_active %}
+          <span
+            class="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full font-medium"
+          >
+            Active
+          </span>
+          {% else %}
+          <span
+            class="bg-red-200 text-red-800 text-xs px-2 py-1 rounded-full font-medium"
+          >
+            Inactive
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Event Details -->
+      <div class="p-6">
+        <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+          {{ event.description|truncatechars:100 }}
+        </p>
+
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-clock w-5 text-blue-500"></i>
+            <span class="ml-3 text-sm"
+              >{{ event.start_time }} - {{ event.end_time }}</span
+            >
+          </div>
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-map-marker-alt w-5 text-red-500"></i>
+            <span class="ml-3 text-sm">{{ event.location }}</span>
+          </div>
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-dollar-sign w-5 text-green-500"></i>
+            <span class="ml-3 text-sm font-medium">Rp{{ event.price }}</span>
+          </div>
+          <div class="flex items-center text-gray-600">
+            <i class="fas fa-users w-5 text-purple-500"></i>
+            <span class="ml-3 text-sm"
+              >{{ event.current_participants }}/{{ event.max_participants }}
+              participants</span
+            >
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-2">
+          <a
+            href="{% url 'events:admin_event_update' event.id %}"
+            class="flex-1 bg-gradient-to-r from-blue-500 to-sky-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-sky-500 transition-all duration-300 font-medium text-sm text-center"
+          >
+            <i class="fas fa-edit mr-2"></i>Edit
+          </a>
+          <a
+            href="{% url 'events:admin_event_delete' event.id %}"
+            class="flex-1 bg-gradient-to-r from-red-500 to-pink-400 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:from-red-600 hover:to-pink-500 transition-all duration-300 font-medium text-sm text-center"
+          >
+            <i class="fas fa-trash mr-2"></i>Delete
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full">
+      <div
+        class="bg-white rounded-xl shadow-lg p-12 text-center border border-blue-100"
+      >
+        <div
+          class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-calendar-alt text-green-500 text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-900 mb-2">No Events Found</h3>
+        <p class="text-gray-600 mb-6">Start by creating your first event.</p>
+        <a
+          href="{% url 'events:admin_event_create' %}"
+          class="inline-block bg-gradient-to-r from-green-500 to-emerald-400 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-500 transition-all duration-300 font-medium"
+        >
+          <i class="fas fa-plus mr-2"></i>Create First Event
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

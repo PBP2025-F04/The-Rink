@@ -24,10 +24,12 @@ urlpatterns = [
     path('', views.main_page, name='main'),
     path('admin/', admin.site.urls),
     path('rental/', include('rental_gear.urls')),
+    path('rental_gear/', include(('rental_gear.urls', 'rental_gear_legacy'), namespace='rental_gear_legacy')),
     path('booking/', include('booking_arena.urls')),
     path('accounts/', include('authentication.urls')),
     path('forum/', include('forum.urls')),  
-    path('events/', include('events.urls'))
+    path('events/', include('events.urls')),
+    path('auth_mob/', include('auth_mob.urls')),
 ]
 
 if settings.DEBUG:

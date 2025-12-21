@@ -1,0 +1,44 @@
+<div id="sport-selection-modal" class="modal">
+    <div class="modal-content">
+        <h3 class="text-3xl font-bold text-sky-900 mb-5">Pilih Aktivitas</h3>
+        <p class="text-sky-700 mb-8">Slot: 
+            <span class="font-semibold text-blue-700">
+                {{ selected_date|date:"l, d F Y" }}, {{ hour }}:00 - {{ hour|add:"1" }}:00
+            </span>
+        </p>
+        
+        {# Form Bersih - Tanpa hx-on aneh-aneh #}
+        <form hx-post="{% url 'booking_arena:create_booking_hourly' arena_id=arena.id %}"
+              hx-target="#slot-list-target" 
+              hx-swap="innerHTML">
+            
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+            <input type="hidden" name="hour" value="{{ hour }}">
+
+            <div class="space-y-4 mb-10">
+                {% if booking_model_meta.activity.field.choices %}
+                    {% for value, display in booking_model_meta.activity.field.choices %}
+                        {% if value %}
+                        <label class="flex items-center p-4 border border-sky-200 rounded-lg cursor-pointer bg-white/50 hover:border-blue-500 transition-all duration-200">
+                            <input type="radio" name="activity" value="{{ value }}" 
+                                   class="form-radio h-5 w-5 text-blue-600 bg-white/50 border-gray-400 focus:ring-blue-500" 
+                                   {% if forloop.first %}checked{% endif %}>
+                            <span class="ml-4 text-lg font-medium text-sky-800">{{ display }}</span>
+                        </label>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeModal()" class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-300 font-medium">
+                    Batal
+                </button>
+                <button type="submit" class="gradient-btn">
+                    Konfirmasi Booking
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

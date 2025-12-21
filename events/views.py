@@ -7,6 +7,75 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Event, EventRegistration
 from django.template.loader import render_to_string
+# events/views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Event
+from django.db import transaction
+
+@csrf_exempt
+def get_events_json(request):
+    events = Event.objects.filter(is_active=True)
+    
+    registered_event_ids = set()
+    if request.user.is_authenticated:
+        registered_event_ids = set(
+            EventRegistration.objects.filter(user=request.user)
+            .values_list('event_id', flat=True)
+        )
+
+    data = []
+    for event in events:
+        # Logika is_registered: True jika ID event ada di daftar pendaftaran user
+        is_registered = event.id in registered_event_ids
+
+        data.append({
+            'id': event.id,
+            'name': event.name,
+            'description': event.description,
+            'date': str(event.date),
+            'time': f"{event.start_time} - {event.end_time}",
+            'location': event.location,
+            'price': float(event.price),
+            'category': event.category,
+            'image_url': event.image.url if event.image else '',
+            'participant_count': event.current_participants,
+            'max_participants': event.max_participants,
+            'is_registered': is_registered, # Menggunakan hasil lookup di atas
+        })
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def join_event_flutter(request, event_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'Unauthorized'}, status=401)
+    
+    if request.method == 'POST':
+        try:
+            event = Event.objects.get(id=event_id)
+            user = request.user
+            
+            # Cek apakah sudah terdaftar (Query langsung ke tabel Registration biar akurat)
+            if EventRegistration.objects.filter(event=event, user=user).exists():
+                return JsonResponse({'status': False, 'message': 'Already registered'}, status=400)
+            
+            if event.is_full:
+                return JsonResponse({'status': False, 'message': 'Event is full'}, status=400)
+            
+            if event.is_past:
+                return JsonResponse({'status': False, 'message': 'Event has passed'}, status=400)
+
+            # Simpan registrasi
+            EventRegistration.objects.create(event=event, user=user)
+            
+            return JsonResponse({'status': True, 'message': 'Successfully joined!'})
+            
+        except Event.DoesNotExist:
+            return JsonResponse({'status': False, 'message': 'Event not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+            
+    return JsonResponse({'status': False, 'message': 'Invalid method'}, status=405)
 
 def event_list(request):
     """Display all events with optional filtering"""
@@ -35,7 +104,7 @@ def event_list(request):
         return render(request, 'events/partials/event_list_items.html', {
             'events': events,
         })
-    
+     
     return render(request, 'events/list.html', {
         'events': events,
         'selected_category': category,
@@ -149,16 +218,105 @@ def cancel_registration(request, slug):
 def my_events(request):
     """Display user's registered events"""
     registrations = request.user.event_registrations.select_related('event').all()
-    
+
     upcoming_regs = registrations.filter(
         event__date__gte=timezone.now().date()
     ).order_by('event__date', 'event__start_time')
-    
+
     past_regs = registrations.filter(
         event__date__lt=timezone.now().date()
     ).order_by('-event__date', '-event__start_time')
-    
+
     return render(request, 'events/my_events.html', {
         'upcoming_registrations': upcoming_regs,
         'past_registrations': past_regs
     })
+
+# Admin views for events
+def admin_event_list(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    events = Event.objects.all()
+    return render(request, 'events/admin_event_list.html', {'events': events})
+
+def admin_event_create(request):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import EventForm
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.slug = slugify(event.name)
+            event.save()
+            messages.success(request, 'Event created successfully!')
+            return redirect('events:admin_event_list')
+    else:
+        form = EventForm()
+    return render(request, 'events/admin_event_form.html', {'form': form, 'action': 'Create'})
+
+def admin_event_update(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    from .forms import EventForm
+    event = get_object_or_404(Event, id=id)
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES, instance=event)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.slug = slugify(event.name)
+            event.save()
+            messages.success(request, 'Event updated successfully!')
+            return redirect('events:admin_event_list')
+    else:
+        form = EventForm(instance=event)
+    return render(request, 'events/admin_event_form.html', {'form': form, 'action': 'Update'})
+
+def admin_event_delete(request, id):
+    if not request.session.get('is_admin'):
+        return redirect('authentication:login')
+    event = get_object_or_404(Event, id=id)
+    if request.method == 'POST':
+        event.delete()
+        messages.success(request, 'Event deleted successfully!')
+        return redirect('events:admin_event_list')
+    return render(request, 'events/admin_event_confirm_delete.html', {'event': event})
+
+@csrf_exempt
+def get_event_detail_json(request, event_id):
+    event = get_object_or_404(Event, id=event_id, is_active=True)
+
+    related_events = Event.objects.filter(
+        category=event.category,
+        is_active=True,
+        date__gte=timezone.now().date()
+    ).exclude(id=event.id)[:3]
+
+    data = {
+        'event': {
+            'id': event.id,
+            'name': event.name,
+            'description': event.description,
+            'date': str(event.date),
+            'time': f"{event.start_time} - {event.end_time}",
+            'location': event.location,
+            'price': float(event.price),
+            'category': event.category,
+            'image_url': event.image.url if event.image else '',
+            'participant_count': event.current_participants,
+            'max_participants': event.max_participants,
+            'is_registered': event.is_registered(request.user),
+        },
+        'recommended_events': [
+            {
+                'id': e.id,
+                'name': e.name,
+                'date': str(e.date),
+                'location': e.location,
+                'image_url': e.image.url if e.image else '',
+            }
+            for e in related_events
+        ]
+    }
+
+    return JsonResponse(data)

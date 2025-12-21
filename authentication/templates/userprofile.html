@@ -1,5 +1,6 @@
-{% extends 'base.html' %} {% load static indodate %} {% block title %} Profil
-Pengguna - The Rink {% endblock %} {% block content %}
+{% extends 'base.html' %} {% load static indodate %} {% block title %} 
+User Profile - The Rink 
+{% endblock %} {% block content %}
 <div
   class="container-fluid py-5"
   style="
@@ -15,16 +16,21 @@ Pengguna - The Rink {% endblock %} {% block content %}
           <div class="card-header bg-white border-0 py-4">
             <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center">
-                <div class="bg-primary bg-gradient rounded-circle p-3 me-3">
-                  <i class="fas fa-user text-white fa-lg"></i>
+                <div
+                  class="{% if user_type == 'seller' %}bg-success{% else %}bg-primary{% endif %} bg-gradient rounded-circle p-3 me-3"
+                >
+                  <i
+                    class="{% if user_type == 'seller' %}fas fa-store{% else %}fas fa-user{% endif %} text-white fa-lg"
+                  ></i>
                 </div>
                 <div>
                   <h2 class="mb-0 fw-bold text-dark">
-                    👋 Halo, {{ user.first_name|default:user.username }}!
+                    👋 Hello, {{ user.first_name|default:user.username }}!
                   </h2>
                   <p class="text-muted mb-0 small">
-                    Kelola profil Anda dan jadikan pengalaman skating lebih
-                    personal
+                    {% if user_type == 'seller' %} Manage your seller profile
+                    and the products you sell {% else %} Manage your profile and
+                    make your skating experience more personal {% endif %}
                   </p>
                 </div>
               </div>
@@ -35,7 +41,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 data-bs-target="#editProfileModal"
                 class="btn btn-primary rounded-pill px-4 py-2"
               >
-                <i class="fas fa-edit me-2"></i>Edit Profil
+                <i class="fas fa-edit me-2"></i>Edit Profile
               </button>
             </div>
           </div>
@@ -44,16 +50,37 @@ Pengguna - The Rink {% endblock %} {% block content %}
             <!-- View Mode - Always shown -->
             <div id="viewMode">
               <div class="row g-4">
+                {% if user_type == 'seller' %}
                 <div class="col-md-6">
                   <div class="info-card p-4 rounded-3 bg-light border">
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-user text-primary me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >NAMA LENGKAP</span
+                        >FULL NAME</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
-                      {{ profile.full_name|default:"Belum diisi" }}
+                      {% if full_name_display %} {{ full_name_display }} 
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-store text-success me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >STORE NAME</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewStoreName">
+                      {% if seller_profile.business_name %} 
+                      {{ seller_profile.business_name }} 
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -62,11 +89,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-phone text-success me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >NOMOR TELEPON</span
+                        >PHONE NUMBER</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
-                      {{ profile.phone_number|default:"Belum diisi" }}
+                      {% if profile.phone_number %} {{ profile.phone_number }}
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -77,7 +107,9 @@ Pengguna - The Rink {% endblock %} {% block content %}
                       <span class="fw-semibold text-muted small">EMAIL</span>
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
-                      {{ profile.email|default:"Belum diisi" }}
+                      {% if profile.email %} {{ profile.email }} {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -86,14 +118,91 @@ Pengguna - The Rink {% endblock %} {% block content %}
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-calendar text-warning me-2"></i>
                       <span class="fw-semibold text-muted small"
-                        >TANGGAL LAHIR</span
+                        >DATE OF BIRTH</span
                       >
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
-                      {% if profile.date_of_birth %}
-                        {{ profile.date_of_birth|indodate }}
+                      {% if profile.date_of_birth %} 
+                      {{ profile.date_of_birth|date:"M d, Y" }} 
                       {% else %}
-                        Belum diisi
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                      <span class="fw-semibold text-muted small">ADDRESS</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewAddress">
+                      {% if profile.address %} {{ profile.address|linebreaks }}
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                {% else %}
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-user text-primary me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >FULL NAME</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewFullName">
+                      {% if full_name_display %} {{ full_name_display }} 
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-phone text-success me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >PHONE NUMBER</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewPhone">
+                      {% if profile.phone_number %} {{ profile.phone_number }}
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-envelope text-info me-2"></i>
+                      <span class="fw-semibold text-muted small">EMAIL</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewEmail">
+                      {% if profile.email %} {{ profile.email }} {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
+                    </p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card p-4 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-calendar text-warning me-2"></i>
+                      <span class="fw-semibold text-muted small"
+                        >DATE OF BIRTH</span
+                      >
+                    </div>
+                    <p class="mb-0 fw-bold text-dark fs-5" id="viewBirthDate">
+                      {% if profile.date_of_birth %} 
+                      {{ profile.date_of_birth|date:"M d, Y" }} 
+                      {% else %}
+                      <strong>Not Provided</strong>
                       {% endif %}
                     </p>
                   </div>
@@ -102,17 +211,134 @@ Pengguna - The Rink {% endblock %} {% block content %}
                   <div class="info-card p-4 rounded-3 bg-light border">
                     <div class="d-flex align-items-center mb-2">
                       <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                      <span class="fw-semibold text-muted small">ALAMAT</span>
+                      <span class="fw-semibold text-muted small">ADDRESS</span>
                     </div>
                     <p class="mb-0 fw-bold text-dark fs-5" id="viewAddress">
-                      {{ profile.address|default:"Belum diisi"|linebreaks }}
+                      {% if profile.address %} {{ profile.address|linebreaks }}
+                      {% else %}
+                      <strong>Not Provided</strong>
+                      {% endif %}
                     </p>
                   </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Products Section (only for sellers) -->
+        {% if user_type == 'seller' %}
+        <div class="container mt-5">
+          <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+              <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 py-4">
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                  >
+                    <div class="d-flex align-items-center">
+                      <div
+                        class="bg-success bg-gradient rounded-circle p-3 me-3"
+                      >
+                        <i class="fas fa-box text-white fa-lg"></i>
+                      </div>
+                      <div>
+                        <h3 class="mb-0 fw-bold text-dark">My Products</h3>
+                        <p class="text-muted mb-0 small">
+                          Manage the products you sell
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-success rounded-pill px-4 py-2"
+                      data-bs-toggle="modal"
+                      data-bs-target="#createProductModal"
+                    >
+                      <i class="fas fa-plus me-2"></i>Add Product
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                  {% if user_products %}
+                  <div class="row g-4">
+                    {% for product in user_products %}
+                    <div class="col-md-6" id="productCard{{ product.id }}">
+                      <div class="card h-100 border-0 shadow-sm product-card">
+                        {% if product.image %}
+                        <img
+                          src="{{ product.image.url }}"
+                          class="card-img-top"
+                          alt="{{ product.name }}"
+                          style="height: 200px; object-fit: cover"
+                        />
+                        {% elif product.image_url %}
+                        <img
+                          src="{{ product.image_url }}"
+                          class="card-img-top"
+                          alt="{{ product.name }}"
+                          style="height: 200px; object-fit: cover"
+                        />
+                        {% else %}
+                        <div
+                          class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                          style="height: 200px"
+                        >
+                          <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                          <h5 class="card-title fw-bold text-dark">
+                            {{ product.name }}
+                          </h5>
+                          <p class="card-text text-muted small mb-2">
+                            <i class="fas fa-tag me-1"></i>
+                            {{ product.category|title }}
+                          </p>
+
+                          <p class="card-text fw-bold text-primary mb-2">
+                            <i class="fas fa-money-bill-wave me-1"></i>
+                            ${{ product.price_per_day }}/day
+                          </p>
+                          <p class="card-text text-muted small mb-3">
+                            <i class="fas fa-boxes me-1"></i>
+                            Stock: {{ product.stock }}
+                          </p>
+                          <div class="d-flex gap-2">
+                            <a
+                              href="{% url 'rental_gear:update_gear' product.id %}"
+                              class="btn btn-outline-primary btn-sm flex-fill"
+                            >
+                              <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <a
+                              href="{% url 'rental_gear:delete_gear' product.id %}"
+                              class="btn btn-outline-danger btn-sm"
+                            >
+                              <i class="fas fa-trash me-1"></i>Delete
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  {% else %}
+                  <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No products yet</h5>
+                    <p class="text-muted">
+                      You don’t have any products yet. Click “Add Product” to
+                      create your first one.
+                    </p>
+                  </div>
+                  {% endif %}
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -130,7 +356,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header bg-gradient-primary text-white">
         <h5 class="modal-title fw-bold" id="editProfileModalLabel">
-          <i class="fas fa-edit me-2"></i>Edit Profil Pengguna
+          <i class="fas fa-edit me-2"></i>Edit User Profile
         </h5>
         <button
           type="button"
@@ -157,7 +383,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 <img
                   id="modalProfileImage"
                   src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'images/default-profile.svg' %}{% endif %}"
-                  alt="Foto Profil"
+                  alt="Profile Picture"
                   class="w-100 h-100 object-fit-cover"
                 />
               </div>
@@ -176,14 +402,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
               </div>
             </div>
             <p class="text-muted small mt-2">
-              Klik ikon kamera untuk mengubah foto profil
+              Click the camera icon to change profile picture
             </p>
           </div>
 
           <div class="row g-3">
             <div class="col-md-6">
               <label for="modal_full_name" class="form-label fw-bold text-dark">
-                <i class="fas fa-user text-primary me-2"></i>Nama Lengkap
+                <i class="fas fa-user text-primary me-2"></i>Full Name
               </label>
               <input
                 type="text"
@@ -191,7 +417,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_full_name"
                 name="full_name"
                 value="{{ profile.full_name }}"
-                placeholder="Masukkan nama lengkap"
+                placeholder="Enter full name"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -200,7 +426,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 for="modal_phone_number"
                 class="form-label fw-bold text-dark"
               >
-                <i class="fas fa-phone text-success me-2"></i>Nomor Telepon
+                <i class="fas fa-phone text-success me-2"></i>Phone Number
               </label>
               <input
                 type="text"
@@ -208,7 +434,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_phone_number"
                 name="phone_number"
                 value="{{ profile.phone_number }}"
-                placeholder="Masukkan nomor telepon"
+                placeholder="Enter phone number"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -222,7 +448,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 id="modal_email"
                 name="email"
                 value="{{ profile.email }}"
-                placeholder="Masukkan email"
+                placeholder="Enter email"
                 style="background: rgba(255, 255, 255, 0.8)"
               />
             </div>
@@ -231,7 +457,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
                 for="modal_date_of_birth"
                 class="form-label fw-bold text-dark"
               >
-                <i class="fas fa-calendar text-warning me-2"></i>Tanggal Lahir
+                <i class="fas fa-calendar text-warning me-2"></i>Date of Birth
               </label>
               <input
                 type="date"
@@ -244,14 +470,14 @@ Pengguna - The Rink {% endblock %} {% block content %}
             </div>
             <div class="col-12">
               <label for="modal_address" class="form-label fw-bold text-dark">
-                <i class="fas fa-map-marker-alt text-danger me-2"></i>Alamat
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>Address
               </label>
               <textarea
                 class="form-control form-control-lg rounded-3 border-0 shadow-sm"
                 id="modal_address"
                 name="address"
                 rows="3"
-                placeholder="Masukkan alamat lengkap"
+                placeholder="Enter full address"
                 style="background: rgba(255, 255, 255, 0.8)"
               >
 {{ profile.address }}</textarea
@@ -265,20 +491,200 @@ Pengguna - The Rink {% endblock %} {% block content %}
             class="btn btn-outline-secondary rounded-pill px-4"
             data-bs-dismiss="modal"
           >
-            <i class="fas fa-times me-2"></i>Batal
+            <i class="fas fa-times me-2"></i>Cancel
           </button>
           <button
             type="submit"
             class="btn btn-primary rounded-pill px-5"
             id="modalSaveBtn"
           >
-            <i class="fas fa-save me-2"></i>Simpan Perubahan
+            <i class="fas fa-save me-2"></i>Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Seller-specific fields in modal -->
+  {% if user_type == 'seller' %}
+  <div class="col-12">
+    <hr class="my-4" />
+    <div class="bg-success bg-opacity-10 p-3 rounded-3 mb-3">
+      <div class="d-flex align-items-center mb-3">
+        <i class="fas fa-store text-success me-2"></i>
+        <span class="fw-bold text-success">Seller Information</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="modal_business_name" class="form-label fw-bold text-dark">
+            <i class="fas fa-store text-primary me-2"></i>Store Name
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+            id="modal_business_name"
+            name="business_name"
+            value="{{ seller_profile.business_name }}"
+            placeholder="Enter store name"
+            style="background: rgba(255, 255, 255, 0.8)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal for creating product (only for sellers) -->
+{% if user_type == 'seller' %}
+<div
+  class="modal fade"
+  id="createProductModal"
+  tabindex="-1"
+  aria-labelledby="createProductModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient-success text-white">
+        <h5 class="modal-title fw-bold" id="createProductModalLabel">
+          <i class="fas fa-plus me-2"></i>Add New Product
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="createProductForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'rental_gear:create_gear' %}"
+      >
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="id_name" class="form-label fw-bold text-dark">
+                <i class="fas fa-tag text-primary me-2"></i>Product Name
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_name"
+                name="name"
+                placeholder="Enter product name"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label
+                for="id_price_per_day"
+                class="form-label fw-bold text-dark"
+              >
+                <i class="fas fa-money-bill-wave text-success me-2"></i>Price
+                per Day
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_price_per_day"
+                name="price_per_day"
+                placeholder="Enter price"
+                style="background: rgba(255, 255, 255, 0.8)"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_stock" class="form-label fw-bold text-dark">
+                <i class="fas fa-boxes text-warning me-2"></i>Stock
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_stock"
+                name="stock"
+                placeholder="Enter stock quantity"
+                style="background: rgba(255, 255, 255, 0.8)"
+                min="1"
+                value="1"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_image_url" class="form-label fw-bold text-dark">
+                <i class="fas fa-image text-info me-2"></i>Image URL
+              </label>
+              <input
+                type="url"
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_image_url"
+                name="image_url"
+                placeholder="Enter image URL"
+                style="background: rgba(255, 255, 255, 0.8)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="id_category" class="form-label fw-bold text-dark">
+                <i class="fas fa-list text-warning me-2"></i>Category
+              </label>
+              <select
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_category"
+                name="category"
+                style="background: rgba(255, 255, 255, 0.8)"
+                required
+              >
+                <option value="">Select category</option>
+                <option value="hockey">Hockey</option>
+                <option value="curling">Curling</option>
+                <option value="ice_skating">Ice Skating</option>
+                <option value="apparel">Apparel</option>
+                <option value="accessories">Accessories</option>
+                <option value="protective_gear">Protective Gear</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="id_description" class="form-label fw-bold text-dark">
+                <i class="fas fa-align-left text-danger me-2"></i>Description
+              </label>
+              <textarea
+                class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+                id="id_description"
+                name="description"
+                rows="3"
+                placeholder="Describe your product"
+                style="background: rgba(255, 255, 255, 0.8)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary rounded-pill px-4"
+            data-bs-dismiss="modal"
+          >
+            <i class="fas fa-times me-2"></i>Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-success rounded-pill px-5"
+            id="submitProduct"
+          >
+            <i class="fas fa-save me-2"></i>Create Product
           </button>
         </div>
       </form>
     </div>
   </div>
 </div>
+{% endif %}
 
 <style>
   .profile-picture-container {
@@ -320,6 +726,19 @@ Pengguna - The Rink {% endblock %} {% block content %}
     background: linear-gradient(45deg, #667eea, #764ba2) !important;
   }
 
+  .bg-gradient-success {
+    background: linear-gradient(45deg, #28a745, #20c997) !important;
+  }
+
+  .product-card {
+    transition: all 0.3s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
   .fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
@@ -353,34 +772,40 @@ Pengguna - The Rink {% endblock %} {% block content %}
 
 <script>
   $(document).ready(function () {
-    // Initialize Modal
+    // Initialize Modals
     const profileModal = new bootstrap.Modal(
       document.getElementById("editProfileModal")
     );
+    const productModalElement = document.getElementById("createProductModal");
+    const productModal = productModalElement
+      ? new bootstrap.Modal(productModalElement)
+      : null;
 
     // Open modal when edit button is clicked
     $("#openEditModal").click(function () {
       profileModal.show();
     });
 
-    // Fungsi untuk format tanggal ke bahasa Indonesia
-    function formatDateIndo(dateStr) {
+    // Function to format date in English
+    function formatDateEnglish(dateStr) {
       const date = new Date(dateStr);
       const months = [
-        "Januari",
-        "Februari",
-        "Maret",
+        "January",
+        "February",
+        "March",
         "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
+        "May",
+        "June",
+        "July",
+        "August",
         "September",
-        "Oktober",
+        "October",
         "November",
-        "Desember",
+        "December",
       ];
-      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      return `${
+        months[date.getMonth()]
+      } ${date.getDate()}, ${date.getFullYear()}`;
     }
 
     // Modal form submission
@@ -392,7 +817,7 @@ Pengguna - The Rink {% endblock %} {% block content %}
       var submitBtn = $("#modalSaveBtn");
       var originalText = submitBtn.html();
       submitBtn
-        .html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...')
+        .html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...')
         .prop("disabled", true);
 
       $.ajax({
@@ -407,31 +832,47 @@ Pengguna - The Rink {% endblock %} {% block content %}
         success: function (response) {
           if (response.success) {
             // Update view mode data
-            $("#viewFullName").text(
-              $("#modal_full_name").val() || "Belum diisi"
+            $("#viewFullName").html(
+              $("#modal_full_name").val() && $("#modal_full_name").val().trim()
+                ? $("#modal_full_name").val()
+                : "<strong>Not Provided</strong>"
             );
-            $("#viewPhone").text(
-              $("#modal_phone_number").val() || "Belum diisi"
+            $("#viewPhone").html(
+              $("#modal_phone_number").val()
+                ? $("#modal_phone_number").val()
+                : "<strong>Not Provided</strong>"
             );
-            $("#viewEmail").text($("#modal_email").val() || "Belum diisi");
+            $("#viewEmail").html(
+              $("#modal_email").val()
+                ? $("#modal_email").val()
+                : "<strong>Not Provided</strong>"
+            );
 
             const birthDate = $("#modal_date_of_birth").val();
             if (birthDate) {
-              $("#viewBirthDate").text(formatDateIndo(birthDate));
+              $("#viewBirthDate").html(formatDateEnglish(birthDate));
             } else {
-              $("#viewBirthDate").text("Belum diisi");
+              $("#viewBirthDate").html("<strong>Not Provided</strong>");
             }
 
             $("#viewAddress").html(
-              ($("#modal_address").val() || "Belum diisi").replace(
-                /\n/g,
-                "<br>"
-              )
+              $("#modal_address").val()
+                ? $("#modal_address").val().replace(/\n/g, "<br>")
+                : "<strong>Not Provided</strong>"
             );
+
+            // Update store name if seller
+            if ($("#modal_business_name").length) {
+              $("#viewStoreName").html(
+                $("#modal_business_name").val()
+                  ? $("#modal_business_name").val()
+                  : "<strong>Not Provided</strong>"
+              );
+            }
 
             // Show success state
             submitBtn
-              .html('<i class="fas fa-check me-2"></i>Tersimpan!')
+              .html('<i class="fas fa-check me-2"></i>Saved!')
               .removeClass("btn-primary")
               .addClass("btn-success");
 
@@ -446,15 +887,68 @@ Pengguna - The Rink {% endblock %} {% block content %}
             }, 1500);
           } else {
             submitBtn.html(originalText).prop("disabled", false);
-            alert("Terjadi kesalahan: " + JSON.stringify(response.errors));
+            alert("An error occurred: " + JSON.stringify(response.errors));
           }
         },
         error: function () {
           submitBtn.html(originalText).prop("disabled", false);
-          alert("Terjadi kesalahan saat menyimpan data.");
+          alert("An error occurred while saving data.");
         },
       });
     });
+
+    // Product form submission (only if product modal exists)
+    if (productModal) {
+      $("#createProductForm").on("submit", function (e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+
+        // Show loading state
+        var submitBtn = $("#submitProduct");
+        var originalText = submitBtn.html();
+        submitBtn
+          .html('<i class="fas fa-spinner fa-spin me-2"></i>Creating...')
+          .prop("disabled", true);
+
+        $.ajax({
+          url: "{% url 'rental_gear:create_gear' %}",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          success: function (response) {
+            if (response.success) {
+              // Show success state
+              submitBtn
+                .html('<i class="fas fa-check me-2"></i>Created!')
+                .removeClass("btn-success")
+                .addClass("btn-success");
+
+              // Close modal and reset after delay
+              setTimeout(function () {
+                $("#createProductModal").modal("hide");
+                submitBtn
+                  .html(originalText)
+                  .removeClass("btn-success")
+                  .addClass("btn-success")
+                  .prop("disabled", false);
+                location.reload();
+              }, 1500);
+            } else {
+              submitBtn.html(originalText).prop("disabled", false);
+              alert("An error occurred: " + JSON.stringify(response.errors));
+            }
+          },
+          error: function () {
+            submitBtn.html(originalText).prop("disabled", false);
+            alert("An error occurred while creating product.");
+          },
+        });
+      });
+    }
 
     // Image preview for modal
     $("#modal_profile_picture").on("change", function () {
@@ -476,15 +970,26 @@ Pengguna - The Rink {% endblock %} {% block content %}
         $("#modal_profile_picture").click();
       });
 
-    // Reset modal when closed
+    // Reset modals when closed
     $("#editProfileModal").on("hidden.bs.modal", function () {
       $("#modalProfileForm")[0].reset();
       $("#modalSaveBtn")
-        .html('<i class="fas fa-save me-2"></i>Simpan Perubahan')
+        .html('<i class="fas fa-save me-2"></i>Save Changes')
         .prop("disabled", false)
         .removeClass("btn-success")
         .addClass("btn-primary");
     });
+
+    if (productModal) {
+      $("#createProductModal").on("hidden.bs.modal", function () {
+        $("#createProductForm")[0].reset();
+        $("#submitProduct")
+          .html('<i class="fas fa-save me-2"></i>Create Product')
+          .prop("disabled", false)
+          .removeClass("btn-success")
+          .addClass("btn-success");
+      });
+    }
   });
 </script>
 {% endblock %}

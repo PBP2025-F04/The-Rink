@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>My Bookings — The Rink</title>
+{% endblock meta %}
+
+{% block content %}
+{% csrf_token %}
+
+<style>
+  body {
+    background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .booking-row {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.2s ease;
+  }
+  .booking-row:hover {
+      background: rgba(255, 255, 255, 0.9);
+  }
+  /* Style tombol cancel biar mirip tema */
+  .btn-cancel {
+    color: #DC3545;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .btn-cancel:hover {
+    color: #a0202d;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="container mx-auto px-4 py-12">
+  <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">My Bookings</h1>
+
+  <div class="bg-white bg-opacity-50 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-sky-200">
+      <thead class="bg-sky-50 bg-opacity-80">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider">Date</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider">Time Slot</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider">Arena</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider">Activity</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider">Status</th>
+          <th scope="col" classall" class="px-6 py-3 text-center text-xs font-medium text-sky-800 uppercase tracking-wider">Action</th>
+        </tr>
+      </thead>
+      <tbody id="booking-list-body">
+        
+        {% if not bookings %}
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">You have no bookings yet.</td>
+          </tr>
+        {% endif %}
+        
+        {# Loop-nya kita pake partial, biar bisa dipake ulang sama view #}
+        {% for booking in bookings %}
+          {% include 'partials/booking_row.html' %}
+        {% endfor %}
+        
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+      if (event.detail.requestConfig.verb === 'post'){
+        setTimeout(() => {
+          const tbody = document.getElementById('booking-list-body');
+          const remainingRows = tbody.querySelectorAll('tr.booking-row');
+          if (remainingRows.length === 0) {
+            tbody.innerHTML = `
+                <tr id="no-booking-msg">
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        You have no bookings yet.
+                    </td>
+                </tr>
+            `;
+          }
+        }, 400);
+      }
+    });
+</script>
+{% endblock extra_js %}

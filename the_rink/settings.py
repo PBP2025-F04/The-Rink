@@ -31,10 +31,7 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "angga-tri41-therink.pbp.cs.ui.ac.id"]
-# CSRF_TRUSTED_ORIGINS = [
-#     "angga-tri41-therink.pbp.cs.ui.ac.id/"
-# ]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "angga-tri41-therink.pbp.cs.ui.ac.id", "testserver"]
 
 
 # Application definition
@@ -47,16 +44,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
+    'django_filters',
+    # CORS support for Flutter/web client
     'authentication',
     'rental_gear',
     'booking_arena',
     'events',
     'forum',
+    'corsheaders',
+    'auth_mob',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CORS middleware must be placed as high as possible, before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,6 +82,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'rental_gear.context_processors.cart_count',
+                'authentication.context_processors.is_admin',
+                'authentication.context_processors.is_admin_logged_in',
             ],
         },
     },
@@ -136,13 +144,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-uk'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
 USE_TZ = True
+
+USE_L10N = False
+
+TIME_FORMAT = 'H:i'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -150,15 +162,46 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static"
+    BASE_DIR / "static",
+    BASE_DIR / "statics",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Media files
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / "media"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CSRF Session cookie
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CORS configuration (development)
+CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_CREDENTIALS = True
+
+# For production, use specific origins
+CORS_ALLOWED_ORIGINS = ["http://localhost:8000", 
+                        "http://127.0.0.1:8000", 
+                        "http://10.0.2.2:8000",
+                        "https://angga-tri41-therink.pbp.cs.ui.ac.id",]
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", 
+                        "http://127.0.0.1:8000", 
+                        "http://10.0.2.2:8000",
+                        "https://angga-tri41-therink.pbp.cs.ui.ac.id",]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^http://localhost:\d+$", 
+                               r"^http://127\.0\.0\.1:\d+$",]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DATE_INPUT_FORMATS': ['%Y-%m-%d'],
+}

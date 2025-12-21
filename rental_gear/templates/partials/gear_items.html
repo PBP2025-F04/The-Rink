@@ -19,7 +19,7 @@
            class="flex items-center justify-center h-10 bg-sky-600 hover:bg-sky-700 text-white px-4 rounded-lg text-sm transition duration-300 shadow-sm">
           Details
         </a>
-        <form class="ajax-add-to-cart h-10" method="post" action="{% url 'rental_gear:add_to_cart' gear.id %}">
+        <form class="ajax-add-to-cart h-10" method="post" action="{% url 'rental_gear:add_to_cart_ajax' gear.id %}">
           {% csrf_token %}
           <input type="hidden" name="quantity" value="1">
           <input type="hidden" name="days" value="1">

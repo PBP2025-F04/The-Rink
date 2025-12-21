@@ -7,7 +7,6 @@
 
 {% block content %}
 <style>
-  /* Custom styles inspired by your CSS */
   body {
     background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%);
     background-attachment: fixed;
@@ -23,69 +22,117 @@
     box-shadow: 0 16px 32px rgba(0, 102, 153, 0.15);
   }
   .arena-item-card img {
-      height: 200px; /* Consistent image height */
+      height: 200px;
       object-fit: cover;
+  }
+  .btn-delete-arena {
+      height: 24px;
+      width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1;
+  }
+  .gradient-btn { 
+      background: linear-gradient(90deg, #00b4d8, #0077b6); 
+      color: white; 
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px; /* full */
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
+  }
+  .gradient-btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 16px rgba(0, 119, 182, 0.3); 
   }
 </style>
 
-<div class="container mx-auto px-4 py-12">
-  <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
+<section class="text-center py-16" style="background: linear-gradient(180deg, #e0f7ff 0%, #f0f9ff 100%);">
+        <h1 class="text-4xl font-bold text-sky-900 mb-8 text-center">Our Arenas</h1>
 
-  {% if user.is_superuser %}
-    <button type="button" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition duration-200"
-            data-bs-toggle="modal" data-bs-target="#addArenaModal">
-      + Add Arena
-    </button>
-    {% endif %}
-
-  {# Container buat list arena biar gampang di-update JS #}
-  <div id="arena-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for arena in arenas %}
-      {# Card Arena #}
-      <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-{{ arena.id }}"> {# Tambah ID unik #}
-        {# --- TOMBOL DELETE (HANYA SUPERUSER) --- #}
         {% if user.is_superuser %}
-        <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
-                data-arena-id="{{ arena.id }}"
+        <div class="mb-6">
+            <button type="button" class="gradient-btn"
+            data-bs-toggle="modal" data-bs-target="#addArenaModal">
+                + Add New Arena
+            </button>
+        </div>
+        {% endif %}
+</section>
+
+<section class="py-20" style="background-color: #f8fcfd;">
+        
+<div class="container mx-auto px-4 py-12">
+    <div id="arena-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        {% for arena in arenas %}
+        <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-{{ arena.id }}">
+        
+            {% if user.is_superuser %}
+            <button type="button" class="absolute top-3 right-3 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
                 data-arena-name="{{ arena.name }}"
+                data-delete-url="{% url 'booking_arena:delete_arena_ajax' arena.id %}"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteArenaModal">
-          X
-        </button>
-        {% endif %}
-        {# --- AKHIR TOMBOL DELETE --- #}
+            X
+            </button>
+            {% endif %}
 
-        <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block text-decoration-none color-inherit">
-          {# ... (Konten Card: Gambar, Nama, Lokasi, dll) ... #}
-           {% if arena.img_url %}
+            <a href="{% url 'booking_arena:arena_detail' arena.id %}" class="block">
+            {% if arena.img_url %}
              <img class="w-full h-[200px] object-cover" src="{{ arena.img_url }}" alt="{{ arena.name }}">
-           {% else %}
+            {% else %}
              <div class="w-full h-[200px] bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
-           {% endif %}
-           <div class="px-6 py-4">
-             <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
-             <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
-             {# ... (Info lain) ... #}
-           </div>
-        </a>
+            {% endif %}
+                <div class="px-6 py-4">
+                    <div class="font-bold text-xl mb-1 text-sky-800">{{ arena.name }}</div>
+                    <p class="text-gray-600 text-sm mb-2">{{ arena.location }}</p>
+                </div>
+            </a>
       </div>
-    {% empty %}
-      <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available.</p>
-    {% endfor %}
-  </div>
+        {% empty %}
+        <p class="text-gray-600 md:col-span-2 lg:col-span-3 text-center">No arenas available.</p>
+        {% endfor %}
+    </div>
 </div>
-
-{# Include template modal (buat di bawah) #}
+</section>
+  
 {% if user.is_superuser %}
-  {% include 'booking_arena/partials/add_arena_modal.html' %}
-  {% include 'booking_arena/partials/delete_arena_modal.html' %}
+  {% include 'partials/add_arena_modal.html' %}
+  {% include 'partials/delete_arena_modal.html' %}
 {% endif %}
 
 {% endblock content %}
 
 {% block extra_js %}
-{# JavaScript buat handle modal & AJAX (buat di bawah) #}
 <script>
+function showToast(message, type = 'success') { console.log(`Toast [${type}]: ${message}`); /* Ganti pake implementasi toast lu */ }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // === Handle Add Arena ===
@@ -96,15 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
     addArenaForm.addEventListener('submit', async function(event) {
       event.preventDefault();
       const formData = new FormData(addArenaForm);
-      const url = addArenaForm.getAttribute('action'); // Ambil dari action form
-      const csrftoken = addArenaForm.querySelector('[name=csrfmiddlewaretoken]').value;
+      const url = addArenaForm.getAttribute('action'); 
 
       try {
         const response = await fetch(url, {
           method: 'POST',
           body: formData,
           headers: { 'X-CSRFToken': csrftoken },
-          // Note: Jangan set Content-Type kalo pake FormData + file upload
         });
         const result = await response.json();
         const modalInstance = bootstrap.Modal.getInstance(addArenaModalElement);
@@ -113,14 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast(result.message || 'Arena added!', 'success');
           modalInstance.hide();
           addArenaForm.reset();
-          // Tambahkan kartu arena baru ke halaman (opsional, atau refresh)
-          addNewArenaCard(result.arena); // Fungsi ini perlu dibuat
+          addNewArenaCard(result.arena); // Panggil fungsi helper
         } else {
-          // Tampilkan error validasi (lebih canggih: tampilkan di bawah field)
-          let errorMsg = result.message || 'Failed to add arena.';
-          if (result.errors) {
-            errorMsg += "\nDetails: " + JSON.stringify(result.errors); // Tampilkan detail error
-          }
+          let errorMsg = result.message || 'Gagal menambah arena.';
+          if (result.errors) { console.error("Validation Errors:", result.errors); }
+          if (result.formset_errors) { console.error("Formset Errors:", result.formset_errors); }
           showToast(errorMsg, 'danger');
         }
       } catch (error) {
@@ -130,48 +172,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Fungsi helper buat nambah kartu baru (contoh sederhana)
   function addNewArenaCard(arena) {
       const grid = document.getElementById('arena-list-grid');
+      const imgSrc = arena.img_url ? arena.img_url : 'https-://via.placeholder.com/400x200';
+      
       const newCardHtml = `
           <div class="rounded-2xl overflow-hidden shadow-lg arena-item-card relative" id="arena-card-${arena.id}">
-              <button type="button" class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
-                      data-arena-id="${arena.id}" data-arena-name="${arena.name}" data-bs-toggle="modal" data-bs-target="#deleteArenaModal">X</button>
-              <a href="${arena.detail_url}" class="block text-decoration-none color-inherit">
-                  ${arena.img_url ? `<img class="w-full h-[200px] object-cover" src="${arena.img_url}" alt="${arena.name}">` : '<div class="w-full h-[200px] bg-gray-200 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>'}
+              <button type="button" class="absolute top-3 right-3 p-1 bg-red-500 text-white rounded-full text-xs hover:bg-red-700 focus:outline-none z-10 btn-delete-arena"
+                      data-arena-name="${arena.name}" 
+                      data-delete-url="${arena.delete_url}"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#deleteArenaModal">X</button>
+              <a href="${arena.detail_url}" class="block">
+                  <img class="w-full h-[200px] object-cover" src="${imgSrc}" alt="${arena.name}">
                   <div class="px-6 py-4">
                       <div class="font-bold text-xl mb-1 text-sky-800">${arena.name}</div>
                       <p class="text-gray-600 text-sm mb-2">${arena.location}</p>
                   </div>
               </a>
           </div>`;
-      grid.insertAdjacentHTML('beforeend', newCardHtml); // Tambah di akhir
+      grid.insertAdjacentHTML('beforeend', newCardHtml);
   }
 
   // === Handle Delete Arena ===
   const deleteArenaModalElement = document.getElementById('deleteArenaModal');
   const confirmDeleteButton = document.getElementById('confirm-delete-button');
-  let arenaToDeleteId = null; // Simpan ID arena yg mau dihapus
+  let urlToDelete = null; 
+  let idToDelete = null;
 
   if (deleteArenaModalElement) {
-    // 1. Pas modal delete mau muncul, simpen ID & nama arenanya
     deleteArenaModalElement.addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget; // Tombol X yg diklik
-      arenaToDeleteId = button.getAttribute('data-arena-id');
+      const button = event.relatedTarget; 
+      
+      urlToDelete = button.getAttribute('data-delete-url');
       const arenaName = button.getAttribute('data-arena-name');
-      // Update teks di modal
+      
+      const urlParts = urlToDelete.split('/');
+      idToDelete = urlParts[urlParts.length - 2]; 
+      
       document.getElementById('delete-arena-name').textContent = arenaName;
     });
 
-    // 2. Pas tombol "Confirm Delete" di modal diklik
     confirmDeleteButton?.addEventListener('click', async function() {
-      if (!arenaToDeleteId) return;
-
-      const url = `/arena/delete-ajax/${arenaToDeleteId}/`; // URL Hardcode
-      const csrftoken = getCookie('csrftoken'); // Ambil CSRF token (fungsi getCookie harus ada)
+      if (!urlToDelete || !idToDelete) return;
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(urlToDelete, {
           method: 'POST',
           headers: { 'X-CSRFToken': csrftoken },
         });
@@ -181,8 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.status === 'success') {
           showToast(result.message || 'Arena deleted!', 'success');
           modalInstance.hide();
-          // Hapus kartu arena dari halaman
-          document.getElementById(`arena-card-${arenaToDeleteId}`)?.remove();
+          document.getElementById(`arena-card-${idToDelete}`)?.remove();
         } else {
           showToast(result.message || 'Failed to delete arena.', 'danger');
         }
@@ -190,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
          showToast('Network error or server issue.', 'danger');
          console.error("Delete Arena Error:", error);
       } finally {
-          arenaToDeleteId = null; // Reset ID
+          urlToDelete = null; 
+          idToDelete = null;
       }
     });
   }

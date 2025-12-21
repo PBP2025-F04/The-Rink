@@ -38,7 +38,11 @@ class Reply(models.Model):
 
 
 class UpVote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='votes')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='votes',
+        null=True, blank=True
+    )
+    session_key = models.CharField(max_length=40, null=True, blank=True) 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='upvotes', null=True, blank=True)
     reply = models.ForeignKey(Reply, on_delete=models.CASCADE, related_name='upvotes', null=True, blank=True)
     is_upvote = models.BooleanField(default=True)
@@ -49,16 +53,28 @@ class UpVote(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'post'],
                 name='unique_vote_per_user_post',
-                condition=models.Q(reply__isnull=True)
+                condition=models.Q(reply__isnull=True, user__isnull=False)
             ),
             models.UniqueConstraint(
                 fields=['user', 'reply'],
                 name='unique_vote_per_user_reply',
-                condition=models.Q(post__isnull=True)
+                condition=models.Q(post__isnull=True, user__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['session_key', 'post'],
+                name='unique_vote_per_session_post',
+                condition=models.Q(reply__isnull=True, session_key__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['session_key', 'reply'],
+                name='unique_vote_per_session_reply',
+                condition=models.Q(post__isnull=True, session_key__isnull=False)
             ),
         ]
 
     def __str__(self):
         target = self.post if self.post else self.reply
         target_type = "Post" if self.post else "Reply"
-        return f"{self.user.username} {'👍' if self.is_upvote else '👎'} {target_type} {target}"
+        voter = self.user.username if self.user else f"Guest({self.session_key[:6]})"
+        return f"{voter} {'👍' if self.is_upvote else '👎'} {target_type} {target}"
+

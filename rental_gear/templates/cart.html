@@ -158,45 +158,18 @@
     {% include 'partials/cart_items.html' %}
   </div>
 
+  {% if cart_items %}
   <div class="cart-summary">
-    <span>Total Items: {{ total_items|default:"0" }}</span><br>
-    <span>Total Price: Rp{{ total_price|default:"0" }}</span>
+    <span>Total Price: ${{ total_price }}</span>
   </div>
 
-  <button class="checkout-ajax btn" data-href="{% url 'rental_gear:checkout_ajax' %}">
+  <a href="{% url 'rental_gear:checkout' %}" class="btn">
     Proceed to Checkout
-  </button>
+  </a>
+  {% endif %}
 
   <div id="checkout-msg"></div>
 </div>
+
+
 {% endblock content %}
-
-{% block extra_js %}
-<script>
-  document.addEventListener("DOMContentLoaded", function(){
-    const checkoutBtn = document.querySelector(".checkout-ajax");
-    const msg = document.getElementById("checkout-msg");
-
-    checkoutBtn.addEventListener("click", function(){
-      fetch(this.dataset.href, {method: "POST", headers: {"X-CSRFToken": getCookie("csrftoken")}})
-        .then(r => r.json())
-        .then(data => {
-          msg.textContent = data.message || "Checkout complete!";
-          msg.style.display = "block";
-          msg.style.color = data.success ? "#0b7a2a" : "red";
-          if(data.success) setTimeout(()=>location.reload(), 2000);
-        })
-        .catch(()=> {
-          msg.textContent = "An error occurred.";
-          msg.style.display = "block";
-          msg.style.color = "red";
-        });
-    });
-
-    function getCookie(name) {
-      const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
-      return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
-    }
-  });
-</script>
-{% endblock extra_js %}

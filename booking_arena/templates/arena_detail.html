@@ -6,182 +6,294 @@
 {% endblock meta %}
 
 {% block content %}
+{% csrf_token %}
+
 <style>
-  /* Custom styles inspired by your CSS */
-  body {
-    background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
-  }
-  .arena-card-detail {
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
-  }
-  .arena-card-detail img {
-    height: 380px; /* Sesuaikan */
-    object-fit: cover;
-  }
-  .booking-card-aside {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 6px 20px rgba(0, 102, 153, 0.15);
-  }
-  .booking-card-aside input[type="date"] {
-      border: 1px solid #90e0ef;
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.2s ease;
-  }
-  .booking-card-aside input[type="date"]:focus {
-      border-color: #00b4d8;
-      box-shadow: 0 0 6px rgba(0, 180, 216, 0.4);
-  }
-  #slot-list-container { max-height: 300px; overflow-y: auto; }
-  .slot-item { background: rgba(255, 255, 255, 0.9); border: 1px solid #caf0f8; }
-  .btn-book { background-color: #0096c7; transition: background-color 0.2s ease; }
-  .btn-book:hover { background-color: #023e8a; }
-  .btn-book:disabled { background-color: #adb5bd; cursor: not-allowed; }
-  .gradient-btn {
-      background: linear-gradient(90deg, #00b4d8, #0077b6);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .gradient-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0, 119, 182, 0.3);
-  }
+    /* === Custom styles (Light Theme - Sesuai CSS Lu) === */
+    body { background: linear-gradient(180deg, #e0f7ff 0%, #ffffff 100%); background-attachment: fixed; min-height: 100vh; color: #013a63; }
+    .arena-card-detail { background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(14px); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1); }
+    .arena-card-detail img { height: 380px; object-fit: cover; }
+    .booking-section { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); box-shadow: 0 6px 20px rgba(0, 102, 153, 0.15); }
+
+    /* Style Input Date Picker (Dari CSS Lama Lu) */
+    input[type="date"].flatpickr-input {
+        border: 1px solid #90e0ef; background: rgba(255, 255, 255, 0.8); color: #013a63;
+        transition: all 0.2s ease; text-align: center; font-weight: 500;
+        padding: 10px; border-radius: 10px; width: 100%; cursor: pointer;
+    }
+    input[type="date"].flatpickr-input:focus { border-color: #00b4d8; box-shadow: 0 0 6px rgba(0, 180, 216, 0.4); outline: none; }
+    .flatpickr-calendar { background: rgba(255, 255, 255, 0.95) !important; border-radius: 0.5rem; border: 1px solid #ade8f4; box-shadow: 0 10px 25px rgba(0, 102, 153, 0.2); color: #013a63; }
+    .flatpickr-day.today { border-color: #00b4d8; background: rgba(0, 180, 216, 0.1); }
+    .flatpickr-day:hover:not(.flatpickr-disabled):not(.selected) { background: rgba(0, 180, 216, 0.2); }
+    .flatpickr-day.selected { background: #0077b6 !important; border-color: #0077b6 !important; color: white !important;}
+    .flatpickr-day.flatpickr-disabled { color: rgba(108, 117, 125, 0.5) !important; }
+    .flatpickr-weekday { color: #6c757d !important; font-weight: 500;}
+    .flatpickr-current-month input.cur-year, .flatpickr-current-month .flatpickr-monthDropdown-months { color: #013a63 !important; font-weight: 600; }
+
+    /* Style Slot (Dari CSS Lama Lu) */
+    #slot-list-target { max-height: 60vh; overflow-y: auto; padding-right: 8px;}
+    .slot-item { 
+        background: rgba(255, 255, 255, 0.8); border: 1px solid #caf0f8; color: #03045e; 
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        padding: 0.75rem 1rem; /* 12px 16px */
+        border-radius: 0.5rem; /* 8px */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .slot-booked { background-color: rgba(230, 230, 230, 0.6); border-color: #e0e0e0; color: #6c757d; cursor: default; }
+    .slot-unavailable { background-color: rgba(245, 245, 245, 0.4); color: #adb5bd; border-color: #eee; cursor: default; }
+
+    /* === CSS TOMBOL BARU (Sesuai Gambar Lu) === */
+    .btn-slot-action {
+        padding: 8px 16px; /* Sedikit lebih besar */
+        border-radius: 0.75rem; /* 12px */
+        font-size: 0.8rem; 
+        font-weight: 600; 
+        color: white; /* Default text white */
+        transition: all 0.2s ease;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+    }
+    .btn-slot-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0, 123, 255, 0.3);
+    }
+    
+    .btn-action-book { 
+        background: linear-gradient(90deg, #00AFFF, #007BFF); /* Blue Gradient */
+    }
+    .btn-action-book:hover { 
+        background: linear-gradient(90deg, #00BFFF, #008BFF);
+    }
+    
+    .btn-action-cancel { 
+        background: linear-gradient(90deg, #FF5A5F, #DC3545); /* Red Gradient */
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+    }
+    .btn-action-cancel:hover { 
+        background: linear-gradient(90deg, #FF6A6F, #E04555);
+        box-shadow: 0 6px 14px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-action-disabled { 
+        background-color: #e9ecef; /* Abu */
+        color: #6c757d;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .btn-action-disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    /* Tombol gradient utama (dipake di modal) */
+    .gradient-btn { 
+        background: linear-gradient(90deg, #00b4d8, #0077b6); 
+        color: white; 
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
+    }
+    .gradient-btn:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 16px rgba(0, 119, 182, 0.3); 
+    }
+    /* === AKHIR CSS TOMBOL BARU === */
+
+
+    /* === CSS MODAL BARU (Glassmorphism, Light Theme) === */
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        /* Overlay semi-gelap, tapi dengan blur */
+        background-color: rgba(15, 23, 42, 0.5); 
+        backdrop-filter: blur(5px); /* Efek blur di background */
+        display: flex; justify-content: center; align-items: center;
+        z-index: 9999; opacity: 0; visibility: hidden;
+        transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+    }
+    .modal.is-active { opacity: 1; visibility: visible; }
+    .modal-content {
+        /* Ini dia "Crystal Glass" */
+        background-color: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 1);
+
+        color: #013a63; /* Teks modal jadi BIRU TUA (sesuai tema) */
+        padding: 2.5rem; /* 40px */
+        border-radius: 1rem; /* 16px */
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 480px; /* Dibuat lebih kecil */
+        transform: translateY(-30px);
+        transition: transform 0.4s ease-in-out;
+    }
+    .modal.is-active .modal-content { transform: translateY(0); }
+    /* === AKHIR CSS MODAL BARU === */
+
+    /* CSS untuk HTMX Indicator */
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator { display: block; }
+    .htmx-request.htmx-indicator { display: block; }
 </style>
 
-{# Main Container #}
-<div class="flex justify-center mt-16 px-4 mb-16">
-  {# Arena Card #}
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 rounded-3xl p-6 max-w-6xl w-full arena-card-detail">
+{# Wadah Utama - Layout 2 kolom (info kiri, booking kanan) #}
+<div class="container mx-auto px-4 py-8 lg:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-    {# Kolom Kiri: Info Arena #}
-    <div class="lg:col-span-2 arena-info">
-      {% if arena.img_url %}
-        <img src="{{ arena.img_url }}" alt="{{ arena.name }}" class="w-full rounded-2xl mb-4">
-      {% else %}
-        <div class="w-full h-96 bg-gray-200 rounded-2xl mb-4 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>
-      {% endif %}
-      <h2 class="text-3xl font-bold text-sky-900 mt-4">{{ arena.name }}</h2>
-      <p class="text-gray-600">{{ arena.location }}</p>
-      <p class="text-gray-600 mb-2">Capacity: {{ arena.capacity }}</p>
-      <p class="text-gray-700 mt-4">{{ arena.description }}</p>
+    {# === KOLOM KIRI: INFO ARENA (Gak berubah) === #}
+    <div class="space-y-8">
+      <div class="p-6 rounded-xl arena-card-detail">
+          {% if arena.img_url %}<img src="{{ arena.img_url }}" alt="{{ arena.name }}" class="w-full rounded-2xl mb-4">{% else %}<div class="w-full h-48 bg-gray-200 rounded-2xl mb-4 flex items-center justify-center"><span class="text-gray-500">No Image</span></div>{% endif %}
+          <h1 class="text-3xl font-bold text-sky-900 mb-2">{{ arena.name }}</h1>
+          <p class="text-gray-600 text-sm">{{ arena.location }}</p>
+          <p class="text-gray-600 text-sm mb-2">Capacity: {{ arena.capacity }}</p>
+          <p class="text-gray-700 mt-4 text-sm">{{ arena.description }}</p>
+          {% if arena.opening_hours_text %}<details class="text-xs text-gray-500 mt-4 pt-2 border-t border-blue-100"><summary class="cursor-pointer text-sky-700 hover:text-sky-900 font-medium">Opening Hours</summary><pre class="whitespace-pre-wrap mt-1 text-gray-600">{{ arena.opening_hours_text }}</pre></details>{% endif %}
+          {% if arena.google_maps_url %}<a href="{{ arena.google_maps_url }}" target="_blank" class="text-xs text-blue-600 hover:underline mt-2 inline-block">View on Google Maps ↗</a>{% endif %}
+      </div>
     </div>
 
-    {# Kolom Kanan: Booking Card #}
-    <aside class="p-6 rounded-2xl text-center booking-card-aside">
-      <h3 class="text-xl font-semibold text-sky-800 mb-4">Check Availability</h3>
+    {# === KOLOM KANAN: BOOKING SECTION (Gak berubah) === #}
+    <div class="space-y-6">
+       <div class="p-6 rounded-xl booking-section">
+            <h2 class="text-xl font-semibold text-sky-800 mb-4 text-center">Book Your Slot</h2>
 
-      <label for="booking_date" class="block text-left font-semibold text-sky-700 mb-1">Select Date:</label>
-      <input type="date" id="booking_date" name="date" required
-             min="{{ timezone.now|date:'Y-m-d' }}"
-             hx-get="{% url 'booking_arena:get_available_slots' arena.id %}"
-             hx-target="#slot-list-container"
-             hx-trigger="change"
-             hx-indicator="#loading-indicator"
-             class="w-full p-2.5 rounded-lg outline-none mb-4">
+            {# --- Bagian Pilih Tanggal --- #}
+            <div class="mb-6">
+                <label for="booking_date_picker" class="block text-sm font-medium text-sky-700 mb-2 text-center">Select Date:</label>
+                <input type="date" id="booking_date_picker" value="{{ today_date_str }}" name="date"
+                       min="{{ timezone.now|date:'Y-m-d' }}"
+                       hx-get="{% url 'booking_arena:get_available_slots' arena.id %}"
+                       hx-target="#slot-list-target"
+                       hx-trigger="change, load"
+                       hx-indicator="#loading-indicator"
+                       class="block w-full p-2.5 rounded-lg border border-sky-300 outline-none">
+            </div>
 
-      <div id="loading-indicator" class="htmx-indicator text-sky-600 my-4">
-          <svg class="animate-spin h-5 w-5 text-sky-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"> <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle> <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path> </svg>
-          Loading slots...
-      </div>
+            {# --- Bagian Jadwal Slot --- #}
+            <div class="border-t border-sky-200 pt-6">
+                <h3 class="text-lg font-semibold text-sky-800 mb-1">Schedule</h3>
+                <p id="slot-schedule-date" class="text-sky-600 mb-4 text-sm font-medium">Loading schedule...</p>
 
-      <div id="slot-list-container" class="mt-4 text-left pr-2">
-        <p class="text-gray-500 text-sm">Please select a date to see available slots.</p>
-      </div>
+                <div id="loading-indicator" class="htmx-indicator text-center py-4 text-sky-600">
+                    <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"> <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle> <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path> </svg>
+                    Loading...
+                </div>
 
-    </aside>
-  </div>
-</div>
-
-{# === MODAL KONFIRMASI BOOKING === #}
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content rounded-xl"> {# Custom rounding #}
-      <div class="modal-header border-b-0">
-        <h5 class="modal-title text-sky-800 font-semibold" id="bookingModalLabel">Confirm Booking</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="confirm-booking-form" method="POST" hx-post="" hx-trigger="submit" hx-swap="none">
-        {% csrf_token %}
-        <div class="modal-body text-gray-700">
-          <p>You are about to book:</p>
-          <p><strong>Arena:</strong> <span id="modal-arena-name">{{ arena.name }}</span></p>
-          <p><strong>Date:</strong> <span id="modal-booking-date"></span></p>
-          <p><strong>Time:</strong> <span id="modal-slot-time"></span></p>
-          <input type="hidden" name="date" id="modal-hidden-date">
-        </div>
-        <div class="modal-footer border-t-0">
-          <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition duration-200" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 gradient-btn">Confirm & Book</button>
-        </div>
-      </form>
+                {# Target untuk hasil HTMX #}
+                <div id="slot-list-target" class="space-y-2">
+                    {# Konten slot akan dimuat di sini oleh partial #}
+                </div>
+            </div>
+       </div>
     </div>
-  </div>
 </div>
+
+{# === WADAH MODAL BARU (Kosong) === #}
+<div id="modal-container"></div>
 {% endblock content %}
 
 {% block extra_js %}
-{# === JavaScript untuk modal tetap sama persis === #}
+{# === Load Library Kalender (Flatpickr) & HTMX === #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+{# Bootstrap JS (bundle) UDAH GAK DIPERLUKAN LAGI #}
+
 <script>
+// === FUNGSI MODAL BARU (Diambil dari main.html) ===
+function showModal() {
+    const modal = document.getElementById('sport-selection-modal');
+    if (modal) {
+        setTimeout(() => {
+            modal.classList.add('is-active');
+        }, 10);
+    } else {
+        console.error("Error: Elemen #sport-selection-modal gak ketemu! Cek file select_sport_modal.html");
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('sport-selection-modal');
+    
+    if (modal) {
+        modal.classList.remove('is-active'); 
+        setTimeout(() => {
+            const container = document.getElementById('modal-container');
+            if (container) container.innerHTML = ''; 
+        }, 400);
+    }
+}
+// === AKHIR FUNGSI MODAL BARU ===
+
 document.addEventListener('DOMContentLoaded', () => {
-  const bookingModal = document.getElementById('bookingModal');
-  const confirmBookingForm = document.getElementById('confirm-booking-form');
+    const dateInputPicker = document.getElementById('booking_date_picker');
+    const scheduleDateDisplay = document.getElementById('slot-schedule-date');
 
-  bookingModal?.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    if (!button) return; // Exit if no button triggered the modal
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'modal-container') {
+            console.log("HTMX selesai loading modal. Membuka sekarang...");
+            showModal(); 
+        }
+    });
+    
+    // === Inisialisasi Kalender JS (Flatpickr - Sama kayak lama) ===
+    if (dateInputPicker) {
+        const calendar = flatpickr(dateInputPicker, {
+            minDate: "today", defaultDate: "today", dateFormat: "Y-m-d",
+            altInput: true, altFormat: "F j, Y",
+            onChange: function(selectedDates, dateStr, instance) {
+                if (scheduleDateDisplay) scheduleDateDisplay.textContent = `Schedule for ${instance.formatDate(selectedDates[0], 'l, d F Y')}`;
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                if (scheduleDateDisplay) scheduleDateDisplay.textContent = `Schedule for ${instance.formatDate(selectedDates[0] || new Date(), 'l, d F Y')}`;
+            }
+        });
+        htmx.trigger(dateInputPicker, 'load');
+    }
 
-    const slotId = button.getAttribute('data-slot-id');
-    const selectedDate = button.getAttribute('data-date');
-    const slotTime = button.getAttribute('data-slot-time');
+    // === Listener HTMX Events (Handle response create & cancel) ===
+    document.body.addEventListener('htmx:afterOnLoad', function(event) {
+        const xhr = event.detail.xhr;
+        const triggerInfo = xhr.getResponseHeader("HX-Trigger");
+        
+        console.log("Server Header:", triggerInfo);
 
-    document.getElementById('modal-booking-date').textContent = selectedDate;
-    document.getElementById('modal-slot-time').textContent = slotTime;
-    document.getElementById('modal-hidden-date').value = selectedDate;
+        if (triggerInfo) {
+            try {
+                const triggers = JSON.parse(triggerInfo);
+                
+                if (triggers.showToast) {
+                    showToast(triggers.showToast.message, triggers.showToast.type);
+                }
 
-    // Use hardcoded URL structure
-    const bookingUrl = `/arena/book/${slotId}/`;
-    confirmBookingForm.setAttribute('hx-post', bookingUrl);
-  });
+                if (triggers.closeModal) {
+                    console.log("Sinyal closeModal diterima! Menutup modal...");
+                    closeModal();
+                }
 
-  document.body.addEventListener('htmx:afterRequest', function(event) {
-      if (event.detail.elt === confirmBookingForm) {
-          try {
-              const response = JSON.parse(event.detail.xhr.responseText);
-              const modalInstance = bootstrap.Modal.getInstance(bookingModal);
-              if (modalInstance) {
-                modalInstance.hide(); // Hide modal first
-              }
+            } catch (e) { 
+                console.error("Error parsing HX-Trigger:", e); 
+            }
+        }
+    });
 
-              if (response.status === 'success') {
-                  showToast(response.message || 'Booking successful!', 'success');
-                  // Trigger HTMX refresh AFTER modal is hidden (optional delay)
-                  setTimeout(() => htmx.trigger('#booking_date', 'change'), 100);
-              } else {
-                  showToast(response.message || 'Booking failed.', 'danger');
-              }
-          } catch (e) {
-              showToast('An error occurred processing the booking.', 'danger');
-              console.error("Error parsing response:", e);
-              const modalInstance = bootstrap.Modal.getInstance(bookingModal);
-               if (modalInstance) {
-                 modalInstance.hide();
-               }
-          }
-      }
-  });
+    document.body.addEventListener('htmx:responseError', function(event) {
+        let errorMsg = 'Network error or server unavailable.';
+        try {
+            errorMsg = event.detail.xhr.responseText;
+        } catch(e) {}
+        showToast(errorMsg, 'danger');
+        closeModal();
+    });
 
-   document.body.addEventListener('htmx:responseError', function(event) {
-       if (event.detail.elt === confirmBookingForm) {
-           showToast('Network error or server unavailable.', 'danger');
-           const modalInstance = bootstrap.Modal.getInstance(bookingModal);
-           if (modalInstance) {
-               modalInstance.hide();
-           }
-       }
-   });
+    // Asumsi lu punya fungsi showToast global
+    function showToast(message, type='success'){ 
+        console.log(`Toast [${type}]: ${message}`); 
+        // Ganti pake implementasi toast lu (misal: Toastify)
+    }
+
 });
 </script>
 {% endblock extra_js %}

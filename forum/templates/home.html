@@ -2,141 +2,194 @@
 {% load static %}
 
 {% block content %}
-<section class="max-w-2xl mx-auto px-4 py-10 mt-20">
-<!-- ❄️ & 👥 Centered Header -->
-<div class="flex flex-col items-center justify-center mb-8 space-y-2">
+<div class="relative min-h-screen bg-gradient-to-b from-blue-200 via-cyan-100 to-blue-200">
+  <!-- Spacer -->
+  <div class="h-16"></div>
 
-  <!-- Baris Ikon Atas -->
-  <div class="flex items-center justify-center gap-4">
+  <!-- Header -->
+  <div class="flex flex-col items-center justify-center mb-8 space-y-2">
+    <div class="flex items-center justify-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8">
+        <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
+      </div>
+    </div>
 
-    <!-- Ikon Users -->
-    <div class="flex items-center justify-center w-8 h-8">
-      <i class="fa-solid fa-users text-blue-500 text-4xl"></i>
+    <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
+        Forum Community
+      </span>
+    </h1>
+
+    <p class="text-lg font-medium text-center mt-3 mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">
+      Where ideas grow, and connections come alive
+    </p>
+
+    <!-- Refresh Button -->
+    <div class="flex justify-center mb-6">
+      <button onclick="refreshPost()" 
+        class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 
+               hover:from-blue-600 hover:to-cyan-500 text-white font-semibold 
+               rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+        <i class="fa-solid fa-rotate-right"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="flex justify-center mt-2">
+      <div class="relative w-full max-w-md transform transition-all duration-300 hover:scale-[1.03] focus-within:scale-[1.03]">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search posts by title..."
+          class="w-full pl-10 pr-4 py-2 rounded-xl border border-cyan-200 shadow-sm 
+                 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
+                 outline-none text-gray-700 placeholder-gray-400 transition-all duration-300 bg-white/70 backdrop-blur-sm"
+          oninput="filterBySearch()"
+        />
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500"></i>
+      </div>
     </div>
   </div>
 
-  <!-- Judul Tengah -->
-  <h1 class="text-4xl md:text-5xl font-extrabold text-cyan-700 text-center mt-10 drop-shadow-sm tracking-tight">
-   <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-500">  Forum  Community</span>
-  </h1>
+  <!-- === Layout  === -->
+<div class="max-w-7xl mx-auto px-8 py-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10">
+
+  <!-- Leaderboard  -->
+  <aside class="lg:w-1/2 w-full rounded-3xl shadow-md border border-cyan-100 
+             bg-white/80 backdrop-blur-sm h-fit
+             lg:sticky lg:top-28
+             overflow-y-auto max-h-[80vh] scrollbar-thin scrollbar-thumb-cyan-300 scrollbar-track-transparent">
+
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
+    <div class="relative p-6">
+      <h3 class="text-xl font-extrabold text-cyan-700 mb-5 flex flex-col items-center justify-center gap-2 text-center">
+        <i class="fa-regular fa-snowflake text-cyan-400 animate-spin-slow text-2xl"></i>
+      <span class="bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">
+        Top Posts This Week
+      </span>
+    </h3>
+      <div id="top-posts-container" class="pr-2">
+  <div id="top-posts-wrapper" class="space-y-6 transition-all duration-300"></div>
 </div>
+    </div>
+  </aside>
 
+    <!-- Forum utama  -->
+  <section class="lg:w-1/2 w-full px-6 py-10 bg-gradient-to-b from-blue-100 via-cyan-50 to-white 
+                 rounded-3xl shadow-md relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-100 via-cyan-50 to-white opacity-70 -z-10"></div>
 
-  <!-- Post Box -->
-  <div id="postBox" class="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 mb-4 relative z-10">
-    <!-- Input utama -->
-    <div  class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
-      <input
-      id="postInput"
-      type="text"
-      placeholder="What do you think?"
-      class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
-      readonly
-      onclick="toggleExpandBox()" 
-      />
+      <!-- Post Box -->
+      <div id="postBox" class="frosted rounded-2xl shadow-sm border border-purple-100 p-5 mb-6 relative z-10">
+        <div class="group border border-cyan-300 rounded-xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-cyan-400 hover:scale-[1.03] hover:shadow-md hover:shadow-cyan-100">
+          <input
+            id="postInput"
+            type="text"
+            placeholder="What do you think?"
+            class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer transition-all duration-200"
+            readonly
+            onclick="toggleExpandBox()" 
+          />
 
-      <!-- Expanded Box -->
-      <div id="expandedBox"
-        class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
+          <!-- Expanded Box -->
+          <div id="expandedBox"
+            class="overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out">
+            <input id="postTitle" type="text" placeholder="Enter post title..."
+              class="w-full px-4 py-3 border-b border-cyan-200 outline-none" />
+            <div id="thumbnailPreview" class="hidden p-4 flex justify-center">
+              <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
+            </div>
+            <textarea id="postContent" rows="4" placeholder="Insert a Content in here..."
+              class="w-full px-4 py-3 border-b border-cyan-200 outline-none"></textarea>
 
-        <!-- Title input -->
-        <input
-        id="postTitle"
-        type="text"
-        placeholder="Enter post title..."
-        class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem]"
-        />
-
-        <!-- Thumbnail preview -->
-        <div id="thumbnailPreview" class="hidden p-4 flex justify-center">
-          <img id="thumbnailImg" src="" class="max-h-40 rounded-lg shadow" alt="thumbnail preview">
-        </div>
-
-        <!-- Content -->
-        <textarea
-          id="postContent"
-          rows="4"
-          placeholder="Insert a Content in here..."
-          class="w-full px-4 py-3 border-b border-cyan-200 outline-none cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 transition-all duration-200 hover:text-[1.05rem] focus:text-[1.05rem]"
-        ></textarea>
-
-        <!-- Toolbar -->
-        <div id="toolbar"
-  class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
-
-          
-          <!-- Kiri: input URL gambar -->
-          <div class="flex items-center gap-2 w-full mr-3">
-            <i class="fa-regular fa-image text-cyan-500"></i>
-            <input
-              id="thumbnailUrl"
-              type="url"
-              placeholder="Paste image URL here (optional)"
-              class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
-              oninput="previewImageUrl()"
-            />
+            <div id="toolbar" class="hidden flex justify-between items-center px-4 pb-3 text-gray-500 transition-all duration-500 ease-out hover:scale-[1.02]">
+              <div class="flex items-center gap-2 w-full mr-3">
+                <i class="fa-regular fa-image text-cyan-500"></i>
+                <input id="thumbnailUrl" type="url" placeholder="Paste image URL here (optional)"
+                  class="w-full px-3 py-1 border border-cyan-200 rounded-md outline-none text-sm focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
+                  oninput="previewImageUrl()" />
+              </div>
+              <button id="postBtn"
+                class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+                Post
+              </button>
+            </div>
           </div>
-
-          <!-- Tombol Post -->
-          <button
-            id="postBtn"
-            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-            Post
-          </button>
         </div>
       </div>
-    </div>
-  </div> 
 
-  <!-- Filter Buttons -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8 mt-6">
-  <button id="filter-all"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-    All Post
-  </button>
+      <!-- Filter Buttons -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex justify-center gap-3 py-3 mb-8">
+        <button id="filter-all"
+          class="bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+          All Post
+        </button>
+        <button id="filter-my"
+          class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
+          My Post
+        </button>
+      </div>
 
-  <button id="filter-my"
-    class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">
-    My Post
-  </button>
+      <!-- Wrapper  -->
+      <div id="post-container" class="flex flex-col gap-6">
 
-   <!-- 🔄 Refresh Button -->
-  <button onclick="refreshPost()" 
-  class="bg-white border border-black text-black font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 hover:bg-gray-100">
-  🔄 Refresh
-</button>
+      <!-- Daftar Post -->
+      <div id="grid" class="flex flex-col gap-6"></div>
 
+      <!-- State Info -->
+      <div id="loading" class="hidden bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <p class="text-gray-600 mt-3">Loading Post...</p>
+      </div>
+
+      <div id="error" class="hidden"></div>
+
+      <div id="empty" class="hidden bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
+        <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination-container"
+          class="flex justify-center items-center gap-3 mt-8 bg-white/80 backdrop-blur-sm 
+                  border border-cyan-100 rounded-xl px-6 py-3 shadow-md text-gray-800 text-base
+                  transition-all duration-300">
+      <!-- Tombol Prev -->
+      <button id="prevBtn"
+        class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+              text-white font-semibold shadow-md hover:scale-[1.03] transition-all duration-300 
+              disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+        <i class="fa-solid fa-angle-left"></i> Prev
+      </button>
+
+      <!-- Info Pagination -->
+      <p id="pagination-info"
+        class="text-gray-700 font-medium bg-cyan-50 px-4 py-2 rounded-lg border border-cyan-100 shadow-sm">
+        1–10 of 50
+      </p>
+
+      <!-- Tombol Next -->
+      <button id="nextBtn"
+        class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 
+              text-white font-semibold shadow-md hover:scale-[1.03] transition-all duration-300 
+              disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+        Next <i class="fa-solid fa-angle-right"></i>
+      </button>
+       </div>
+      </div>
+    </section>
+  </div>
 </div>
 
-  <!-- Post List -->
-  <div id="grid" class="flex flex-col gap-6"></div>
-</section>
-
-<!-- Loading State -->
-<div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-  <svg class="animate-spin h-8 w-8 text-purple-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
-  viewBox="0 0 24 24">
-  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-  <path class="opacity-75" fill="currentColor"
-  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-</svg>
-<p class="text-gray-600 mt-3">Loading replies...</p>
-</div>
-
-<div id="error" class="hidden"></div>
-<div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-  <h3 class="text-lg font-medium text-gray-900 mb-2">No Post found</h3>
-  <p class="text-gray-500 mb-6">Be the first to share activity with the community.</p>
-</div>
-
-<!-- MODAL DETAIL POST -->
+<!-- Modal Detail Post -->
 <div id="postDetailModal"
   class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
   <div class="bg-white rounded-xl shadow-xl w-11/12 max-w-2xl p-6 relative">
     <button onclick="closePostModal()"
-      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">
-      ×
-    </button>
+      class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
     <div id="postDetailContent" class="mt-2">
       <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading...</h2>
       <p class="text-gray-600 text-sm mb-4">Please wait...</p>
@@ -160,12 +213,21 @@
 
   let activeFilter = 'all';
   let allPostData = [];
+  let currentPage = 1;
+  const perPage = 10;
+  
+  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+    loadingSpinner.classList.toggle('hidden', !showLoading);
+    errorMessage.classList.toggle('hidden', !showError);
+    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+    postGridContainer.classList.toggle('hidden', !showGrid);
+
+    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
+  }
 
   function updateFilterButtonsAppearance() {
   const activeClass = "bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105"
   const inactiveClass = "bg-white text-gray-700 border border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-gray-200";
-
-
   if (activeFilter === 'all') {
     showAllPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeClass}`;
     showMyPostButton.className = `px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${inactiveClass}`;
@@ -176,141 +238,168 @@
     }
   }
 
-  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
-    loadingSpinner.classList.toggle('hidden', !showLoading);
-    errorMessage.classList.toggle('hidden', !showError);
-    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
-    postGridContainer.classList.toggle('hidden', !showGrid);
-
-    if (showGrid) postGridContainer.className = 'flex flex-col gap-4';
-  }
-
   async function fetchPostFromServer() {
-  try {
     displayPageSection({ showLoading: true });
 
-    const response = await fetch(POST_API_ENDPOINT, {
-      headers: { 'Accept': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch post data from server');
-    }
-
-    const postData = await response.json();
+    const res = await fetch(POST_API_ENDPOINT, { headers: { Accept: "application/json" }});
+    const postData = await res.json();
     allPostData = postData || [];
 
-    if (allPostData.length === 0) {
-      displayPageSection({ showEmpty: true });
-    } else {
-      displayPageSection({ showGrid: true });
-      filterPosts();
-    }
-  } catch (error) {
-    console.error('Error loading post:', error);
-    displayPageSection({ showError: true });
+    if (!allPostData.length) displayPageSection({ showEmpty: true });
+    else displayPageSection({ showGrid: true });
   }
-}
 
-
-  document.addEventListener('click', e => {
-    const modal = document.getElementById('postDetailModal');
-    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
-      closePostModal();
-    }
-  });
-function buildPost(postItem) {
-  const postElement = document.createElement('div');
-  postElement.dataset.postId = postItem.id;
-  postElement.className =
-    'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
-
-  const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric'
+  // initial load
+  document.addEventListener("DOMContentLoaded", async () => {
+    await fetchPostFromServer();
+    updateFilterButtonsAppearance();
+    filterPosts();
+    refreshTopPosts();
   });
 
-  const thumbnailHtml = postItem.thumbnail_url
-    ? `<img src="${postItem.thumbnail_url}" alt="${postItem.title}" class="w-36 h-36 object-cover rounded-lg border border-gray-200">`
+  function buildPost(postItem) {
+    const postElement = document.createElement('div');
+    postElement.dataset.postId = postItem.id;
+    postElement.className =
+      'bg-white rounded-xl border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] p-5 flex flex-col gap-4'; 
+
+    const formattedDate = new Date(postItem.created_at).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+
+    const thumbnailHtml = postItem.thumbnail_url
+    ? `<img 
+          src="${postItem.thumbnail_url}" 
+          alt="${postItem.title || 'thumbnail'}"
+          loading="lazy"
+          decoding="async"
+          onerror="this.onerror=null; this.src='{% static 'img/placeholder.png' %}';"
+          class="w-36 h-36 object-cover rounded-lg border border-gray-200"
+      >`
     : `<div class="w-36 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm border">No Image</div>`;
 
-  postElement.innerHTML = `
-    <div class="flex flex-row gap-5 items-start">
-      ${thumbnailHtml}
-      <div class="flex flex-col justify-between flex-1">
-        <div>
-          <div class="flex justify-between text-sm text-gray-500 mb-1">
-            <time>${formattedDate}</time>
-            ${
-              CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
-                ? `<div class="flex gap-3">
-                    <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
-                    <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
-                   </div>`
-                : ''
-            }
+
+    postElement.innerHTML = `
+      <div class="flex flex-row gap-5 items-start">
+        ${thumbnailHtml}
+        <div class="flex flex-col justify-between flex-1">
+          <div>
+            <div class="flex justify-between text-sm text-gray-500 mb-1">
+              <time>${formattedDate}</time>
+              ${
+                CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(postItem.user_id)
+                  ? `<div class="flex gap-3">
+                      <button onclick='showEditModal(${JSON.stringify(postItem)})' class="text-gray-600 hover:text-blue-600">✏️ Edit</button>
+                      <button onclick='openDeleteModal("${postItem.id}")' class="text-red-500 hover:text-red-600">🗑️ Delete</button>
+                    </div>`
+                  : ''
+              }
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
+            <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">${postItem.title || 'Untitled'}</h3>
-          <p class="text-gray-700 text-sm leading-relaxed mb-2">${postItem.content || ''}</p>
-        </div>
 
-        <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
-          <button onclick="toggleReplyBox(${postItem.id})" 
-            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-            💬 Reply
-          </button>
-          <div class="flex items-center gap-3">
-            <button onclick="votePost(${postItem.id}, true)" 
-              class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
-                <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+          <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+            <button onclick="toggleReplyBox(${postItem.id})" 
+              class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+              <i class="fa-regular fa-comment-dots"></i> Reply
             </button>
+            <div class="flex items-center gap-3">
+              <button onclick="votePost(${postItem.id}, true, event)" 
+                class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                  <i class="fa-regular fa-thumbs-up"></i>  <span id="up-${postItem.id}" class="font-medium">${postItem.upvotes_count || 0}</span>
+              </button>
 
-            <button onclick="votePost(${postItem.id}, false)" 
-              class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
-                <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
-            </button>
+              <button onclick="votePost(${postItem.id}, false, event)" 
+                class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                  <i class="fa-regular fa-thumbs-down"></i>  <span id="down-${postItem.id}" class="font-medium">${postItem.downvotes_count || 0}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Reply Section -->
-    <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3">
-      <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
-      <div class="flex gap-2">
-        <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
-          class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
-        <button onclick="sendReply(${postItem.id})" 
-          class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">Send</button>
+      <!-- Reply Section -->
+      <div id="replyBox-${postItem.id}" class="hidden mt-3 border-t pt-3">
+        <div id="replies-${postItem.id}" class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+        <div class="flex gap-2">
+          <input id="replyInput-${postItem.id}" type="text" placeholder="Create your reply" 
+            class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+          <button onclick="sendReply(${postItem.id})" 
+            class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 transform hover:scale-105">Send</button>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  return postElement;
-}
+    return postElement;
+  }
 
+  function toggleReplyBox(postId) {
+    const box = document.getElementById(`replyBox-${postId}`);
+    if (box.classList.contains('hidden')) {
+      box.classList.remove('hidden');
+      loadReplies(postId);
+    } 
+    else {
+      box.classList.add('hidden');
+    }
+  }
 
-function toggleReplyBox(postId) {
-  const box = document.getElementById(`replyBox-${postId}`);
-  if (box.classList.contains('hidden')) {
-    box.classList.remove('hidden');
-    loadReplies(postId);
+  function toggleExpandBox() {
+  if (!CURRENT_USER_ID) {
+    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+    return;
+  }
+
+  const box = document.getElementById("expandedBox");
+  const toolbar = document.getElementById("toolbar");
+  const input = document.getElementById("postInput");
+  const isOpen = box.classList.contains("open");
+
+  if (isOpen) {
+    box.style.maxHeight = "0px";
+    box.style.opacity = "0";
+    toolbar.style.opacity = "0";
+    toolbar.style.transform = "translateY(8px)";
+    input.classList.remove("ring-2", "ring-cyan-300");
+
+    setTimeout(() => {
+      toolbar.classList.add("hidden");
+      box.classList.remove("open");
+    }, 400);
   } else {
-    box.classList.add('hidden');
+    box.classList.remove("max-h-0", "opacity-0", "hidden");
+    box.style.display = "block";
+    void box.offsetHeight; 
+    box.style.maxHeight = box.scrollHeight + 150 + "px";
+    box.style.opacity = "1";
+    box.classList.add("open");
+    input.classList.add("ring-2", "ring-cyan-300");
+
+    toolbar.classList.remove("hidden");
+    toolbar.style.display = "flex";
+    setTimeout(() => {
+      toolbar.style.opacity = "1";
+      toolbar.style.transform = "translateY(0)";
+    }, 250);
+
+    setTimeout(() => {
+      box.style.maxHeight = box.scrollHeight + 150 + "px";
+    }, 350);
   }
 }
 
-// 🕒 Helper: hitung waktu relatif yang akurat
-function getTimeAgo(createdAtStr) {
-  const createdAt = new Date(createdAtStr);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
-  if (diff < 60) return `${diff}s yang lalu`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m yang lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`;
-  return `${Math.floor(diff / 86400)} hari yang lalu`;
-}
+  function getTimeAgo(createdAtStr) {
+    const createdAt = new Date(createdAtStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+    if (diff < 60) return `${diff}s yang lalu`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m yang lalu`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`;
+    return `${Math.floor(diff / 86400)} hari yang lalu`;
+  }
 
-async function loadReplies(postId) {
+  async function loadReplies(postId) {
   const container = document.getElementById(`replies-${postId}`);
   container.innerHTML = `<p class="text-gray-400 text-sm">Loading...</p>`;
 
@@ -364,6 +453,13 @@ async function loadReplies(postId) {
           <i class="fa-regular fa-thumbs-down"></i> 
           <span id="down-reply-${r.id}" class="font-medium">${r.downvotes_count || 0}</span>
         </button>
+
+        <button onclick="replyToUser('${r.author}', ${r.post_id}, window.event)"
+        class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md 
+               hover:bg-blue-100 transition">
+          <i class="fa-solid fa-reply text-xs"></i>
+          <span class="text-sm font-medium">Reply</span>
+        </button>
       </div>
 
       <!-- Tombol Edit/Delete hanya untuk author -->
@@ -391,16 +487,13 @@ async function loadReplies(postId) {
   }
 }
 
-
-function confirmDeleteReply(replyId, postId) {
-  // Buat elemen overlay
+  function confirmDeleteReply(replyId, postId) {
   const overlay = document.createElement("div");
   overlay.className = `
     fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center
     animate-fadeIn
   `;
 
-  // Buat dialog box
   overlay.innerHTML = `
     <div class="bg-white rounded-xl shadow-xl w-80 p-5 text-center animate-scaleIn">
       <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirm Delete</h3>
@@ -420,10 +513,8 @@ function confirmDeleteReply(replyId, postId) {
     </div>
   `;
 
-  // Tambah ke body
   document.body.appendChild(overlay);
 
-  // Event listeners
   document.getElementById("cancelDelete").onclick = () => overlay.remove();
   document.getElementById("confirmDelete").onclick = async () => {
     overlay.remove();
@@ -431,18 +522,8 @@ function confirmDeleteReply(replyId, postId) {
   };
 }
 
-
-
-// 🕓 Auto-update label waktu tiap 1 menit
-setInterval(() => {
-  document.querySelectorAll("[data-created-at]").forEach(el => {
-    el.textContent = getTimeAgo(el.dataset.createdAt);
-  });
-}, 60000);
-
-
-
-async function sendReply(postId) {
+  async function sendReply(postId) {
+  if (event) event.stopPropagation();
   if (!CURRENT_USER_ID) {
     window.location.href = "{% url 'authentication:login' %}?next=/forum/";
     return;
@@ -467,11 +548,8 @@ async function sendReply(postId) {
 
     const container = document.getElementById(`replies-${postId}`);
     const initials = newReply.author ? newReply.author[0].toUpperCase() : "U";
-
-    // ✅ Cek apakah user login adalah author reply
     const isAuthor = Number(CURRENT_USER_ID) === Number(newReply.author_id);
 
-    // 💬 Tambahkan reply baru lengkap dengan tombol edit/delete (kalau author)
     container.insertAdjacentHTML("beforeend", `
 <div id="reply-${newReply.id}" 
      class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
@@ -506,6 +584,13 @@ async function sendReply(postId) {
           <i class="fa-regular fa-thumbs-down"></i> 
           <span id="down-reply-${newReply.id}" class="font-medium">0</span>
         </button>
+
+        <button onclick="replyToUser('${newReply.author}', ${postId}, event)"
+        class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md 
+               hover:bg-blue-100 transition">
+  <i class="fa-solid fa-reply text-xs"></i>
+  <span class="text-sm font-medium">Reply</span>
+</button>
       </div>
 
       ${
@@ -529,10 +614,8 @@ async function sendReply(postId) {
 </div>
     `);
 
-    // Auto scroll ke bawah
     container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
 
-    // Update waktu dinamis di label baru
     const timeLabel = container.querySelector(`[data-created-at="${newReply.created_at}"]`);
     if (timeLabel) timeLabel.textContent = "baru saja";
 
@@ -541,10 +624,36 @@ async function sendReply(postId) {
   }
 }
 
+async function replyToUser(username, postId, event) {
+  if (event) event.stopPropagation();
 
+  const mention = `@${username} `;
 
+  const replyBox = document.getElementById(`replyBox-${postId}`);
+  if (replyBox && replyBox.classList.contains("hidden")) {
+    toggleReplyBox(postId);
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
 
-async function votePost(id, isUpvote) {
+  let input = document.getElementById(`replyInput-${postId}`);
+  if (!input) {
+    const expandContainer = document.getElementById(`expand-top-post-${postId}`);
+    input = expandContainer ? expandContainer.querySelector(`#replyInput-${postId}`) : null;
+  }
+
+  if (!input) return;
+
+  if (!input.value.includes(mention)) input.value = mention + input.value;
+  input.focus();
+  input.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    input.selectionStart = input.selectionEnd = input.value.length;
+  }, 10);
+}
+
+  async function votePost(id, isUpvote, event) {
+  if (event) event.stopPropagation();
+
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
@@ -552,18 +661,136 @@ async function votePost(id, isUpvote) {
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       },
+      credentials: "include",
       body: JSON.stringify({ type: "post", id, is_upvote: isUpvote }),
     });
 
+    if (!res.ok) throw new Error("Failed to vote");
+
     const data = await res.json();
+
     document.getElementById(`up-${id}`).textContent = data.upvotes;
     document.getElementById(`down-${id}`).textContent = data.downvotes;
-  } catch {
+
+    const index = allPostData.findIndex(p => p.id === id);
+    if (index !== -1) {
+      allPostData[index].upvotes_count = data.upvotes;
+      allPostData[index].downvotes_count = data.downvotes;
+    }
+
+  } catch (error) {
+    console.error(error);
     showToast("Error", "Gagal vote", "error");
   }
 }
 
-async function voteReply(id, isUpvote) {
+ async function openTopPost(postId, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const container = document.getElementById(`expand-top-post-${postId}`);
+  const isOpen = container.classList.contains("open");
+
+  document.querySelectorAll('[id^="expand-top-post-"]').forEach(div => {
+    if (div !== container) {
+      div.classList.remove("open");
+      div.classList.add("hidden");
+      div.innerHTML = "";
+      div.style.maxHeight = "";
+      div.style.opacity = "";
+      div.style.transition = "none";
+    }
+  });
+
+  if (isOpen) {
+    container.classList.remove("open");
+    container.classList.add("hidden");
+    container.innerHTML = "";
+    container.style.maxHeight = "";
+    container.style.opacity = "";
+    container.style.transition = "none";
+    return;
+  }
+
+  container.classList.remove("hidden");
+  container.classList.add("open");
+  container.style.transition = "none";
+  container.innerHTML = `<p class="text-gray-400 text-sm px-2">Loading post...</p>`;
+
+  try {
+    const res = await fetch(`/forum/get-post/${postId}/`);
+    if (!res.ok) throw new Error("Failed to fetch post details");
+    const post = await res.json();
+
+    container.innerHTML = `
+  <div class="border-t pt-3 mt-3 text-sm text-gray-700">
+    <div id="replies-${post.id}" 
+         class="max-h-48 overflow-y-auto flex flex-col gap-2 mb-3 border-b pb-3"></div>
+
+    <div class="flex gap-2 mt-3" onclick="event.stopPropagation()">
+      <input id="replyInput-${post.id}" type="text" placeholder="Create your reply" 
+        class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400">
+      <button onclick="sendReply(${post.id})" 
+        class="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 
+               text-white font-semibold px-4 py-2 rounded-md shadow-md transition-all duration-300 
+               transform hover:scale-105">
+        Send
+      </button>
+    </div>
+  </div>
+`;
+
+    const resReplies = await fetch(`/forum/get-replies/${postId}/`);
+    const replies = await resReplies.json();
+    const replyBox = document.getElementById(`replies-${post.id}`);
+
+    replyBox.innerHTML = replies.length
+      ? replies.map(r => {
+          const initials = r.author ? r.author[0].toUpperCase() : "U";
+          return `
+            <div id="reply-${r.id}"
+              class="relative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4 border border-cyan-200 
+                     shadow-sm hover:shadow-md transition-all duration-300 ease-in-out mb-2">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 flex items-center justify-center rounded-full text-white font-bold 
+                            bg-gradient-to-r from-cyan-400 to-blue-400 shadow-sm">${initials}</div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold text-cyan-700">${r.author}</span>
+                    <span class="text-xs text-gray-400">${getTimeAgo(r.created_at)}</span>
+                  </div>
+                  <p class="text-gray-800 text-sm mb-3 leading-relaxed">${r.content}</p>
+                  <div class="flex items-center gap-3">
+                    <button onclick="voteReply(${r.id}, true)" 
+                      class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                      <i class="fa-regular fa-thumbs-up"></i>
+                      <span id="up-reply-${r.id}" class="font-medium">${r.upvotes_count || 0}</span>
+                    </button>
+                    <button onclick="voteReply(${r.id}, false)" 
+                      class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                      <i class="fa-regular fa-thumbs-down"></i>
+                      <span id="down-reply-${r.id}" class="font-medium">${r.downvotes_count || 0}</span>
+                    </button>
+                    <button onclick="replyToUser('${r.author}', ${post.id}, event)"
+                      class="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition">
+                      <i class="fa-solid fa-reply text-xs"></i> <span class="text-sm font-medium">Reply</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join("")
+      : `<p class="text-gray-500 text-sm">No response yet.</p>`;
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="text-red-500 text-sm px-2">Failed to load post.</p>`;
+  }
+}
+
+  async function voteReply(id, isUpvote) {
   try {
     const res = await fetch("{% url 'forum:toggle_vote' %}", {
       method: "POST",
@@ -571,6 +798,7 @@ async function voteReply(id, isUpvote) {
         "Content-Type": "application/json",
         "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       },
+      credentials: "include",
       body: JSON.stringify({ type: "reply", id, is_upvote: isUpvote }),
     });
 
@@ -582,7 +810,7 @@ async function voteReply(id, isUpvote) {
   }
 }
 
-async function deleteReply(replyId, postId) {
+  async function deleteReply(replyId, postId) {
   try {
     const res = await fetch(`/forum/delete-reply/${replyId}/`, {
       method: "DELETE",
@@ -592,7 +820,6 @@ async function deleteReply(replyId, postId) {
     });
 
     if (res.ok) {
-      // Hapus reply dari tampilan langsung dengan animasi
       const replyEl = document.getElementById(`reply-${replyId}`);
       if (replyEl) {
         replyEl.classList.add("opacity-0", "scale-95", "transition", "duration-300");
@@ -608,9 +835,7 @@ async function deleteReply(replyId, postId) {
   }
 }
 
-
-
-function showEditReply(replyId, currentContent) {
+  function showEditReply(replyId, currentContent) {
   const contentEl = document.getElementById(`reply-content-${replyId}`);
   const original = contentEl.innerText;
   contentEl.innerHTML = `
@@ -622,12 +847,12 @@ function showEditReply(replyId, currentContent) {
   `;
 }
 
-function cancelEdit(replyId, originalText) {
+  function cancelEdit(replyId, originalText) {
   const contentEl = document.getElementById(`reply-content-${replyId}`);
   contentEl.textContent = originalText;
 }
 
-async function saveEditReply(replyId) {
+  async function saveEditReply(replyId) {
   const textarea = document.getElementById(`edit-text-${replyId}`);
   const newContent = textarea.value.trim();
   if (!newContent) return;
@@ -651,125 +876,170 @@ async function saveEditReply(replyId) {
   }
 }
 
-
-
-
-function filterPosts() {
+  function filterPosts() {
   updateFilterButtonsAppearance();
-  const filtered = activeFilter === 'all'
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  const paginationContainer = document.getElementById("pagination-container");
+
+  let filtered = activeFilter === 'all'
     ? allPostData
     : allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
 
-  if (!filtered.length) displayPageSection({ showEmpty: true });
-  else { renderPosts(filtered); displayPageSection({ showGrid: true }); }
-}
-
-  async function openPostModal(id) {
-  const modal = document.getElementById('postDetailModal');
-  const content = document.getElementById('postDetailContent');
-
-  modal.classList.remove('hidden');
-  content.innerHTML = `<p>Loading...</p>`;
-
-  try {
-    const postRes = await fetch(`/forum/json/${id}/`);
-    const post = await postRes.json();
-
-    const replyRes = await fetch(`/forum/get-replies/${id}/`);
-    const replies = await replyRes.json();
-
-    let repliesHtml = replies.map(r => `
-      <div class="bg-gray-50 p-3 rounded-lg mb-2 border">
-        <p class="text-sm text-gray-700"><b>${r.author}</b> ${r.content}</p>
-        <p class="text-xs text-gray-500">${r.created_at}</p>
-      </div>
-    `).join('');
-
-    content.innerHTML = `
-      <h2 class="text-xl font-bold mb-2">${post.title}</h2>
-      <p class="text-gray-700 mb-4">${post.content}</p>
-
-      <div id="repliesSection" class="max-h-64 overflow-y-auto mb-4 p-2 bg-gray-100 rounded-lg">
-        ${repliesHtml || '<p class="text-sm text-gray-500 text-center">Belum ada balasan.</p>'}
-      </div>
-
-      <div class="flex items-center gap-2">
-        <input id="replyInput" type="text" placeholder="Tulis balasan kamu..." class="w-full border rounded-lg px-3 py-2">
-        <button onclick="sendReply(${id})" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Kirim</button>
-      </div>
-    `;
-  } catch (err) {
-    console.error(err);
-    content.innerHTML = `<p class="text-red-500">Gagal memuat data.</p>`;
-  }
-}
-
-function closePostModal() {
-  document.getElementById('postDetailModal').classList.add('hidden');
-}
-  // Render post
-  function renderPosts(postItems) {
-    postGridContainer.innerHTML = '';
-    postItems.forEach(p => postGridContainer.prepend(buildPost(p)));
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
   }
 
-  // Refresh post
-  function refreshPost() {
-    showToast("Refreshing", "Showing latest posts...");
-    fetchPostFromServer();
-  }
+  currentPage = 1;
 
-  function toggleExpandBox() {
-  if (!CURRENT_USER_ID) {
-    window.location.href = "{% url 'authentication:login' %}?next=/forum/";
+  if (!filtered.length) {
+    displayPageSection({ showEmpty: true });
+    paginationContainer.classList.add("hidden");
+    document.getElementById("pagination-info").textContent = "0–0 of 0";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
     return;
   }
 
-  const box = document.getElementById("expandedBox");
-  const toolbar = document.getElementById("toolbar");
-  const input = document.getElementById("postInput");
-  const isOpen = box.classList.contains("open");
-
-  if (isOpen) {
-    // 🔻 Tutup smooth
-    box.style.maxHeight = "0px";
-    box.style.opacity = "0";
-    toolbar.style.opacity = "0";
-    toolbar.style.transform = "translateY(8px)";
-    input.classList.remove("ring-2", "ring-cyan-300");
-
-    // sembunyikan toolbar setelah transisi
-    setTimeout(() => {
-      toolbar.classList.add("hidden");
-      box.classList.remove("open");
-    }, 400);
-  } else {
-    // 🔹 Buka expand box
-    box.classList.remove("max-h-0", "opacity-0", "hidden");
-    box.style.display = "block";
-    void box.offsetHeight; // force reflow
-    box.style.maxHeight = box.scrollHeight + 150 + "px";
-    box.style.opacity = "1";
-    box.classList.add("open");
-    input.classList.add("ring-2", "ring-cyan-300");
-
-    // 🔹 Tampilkan toolbar setelah delay
-    toolbar.classList.remove("hidden");
-    toolbar.style.display = "flex";
-    setTimeout(() => {
-      toolbar.style.opacity = "1";
-      toolbar.style.transform = "translateY(0)";
-    }, 250);
-
-    // Pastikan parent tinggi cukup besar untuk toolbar
-    setTimeout(() => {
-      box.style.maxHeight = box.scrollHeight + 150 + "px";
-    }, 350);
-  }
+  displayPageSection({ showGrid: true });
+  paginationContainer.classList.remove("hidden");
+  renderPaginatedPostsFiltered(filtered);
 }
 
 
 
+  function closePostModal() {
+  document.getElementById('postDetailModal').classList.add('hidden');
+}
+  
+  function renderPosts(postItems) {
+  postGridContainer.innerHTML = '';
+  postItems.forEach(p => postGridContainer.appendChild(buildPost(p)));
+}
+
+
+  async function refreshPost() {
+    showToast("Refreshing", "Loading latest posts...");
+    currentPage = 1;
+
+    activeFilter = localStorage.getItem("activeFilter") || "all";
+    await fetchPostFromServer();
+    updateFilterButtonsAppearance();
+    filterPosts();
+    refreshTopPosts();
+  }
+
+async function refreshTopPosts() {
+  const container = document.querySelector("#top-posts-wrapper");
+  container.innerHTML = `
+    <p class="text-gray-400 text-sm text-center py-3 animate-pulse">
+      Refreshing leaderboard...
+    </p>`;
+
+  try {
+    const res = await fetch("{% url 'forum:get_top_posts_json' %}");
+    if (!res.ok) throw new Error("Failed to fetch leaderboard");
+    const data = await res.json();
+
+    container.innerHTML = "";
+
+    data.forEach((p, i) => {
+      const card = document.createElement("div");
+      card.className =
+        "bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 p-5";
+
+      const formattedDate = new Date(p.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+
+      card.innerHTML = `
+        <div class="flex flex-row gap-5 items-start">
+          ${
+            p.thumbnail_url
+              ? `<img src="${p.thumbnail_url}" class="w-24 h-24 object-cover rounded-lg border border-cyan-100">`
+              : `<div class="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-lg text-gray-400 text-sm border">No Img</div>`
+          }
+
+          <div class="flex-1">
+            <div class="flex justify-between text-sm text-gray-500 mb-1">
+              <time>${formattedDate}</time>
+            </div>
+
+            <h4 class="text-lg font-semibold text-gray-900 mb-1">${i + 1}. ${
+        p.title || "Untitled"
+      }</h4>
+            <p class="text-gray-700 text-sm leading-relaxed mb-2 line-clamp-2">
+              ${p.content || ""}
+            </p>
+
+            <div class="flex justify-between items-center border-t pt-2 text-sm text-gray-500">
+              <button onclick="openTopPost(${p.id}, event); event.stopPropagation();"
+                class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+                <i class="fa-regular fa-comment-dots"></i> Reply
+              </button>
+
+              <div class="flex items-center gap-3">
+                <button onclick="votePost(${p.id}, true); event.stopPropagation();" 
+                  class="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition">
+                  <i class="fa-regular fa-thumbs-up"></i> 
+                  <span id="up-${p.id}" class="font-medium">${p.total_up || 0}</span>
+                </button>
+
+                <button onclick="votePost(${p.id}, false); event.stopPropagation();" 
+                  class="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition">
+                  <i class="fa-regular fa-thumbs-down"></i> 
+                  <span id="down-${p.id}" class="font-medium">${p.total_down || 0}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="expand-top-post-${p.id}" class="hidden mt-3 overflow-hidden transition-all duration-500 ease-in-out"></div>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="text-red-500 text-sm text-center py-3">Failed to load leaderboard.</p>`;
+  }
+}
+
+  function filterBySearch() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const filtered = allPostData.filter(p =>
+    p.title.toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    displayPageSection({ showEmpty: true });
+  } else {
+    renderPosts(filtered);
+    displayPageSection({ showGrid: true });
+  }
+
+  const info = document.getElementById("pagination-info");
+  if (query) {
+    info.textContent = `1–${filtered.length} of ${filtered.length}`;
+  } else {
+    renderPaginatedPosts();
+  }
+}
+
+  function jumpToSearchedPost() {
+  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+  if (!query) return;
+
+  const targetPost = allPostData.find(p => p.title.toLowerCase().includes(query));
+
+  if (targetPost) {
+    scrollToPost(targetPost.id);
+  } else {
+    
+  }
+}
 
   function adjustExpandedHeight() {
   const box = document.getElementById("expandedBox");
@@ -778,8 +1048,104 @@ function closePostModal() {
   }
 }
 
-// Handle POST submission
-document.getElementById("postBtn").addEventListener("click", async () => {
+  function renderPaginatedPosts() {
+  const total = allPostData.length;
+  const totalPages = Math.ceil(total / perPage);
+
+  if (total === 0) {
+    document.getElementById("pagination-info").textContent = "0–0 of 0";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+    return;
+  }
+
+  const start = (currentPage - 1) * perPage;
+  const end = Math.min(start + perPage, total);
+  const visiblePosts = allPostData.slice(start, end);
+
+  postGridContainer.innerHTML = '';
+  visiblePosts.forEach(p => postGridContainer.appendChild(buildPost(p)));
+
+  document.getElementById("pagination-info").textContent = `${start + 1}–${end} of ${total}`;
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
+}
+
+function renderPaginatedPostsFiltered(filteredData) {
+  const total = filteredData.length;
+  const totalPages = Math.ceil(total / perPage);
+
+  const start = (currentPage - 1) * perPage;
+  const end = Math.min(start + perPage, total);
+  const visiblePosts = filteredData.slice(start, end);
+
+  postGridContainer.innerHTML = '';
+  visiblePosts.forEach(p => postGridContainer.appendChild(buildPost(p)));
+
+  document.getElementById("pagination-info").textContent = `${start + 1}–${end} of ${total}`;
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
+}
+
+
+  function nextPage() {
+  let filtered;
+  if (activeFilter === "my") {
+    filtered = allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+  } else {
+    filtered = allPostData;
+  }
+
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+  }
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderPaginatedPostsFiltered(filtered);
+
+    setTimeout(() => {
+      const postsOnPage = document.querySelectorAll("#grid > div").length;
+      if (postsOnPage < perPage) {
+        const lastPost = document.querySelector("#grid > div:last-child");
+        if (lastPost) {
+          lastPost.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+      }
+    }, 100);
+  }
+}
+
+function prevPage() {
+  let filtered;
+
+  if (activeFilter === "my") {
+    filtered = allPostData.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+  } else {
+    filtered = allPostData;
+  }
+
+  const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  if (searchQuery) {
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchQuery));
+  }
+
+  if (currentPage > 1) {
+    currentPage--;
+    renderPaginatedPostsFiltered(filtered);
+  }
+}
+
+  setInterval(() => {
+    document.querySelectorAll("[data-created-at]").forEach(el => {
+      el.textContent = getTimeAgo(el.dataset.createdAt);
+    });
+  }, 60000);
+
+  // Handle POST submission
+  document.getElementById("postBtn").addEventListener("click", async () => {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
   const imageUrl = document.getElementById("thumbnailUrl").value.trim();
@@ -791,7 +1157,7 @@ document.getElementById("postBtn").addEventListener("click", async () => {
   }
 
   postBtn.disabled = true;
-  postBtn.textContent = "Posting...";
+  postBtn.textContent = "Posted...";
 
   try {
     const response = await fetch("{% url 'forum:add_post' %}", {
@@ -813,11 +1179,10 @@ document.getElementById("postBtn").addEventListener("click", async () => {
 
       toggleExpandBox();
       allPostData.unshift(data);
-      if (activeFilter === "my") {
-        filterPosts(); 
-      } else {
-        renderPosts(allPostData);
-      }
+
+      filterPosts();
+
+      refreshTopPosts();
     } else {
       showToast("Failed to Post", "Please try again later.", "error");
     }
@@ -829,11 +1194,26 @@ document.getElementById("postBtn").addEventListener("click", async () => {
     postBtn.textContent = "Post";
   }
 });
+  
+  document.getElementById("searchInput").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); 
+    jumpToSearchedPost();
+  }
+});
 
-
+  document.getElementById("searchInput").blur();
+  
+  document.addEventListener('click', e => {
+    const modal = document.getElementById('postDetailModal');
+    if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+      closePostModal();
+    }
+  });
 
   // Refresh post list when post added, edited, or deleted
   document.addEventListener('postAdded', fetchPostFromServer);
+  document.addEventListener("DOMContentLoaded", refreshTopPosts);
 
   // ==== FILTER BUTTON EVENT LISTENERS ====
   showAllPostButton.addEventListener('click', e => {
@@ -854,9 +1234,16 @@ document.getElementById("postBtn").addEventListener("click", async () => {
   if (savedFilter) {
     activeFilter = savedFilter;
   }
-  // Load Post
-  updateFilterButtonsAppearance();
-  fetchPostFromServer();
+
+  document.getElementById("nextBtn").addEventListener("click", nextPage);
+  document.getElementById("prevBtn").addEventListener("click", prevPage);
+
+  // Load Post sesuai filter terakhir
+  fetchPostFromServer().then(() => {
+    updateFilterButtonsAppearance();
+    filterPosts();
+  });
 </script>
+
 {% include 'modal.html' %}
 {% endblock content%}

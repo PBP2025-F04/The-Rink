@@ -14,6 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'the_rink.settings')
 django.setup()
 
 from rental_gear.models import Gear
+from django.contrib.auth.models import User
 
 
 def clean_price(price_str):
@@ -98,20 +99,36 @@ def load_hockey_equipment():
                     if len(name) > 100:
                         name = name[:97] + '...'
 
+                    # Get or create a default seller user
+                    seller, created = User.objects.get_or_create(
+                        username='default_seller',
+                        defaults={
+                            'email': 'seller@example.com',
+                            'first_name': 'Default',
+                            'last_name': 'Seller'
+                        }
+                    )
+
+                    image_url = row.get('Image_URL') or row.get('Image')
                     item = Gear.objects.create(
                         name=name,
                         category='hockey',
                         price_per_day=daily_rate,
-                        size='Standard',
                         stock=3,
+                        seller=seller,
+                        image_url=image_url or None,
                     )
 
-                    image_url = row.get('Image_URL') or row.get('Image')
+                    # Download and save image if URL is available
                     if image_url:
-                        _save_image_from_url(item, image_url)
+                        if _save_image_from_url(item, image_url):
+                            print(f"Created: {item.name} (with image)")
+                        else:
+                            print(f"Created: {item.name} (image download failed)")
+                    else:
+                        print(f"Created: {item.name}")
 
                     item.save()
-                    print(f"Created: {item.name}")
                 except Exception as e:
                     print(f"Error creating skate {row.get('Name', 'Unknown')}: {str(e)}")
 
@@ -130,20 +147,36 @@ def load_hockey_equipment():
                     if len(name) > 100:
                         name = name[:97] + '...'
 
+                    # Get or create a default seller user
+                    seller, created = User.objects.get_or_create(
+                        username='default_seller',
+                        defaults={
+                            'email': 'seller@example.com',
+                            'first_name': 'Default',
+                            'last_name': 'Seller'
+                        }
+                    )
+
+                    image_url = row.get('Image_URL') or row.get('Image')
                     item = Gear.objects.create(
                         name=name,
                         category='hockey',
                         price_per_day=daily_rate,
-                        size='Standard',
                         stock=3,
+                        seller=seller,
+                        image_url=image_url or None,
                     )
 
-                    image_url = row.get('Image_URL') or row.get('Image')
+                    # Download and save image if URL is available
                     if image_url:
-                        _save_image_from_url(item, image_url)
+                        if _save_image_from_url(item, image_url):
+                            print(f"Created: {item.name} (with image)")
+                        else:
+                            print(f"Created: {item.name} (image download failed)")
+                    else:
+                        print(f"Created: {item.name}")
 
                     item.save()
-                    print(f"Created: {item.name}")
                 except Exception as e:
                     print(f"Error creating stick {row.get('Name', 'Unknown')}: {str(e)}")
 
@@ -180,20 +213,36 @@ def load_ice_skating_equipment():
                             elif any(word in item_lower for word in ['protect', 'pad', 'guard']):
                                 category = 'protective_gear'
 
+                            # Get or create a default seller user
+                            seller, created = User.objects.get_or_create(
+                                username='default_seller',
+                                defaults={
+                                    'email': 'seller@example.com',
+                                    'first_name': 'Default',
+                                    'last_name': 'Seller'
+                                }
+                            )
+
+                            image_url = row.get('Image_URL') or row.get('Image')
                             item = Gear.objects.create(
                                 name=name,
                                 category=category,
                                 price_per_day=daily_rate,
-                                size='One Size',
                                 stock=3,
+                                seller=seller,
+                                image_url=image_url or None,
                             )
 
-                            image_url = row.get('Image_URL') or row.get('Image')
+                            # Download and save image if URL is available
                             if image_url:
-                                _save_image_from_url(item, image_url)
+                                if _save_image_from_url(item, image_url):
+                                    print(f"Created {category}: {item.name} (with image)")
+                                else:
+                                    print(f"Created {category}: {item.name} (image download failed)")
+                            else:
+                                print(f"Created {category}: {item.name}")
 
                             item.save()
-                            print(f"Created {category}: {item.name}")
                         except Exception as e:
                             print(f"Error creating figure skating item {row.get('Name', 'Unknown')}: {str(e)}")
 
@@ -218,20 +267,36 @@ def load_curling_equipment():
                     if len(name) > 100:
                         name = name[:97] + '...'
 
+                    # Get or create a default seller user
+                    seller, created = User.objects.get_or_create(
+                        username='default_seller',
+                        defaults={
+                            'email': 'seller@example.com',
+                            'first_name': 'Default',
+                            'last_name': 'Seller'
+                        }
+                    )
+
+                    image_url = row.get('Image_URL') or row.get('Image')
                     item = Gear.objects.create(
                         name=name,
                         category='curling',
                         price_per_day=daily_rate,
-                        size='Standard',
                         stock=3,
+                        seller=seller,
+                        image_url=image_url or None,
                     )
 
-                    image_url = row.get('Image_URL') or row.get('Image')
+                    # Download and save image if URL is available
                     if image_url:
-                        _save_image_from_url(item, image_url)
+                        if _save_image_from_url(item, image_url):
+                            print(f"Created: {item.name} (with image)")
+                        else:
+                            print(f"Created: {item.name} (image download failed)")
+                    else:
+                        print(f"Created: {item.name}")
 
                     item.save()
-                    print(f"Created: {item.name}")
                 except Exception as e:
                     print(f"Error creating curling footwear {row.get('Name', 'Unknown')}: {str(e)}")
 
@@ -252,20 +317,36 @@ def load_curling_equipment():
                     if len(name) > 100:
                         name = name[:97] + '...'
 
+                    # Get or create a default seller user
+                    seller, created = User.objects.get_or_create(
+                        username='default_seller',
+                        defaults={
+                            'email': 'seller@example.com',
+                            'first_name': 'Default',
+                            'last_name': 'Seller'
+                        }
+                    )
+
+                    image_url = row.get('Image_URL') or row.get('Image')
                     item = Gear.objects.create(
                         name=name,
                         category='curling',
                         price_per_day=daily_rate,
-                        size='Standard',
                         stock=3,
+                        seller=seller,
+                        image_url=image_url or None,
                     )
 
-                    image_url = row.get('Image_URL') or row.get('Image')
+                    # Download and save image if URL is available
                     if image_url:
-                        _save_image_from_url(item, image_url)
+                        if _save_image_from_url(item, image_url):
+                            print(f"Created: {item.name} (with image)")
+                        else:
+                            print(f"Created: {item.name} (image download failed)")
+                    else:
+                        print(f"Created: {item.name}")
 
                     item.save()
-                    print(f"Created: {item.name}")
                 except Exception as e:
                     print(f"Error creating curling broom {row.get('Name', 'Unknown')}: {str(e)}")
 
