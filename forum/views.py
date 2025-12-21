@@ -13,9 +13,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.timezone import localtime
 import requests
 import json
-
 from functools import wraps
-from django.http import JsonResponse
 
 def login_required_json(view_func):
     @wraps(view_func)
@@ -731,9 +729,6 @@ def get_post_detail_flutter(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found"}, status=404)
-    
-# authentication/views.py atau app mana aja
-from django.http import JsonResponse
 
 def auth_person_forum(request):
     return JsonResponse({
