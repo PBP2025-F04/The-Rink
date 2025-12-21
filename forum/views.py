@@ -535,6 +535,8 @@ def delete_post_flutter(request, id):
 @csrf_exempt
 @login_required_json
 def add_reply_flutter(request, post_id):
+    print("COOKIES:", request.COOKIES)
+    print("USER:", request.user, request.user.is_authenticated)
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
@@ -659,27 +661,55 @@ def toggle_vote_flutter(request):
 def get_top_posts_json_flutter(request):
     posts = (
         Post.objects
+        .select_related('author')
+        .prefetch_related(
+            'upvotes',
+            Prefetch(
+                'replies',
+                queryset=Reply.objects
+                    .select_related('author')
+                    .prefetch_related('upvotes')
+                    .order_by('created_at', 'id')
+            )
+        )
         .annotate(
-            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)),
-            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
+            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True), distinct=True),
+            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False), distinct=True),
         )
         .annotate(score=F('total_up') - F('total_down'))
-        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:3]
+        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:5]
     )
 
-    data = [
-        {
-            "id": p.id,
-            "title": p.title,
-            "content": strip_tags(p.content)[:120],
-            "total_up": p.total_up,
-            "total_down": p.total_down,
-            "replies": p.replies.count(),
-            "thumbnail_url": p.thumbnail_url,
-            "created_at": localtime(p.created_at).isoformat() if p.created_at else None,
-        }
-        for p in posts
-    ]
+    data = []
+    for post in posts:
+        replies_data = [
+            {
+                "id": r.id,
+                "author": r.author.username if r.author else None,
+                "content": r.content,
+                "created_at": localtime(r.created_at).isoformat(),
+                "updated_at": localtime(r.updated_at).isoformat(),
+                "upvotes_count": r.total_upvotes(),
+                "downvotes_count": r.total_downvotes(),
+            }
+            for r in post.replies.all()
+        ]
+
+        data.append({
+            "id": post.id,
+            "author": post.author.username if post.author else None,
+            "title": post.title,
+            "content": post.content,
+            "created_at": localtime(post.created_at).isoformat(),
+            "updated_at": localtime(post.updated_at).isoformat(),
+            "thumbnail_url": post.thumbnail_url or "",
+            "user_id": post.author.id if post.author else None,
+            "upvotes_count": int(getattr(post, "total_up", 0)),
+            "downvotes_count": int(getattr(post, "total_down", 0)),
+
+            "replies": replies_data,
+            "replies_count": len(replies_data),
+        })
 
     return JsonResponse(data, safe=False)
 
@@ -701,6 +731,16 @@ def get_post_detail_flutter(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found"}, status=404)
+    
+# authentication/views.py atau app mana aja
+from django.http import JsonResponse
+
+def auth_person_forum(request):
+    return JsonResponse({
+        "is_authenticated": request.user.is_authenticated,
+        "user_id": request.user.id if request.user.is_authenticated else None,
+        "username": request.user.username if request.user.is_authenticated else None,
+    })
 
 # Admin Flutter endpoints
 @csrf_exempt
