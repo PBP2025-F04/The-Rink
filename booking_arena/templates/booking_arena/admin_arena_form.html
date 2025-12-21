@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block title %}Admin - {{ action }} Arena{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block title %}Admin - {{ action }} Arena
+{% endblock %} {% block content %}
 <div class="container mt-5">
   <h1>{{ action }} Arena</h1>
 
@@ -39,9 +40,11 @@
     </div>
 
     <div class="mb-3">
-      <label for="{{ form.img.id_for_label }}" class="form-label">Image</label>
-      {{ form.img }} {% if form.img.errors %}
-      <div class="text-danger">{{ form.img.errors }}</div>
+      <label for="{{ form.img_url.id_for_label }}" class="form-label"
+        >Image URL</label
+      >
+      {{ form.img_url }} {% if form.img_url.errors %}
+      <div class="text-danger">{{ form.img_url.errors }}</div>
       {% endif %}
     </div>
 

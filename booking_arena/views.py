@@ -3,6 +3,7 @@ import json  # <--- INI PENTING
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponse, HttpRequest, Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.db.models import Q
@@ -369,3 +370,37 @@ def admin_arena_list(request):
 def admin_booking_list(request):
     bookings = Booking.objects.all().select_related('arena', 'user').order_by('-date', '-start_hour')
     return render(request, 'booking_arena/admin_booking_list.html', {'bookings': bookings})
+
+@user_passes_test(is_superuser)
+def admin_arena_create(request):
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Arena created successfully!')
+            return redirect('booking_arena:admin_arena_list')
+    else:
+        form = ArenaForm()
+    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Create'})
+
+@user_passes_test(is_superuser)
+def admin_arena_update(request, arena_id):
+    arena = get_object_or_404(Arena, id=arena_id)
+    if request.method == 'POST':
+        form = ArenaForm(request.POST, request.FILES, instance=arena)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Arena updated successfully!')
+            return redirect('booking_arena:admin_arena_list')
+    else:
+        form = ArenaForm(instance=arena)
+    return render(request, 'booking_arena/admin_arena_form.html', {'form': form, 'action': 'Update'})
+
+@user_passes_test(is_superuser)
+def admin_arena_delete(request, arena_id):
+    arena = get_object_or_404(Arena, id=arena_id)
+    if request.method == 'POST':
+        arena.delete()
+        messages.success(request, 'Arena deleted successfully!')
+        return redirect('booking_arena:admin_arena_list')
+    return render(request, 'booking_arena/admin_arena_confirm_delete.html', {'arena': arena})

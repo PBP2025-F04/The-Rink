@@ -29,5 +29,8 @@ urlpatterns = [
 
     # Admin URLs
     path('admin/arenas/', views.admin_arena_list, name='admin_arena_list'),
+    path('admin/arenas/add/', views.admin_arena_create, name='admin_arena_create'),
+    path('admin/arenas/<uuid:arena_id>/edit/', views.admin_arena_update, name='admin_arena_update'),
+    path('admin/arenas/<uuid:arena_id>/delete/', views.admin_arena_delete, name='admin_arena_delete'),
     path('admin/bookings/', views.admin_booking_list, name='admin_booking_list'),
 ]
