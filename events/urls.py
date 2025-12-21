@@ -18,4 +18,5 @@ urlpatterns = [
     
     path('api/list/', views.get_events_json, name='get_events_json'),
     path('api/join/<int:event_id>/', views.join_event_flutter, name='join_event_flutter'),
+    path('api/detail/<int:event_id>/', views.get_event_detail_json),
 ]
