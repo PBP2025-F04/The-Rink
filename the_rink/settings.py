@@ -68,7 +68,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'the_rink.urls'
@@ -187,12 +186,14 @@ CSRF_USE_SESSIONS = False
 
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
+
 # CORS configuration (development)
 CORS_ALLOW_CREDENTIALS = True
 
 # For production, use specific origins:
-CORS_ALLOWED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000",]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "https://angga-tri41-therink.pbp.cs.ui.ac.id", "http://10.0.2.2:8000",]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^http://localhost:\d+$", r"^http://127\.0\.0\.1:\d+$",]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
