@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}Admin - Delete Gear{% endblock %} 
+{% extends 'base.html' %} {% load humanize %} {% block title %}Admin - Delete Gear{% endblock %} 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
   <!-- Header -->
@@ -72,7 +72,7 @@
               <div>
                 <p class="text-sm text-gray-500">Price per Day</p>
                 <p class="font-medium text-blue-900">
-                  ${{ gear.price_per_day }}
+                  Rp {{ gear.price_per_day|floatformat:0|intcomma }}
                 </p>
               </div>
             </div>

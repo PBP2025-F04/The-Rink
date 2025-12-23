@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block meta %}
 <title>Cart — The Rink</title>
@@ -160,7 +161,7 @@
 
   {% if cart_items %}
   <div class="cart-summary">
-    <span>Total Price: ${{ total_price }}</span>
+    <span>Total Price: Rp {{ total_price|floatformat:0|intcomma }}</span>
   </div>
 
   <a href="{% url 'rental_gear:checkout' %}" class="btn">

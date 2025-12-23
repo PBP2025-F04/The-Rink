@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block meta %}
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% block meta %}
 <title>{{ gear.name }} — The Rink</title>
 <style>
   body {
@@ -253,7 +253,7 @@
     <aside class="info-col">
       <h1 class="product-title">{{ gear.name }}</h1>
       <div class="tag">{{ gear.get_category_display }}</div>
-      <div class="price">$ {{ gear.price_per_day }}</div>
+      <div class="price">Rp {{ gear.price_per_day|floatformat:0|intcomma }}</div>
       <p class="short-desc">
         Size: {{ gear.size }} • Stock: {{ gear.stock }} • {% if gear.seller.username == 'system_admin' %} Created by Admin
         {% else %}Created by {{ gear.seller.get_full_name|default:gear.seller.username }}
@@ -287,7 +287,7 @@
         </div>
 
         <div class="total-cost">
-          Total: $<span id="total">{{ gear.price_per_day }}</span>
+          Total: Rp <span id="total">{{ gear.price_per_day|floatformat:0 }}</span>
         </div>
         <button class="btn" type="submit">Add to cart</button>
       </form>
@@ -307,7 +307,7 @@
     function update(){
       const q = parseInt(qtyInput.value)||1;
       const d = parseInt(daysInput.value)||1;
-      totalEl.textContent = (q*d*price).toLocaleString();
+      totalEl.textContent = Math.round(q*d*price).toLocaleString('id-ID');
       document.getElementById('qty').value = q;
       document.getElementById('days').value = d;
     }
