@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block meta %}
 <title>Catalog — The Rink</title>
@@ -82,7 +83,7 @@
               <div>
                 <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
                 <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
-                <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
+                <div class="font-bold text-sky-800">Rp {{ gear.price_per_day|floatformat:0|intcomma }}</div>
               </div>
               <div class="flex gap-3 mt-4">
                 <a href="{% url 'rental_gear:gear_detail' gear.id %}"
@@ -132,7 +133,7 @@
             <div>
               <h3 class="text-lg font-semibold text-sky-900 mb-1">{{ gear.name }}</h3>
               <p class="text-sky-700 text-sm mb-1">Category: {{ gear.get_category_display }}</p>
-              <div class="font-bold text-sky-800">${{ gear.price_per_day }}</div>
+              <div class="font-bold text-sky-800">Rp {{ gear.price_per_day|floatformat:0|intcomma }}</div>
             </div>
             <div class="flex gap-3 mt-4">
               <a href="{% url 'rental_gear:gear_detail' gear.id %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sky-700 transition">Detail</a>
