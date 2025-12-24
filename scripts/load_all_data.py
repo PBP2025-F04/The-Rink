@@ -92,8 +92,10 @@ def load_hockey_equipment():
             reader = csv.DictReader(file)
             for row in reader:
                 try:
-                    price = clean_price(row.get('Price'))
-                    daily_rate = (price / Decimal('30')).quantize(Decimal('0.01'))
+                    price_usd = clean_price(row.get('Price'))
+                    # Konversi USD ke IDR (kurs 16000)
+                    price_idr = price_usd * Decimal('16000')
+                    daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                     name = f"{row.get('Brand','').strip()} {row.get('Name','').strip()}".strip()
                     if len(name) > 100:
