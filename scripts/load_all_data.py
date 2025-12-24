@@ -22,6 +22,11 @@ try:
 except NameError:
     BASE_DIR = os.getcwd()
 
+# Debug: print paths
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"Dataset path: {os.path.join(BASE_DIR, 'Dataset')}")
+print(f"Dataset exists: {os.path.exists(os.path.join(BASE_DIR, 'Dataset'))}")
+
 
 def clean_price(price_str):
     """Cleans price string and converts to Decimal safely"""
