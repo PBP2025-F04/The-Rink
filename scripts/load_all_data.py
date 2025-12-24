@@ -359,19 +359,18 @@ def load_curling_equipment():
                     print(f"Error creating curling broom {row.get('Name', 'Unknown')}: {str(e)}")
 
 
-if __name__ == '__main__':
-    # Clear existing data
-    print('Clearing existing items from database...')
-    Gear.objects.all().delete()
+# Clear existing data
+print('Clearing existing items from database...')
+Gear.objects.all().delete()
 
-    # Load all equipment by category
-    load_hockey_equipment()
-    load_ice_skating_equipment()
-    load_curling_equipment()
+# Load all equipment by category
+load_hockey_equipment()
+load_ice_skating_equipment()
+load_curling_equipment()
 
-    # Print summary
-    print('\nData loading completed!')
-    print('\nItems by category:')
-    for category in ['hockey', 'ice_skating', 'curling', 'apparel', 'accessories', 'protective_gear']:
-        count = Gear.objects.filter(category=category).count()
-        print(f"{category}: {count} items")
+# Print summary
+print('\nData loading completed!')
+print('\nItems by category:')
+for category in ['hockey', 'ice_skating', 'curling', 'apparel', 'accessories', 'protective_gear']:
+    count = Gear.objects.filter(category=category).count()
+    print(f"{category}: {count} items")
