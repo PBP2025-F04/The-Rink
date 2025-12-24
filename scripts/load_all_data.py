@@ -16,6 +16,12 @@ django.setup()
 from rental_gear.models import Gear
 from django.contrib.auth.models import User
 
+# Base directory - works both when run directly and via exec()
+try:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+except NameError:
+    BASE_DIR = os.getcwd()
+
 
 def clean_price(price_str):
     """Cleans price string and converts to Decimal safely"""
@@ -86,15 +92,15 @@ def load_hockey_equipment():
 
     # Load hockey skates
     print("Loading hockey skates...")
-    skates_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Dataset', 'hockey', 'hockey_skates.csv')
+    skates_file = os.path.join(BASE_DIR, 'Dataset', 'hockey', 'hockey_skates.csv')
     if os.path.exists(skates_file):
         with open(skates_file, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 try:
                     price_usd = clean_price(row.get('Price'))
-                    # Konversi USD ke IDR (kurs 16000)
-                    price_idr = price_usd * Decimal('16000')
+                    # Konversi USD ke IDR (kurs 15500)
+                    price_idr = price_usd * Decimal('15500')
                     daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                     name = f"{row.get('Brand','').strip()} {row.get('Name','').strip()}".strip()
@@ -136,15 +142,15 @@ def load_hockey_equipment():
 
     # Load hockey sticks
     print("\nLoading hockey sticks...")
-    sticks_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Dataset', 'hockey', 'hockey_sticks.csv')
+    sticks_file = os.path.join(BASE_DIR, 'Dataset', 'hockey', 'hockey_sticks.csv')
     if os.path.exists(sticks_file):
         with open(sticks_file, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 try:
                     price_usd = clean_price(row.get('Price'))
-                    # Konversi USD ke IDR (kurs 16000)
-                    price_idr = price_usd * Decimal('16000')
+                    # Konversi USD ke IDR (kurs 15500)
+                    price_idr = price_usd * Decimal('15500')
                     daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                     name = f"{row.get('Brand','').strip()} {row.get('Name','').strip()}".strip()
@@ -188,7 +194,7 @@ def load_hockey_equipment():
 def load_ice_skating_equipment():
     print("\nLoading ice skating equipment...")
 
-    figure_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Dataset', 'figure')
+    figure_dir = os.path.join(BASE_DIR, 'Dataset', 'figure')
     if os.path.exists(figure_dir):
         for fname in os.listdir(figure_dir):
             if fname.endswith('.csv'):
@@ -200,8 +206,8 @@ def load_ice_skating_equipment():
                     for row in reader:
                         try:
                             price_usd = clean_price(row.get('Price'))
-                            # Konversi USD ke IDR (kurs 16000)
-                            price_idr = price_usd * Decimal('16000')
+                            # Konversi USD ke IDR (kurs 15500)
+                            price_idr = price_usd * Decimal('15500')
                             daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                             name = row.get('Name','').strip()
@@ -258,15 +264,15 @@ def load_curling_equipment():
 
     # Load curling footwear
     print("\nLoading curling footwear...")
-    footwear_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Dataset', 'curling', 'curlingstore_footwear.csv')
+    footwear_file = os.path.join(BASE_DIR, 'Dataset', 'curling', 'curlingstore_footwear.csv')
     if os.path.exists(footwear_file):
         with open(footwear_file, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 try:
                     price_usd = clean_price(row.get('Price'))
-                    # Konversi USD ke IDR (kurs 16000)
-                    price_idr = price_usd * Decimal('16000')
+                    # Konversi USD ke IDR (kurs 15500)
+                    price_idr = price_usd * Decimal('15500')
                     daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                     name = row.get('Name','').strip()
@@ -310,15 +316,15 @@ def load_curling_equipment():
 
     # Load curling brooms
     print("\nLoading curling brooms...")
-    brooms_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Dataset', 'curling', 'curlingstore_brooms.csv')
+    brooms_file = os.path.join(BASE_DIR, 'Dataset', 'curling', 'curlingstore_brooms.csv')
     if os.path.exists(brooms_file):
         with open(brooms_file, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 try:
                     price_usd = clean_price(row.get('Price'))
-                    # Konversi USD ke IDR (kurs 16000)
-                    price_idr = price_usd * Decimal('16000')
+                    # Konversi USD ke IDR (kurs 15500)
+                    price_idr = price_usd * Decimal('15500')
                     daily_rate = (price_idr / Decimal('30')).quantize(Decimal('0'))
 
                     name = row.get('Name','').strip()
