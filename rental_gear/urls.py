@@ -9,7 +9,7 @@ from rental_gear.views import (
     get_gears_json, get_gear_detail_json, get_cart_json, add_to_cart_flutter,
     update_cart_item_flutter, remove_from_cart_flutter, checkout_flutter,
     get_rentals_json, create_gear_flutter, update_gear_flutter, delete_gear_flutter,
-    get_seller_gears_json
+    get_seller_gears_json, admin_gears_flutter, update_gear_admin_flutter, delete_gear_flutter
 )
 
 app_name = 'rental_gear'
@@ -28,6 +28,9 @@ urlpatterns = [
     path('api/flutter/seller/gears/create/', create_gear_flutter, name='flutter_create_gear'),
     path('api/flutter/seller/gears/<int:id>/update/', update_gear_flutter, name='flutter_update_gear'),
     path('api/flutter/seller/gears/<int:id>/delete/', delete_gear_flutter, name='flutter_delete_gear'),
+    path('api/admin/gears/', admin_gears_flutter, name='admin_gears_flutter'),
+    path('api/admin/gears/<int:gear_id>/update/', update_gear_admin_flutter, name='update_gear_admin_flutter'),
+    path('api/delete-gear/<int:gear_id>/', delete_gear_flutter, name='delete_gear_flutter'),
     
     # API URLs
     path('api/gear/<int:id>/', gear_detail, name='gear_api_detail'),

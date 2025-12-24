@@ -1,6 +1,8 @@
 # events/urls.py
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'events'
 
@@ -18,4 +20,8 @@ urlpatterns = [
     
     path('api/list/', views.get_events_json, name='get_events_json'),
     path('api/join/<int:event_id>/', views.join_event_flutter, name='join_event_flutter'),
+    path('api/detail/<int:event_id>/', views.get_event_detail_json),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

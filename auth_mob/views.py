@@ -661,7 +661,7 @@ def delete_post_admin(request, post_id):
             "message": "Access denied. Admin privileges required."
         }, status=403)
 
-    if request.method != 'DELETE':
+    if request.method not in ['DELETE', 'POST']:
         return JsonResponse({
             "status": False,
             "message": "Invalid request method."
@@ -719,7 +719,7 @@ def delete_reply_admin(request, reply_id):
             "message": "Access denied. Admin privileges required."
         }, status=403)
 
-    if request.method != 'DELETE':
+    if request.method not in ['DELETE', 'POST']:
         return JsonResponse({
             "status": False,
             "message": "Invalid request method."

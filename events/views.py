@@ -11,15 +11,23 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Event
+from django.db import transaction
 
 @csrf_exempt
 def get_events_json(request):
     events = Event.objects.filter(is_active=True)
+    
+    registered_event_ids = set()
+    if request.user.is_authenticated:
+        registered_event_ids = set(
+            EventRegistration.objects.filter(user=request.user)
+            .values_list('event_id', flat=True)
+        )
+
     data = []
     for event in events:
-        is_registered = False
-        if request.user.is_authenticated:
-            is_registered = event.is_registered(request.user)
+        # Logika is_registered: True jika ID event ada di daftar pendaftaran user
+        is_registered = event.id in registered_event_ids
 
         data.append({
             'id': event.id,
@@ -33,31 +41,39 @@ def get_events_json(request):
             'image_url': event.image.url if event.image else '',
             'participant_count': event.current_participants,
             'max_participants': event.max_participants,
-            'is_registered': is_registered,
+            'is_registered': is_registered, # Menggunakan hasil lookup di atas
         })
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
-@login_required
 def join_event_flutter(request, event_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'Unauthorized'}, status=401)
+    
     if request.method == 'POST':
         try:
             event = Event.objects.get(id=event_id)
+            user = request.user
             
-            # Check conditions
+            # Cek apakah sudah terdaftar (Query langsung ke tabel Registration biar akurat)
+            if EventRegistration.objects.filter(event=event, user=user).exists():
+                return JsonResponse({'status': False, 'message': 'Already registered'}, status=400)
+            
             if event.is_full:
                 return JsonResponse({'status': False, 'message': 'Event is full'}, status=400)
-            if event.is_registered(request.user):
-                return JsonResponse({'status': False, 'message': 'Already registered'}, status=400)
+            
             if event.is_past:
                 return JsonResponse({'status': False, 'message': 'Event has passed'}, status=400)
 
-            # Register user
-            EventRegistration.objects.create(event=event, user=request.user)
+            # Simpan registrasi
+            EventRegistration.objects.create(event=event, user=user)
             
             return JsonResponse({'status': True, 'message': 'Successfully joined!'})
+            
         except Event.DoesNotExist:
             return JsonResponse({'status': False, 'message': 'Event not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
             
     return JsonResponse({'status': False, 'message': 'Invalid method'}, status=405)
 
@@ -265,3 +281,42 @@ def admin_event_delete(request, id):
         messages.success(request, 'Event deleted successfully!')
         return redirect('events:admin_event_list')
     return render(request, 'events/admin_event_confirm_delete.html', {'event': event})
+
+@csrf_exempt
+def get_event_detail_json(request, event_id):
+    event = get_object_or_404(Event, id=event_id, is_active=True)
+
+    related_events = Event.objects.filter(
+        category=event.category,
+        is_active=True,
+        date__gte=timezone.now().date()
+    ).exclude(id=event.id)[:3]
+
+    data = {
+        'event': {
+            'id': event.id,
+            'name': event.name,
+            'description': event.description,
+            'date': str(event.date),
+            'time': f"{event.start_time} - {event.end_time}",
+            'location': event.location,
+            'price': float(event.price),
+            'category': event.category,
+            'image_url': event.image.url if event.image else '',
+            'participant_count': event.current_participants,
+            'max_participants': event.max_participants,
+            'is_registered': event.is_registered(request.user),
+        },
+        'recommended_events': [
+            {
+                'id': e.id,
+                'name': e.name,
+                'date': str(e.date),
+                'location': e.location,
+                'image_url': e.image.url if e.image else '',
+            }
+            for e in related_events
+        ]
+    }
+
+    return JsonResponse(data)

@@ -9,13 +9,11 @@ from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.timezone import localtime
 import requests
 import json
-
 from functools import wraps
-from django.http import JsonResponse
 
 def login_required_json(view_func):
     @wraps(view_func)
@@ -535,6 +533,8 @@ def delete_post_flutter(request, id):
 @csrf_exempt
 @login_required_json
 def add_reply_flutter(request, post_id):
+    print("COOKIES:", request.COOKIES)
+    print("USER:", request.user, request.user.is_authenticated)
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
@@ -659,27 +659,55 @@ def toggle_vote_flutter(request):
 def get_top_posts_json_flutter(request):
     posts = (
         Post.objects
+        .select_related('author')
+        .prefetch_related(
+            'upvotes',
+            Prefetch(
+                'replies',
+                queryset=Reply.objects
+                    .select_related('author')
+                    .prefetch_related('upvotes')
+                    .order_by('created_at', 'id')
+            )
+        )
         .annotate(
-            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True)),
-            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False))
+            total_up=Count('upvotes', filter=Q(upvotes__is_upvote=True), distinct=True),
+            total_down=Count('upvotes', filter=Q(upvotes__is_upvote=False), distinct=True),
         )
         .annotate(score=F('total_up') - F('total_down'))
-        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:3]
+        .order_by('-score', '-total_up', '-total_down', '-created_at', '-id')[:5]
     )
 
-    data = [
-        {
-            "id": p.id,
-            "title": p.title,
-            "content": strip_tags(p.content)[:120],
-            "total_up": p.total_up,
-            "total_down": p.total_down,
-            "replies": p.replies.count(),
-            "thumbnail_url": p.thumbnail_url,
-            "created_at": localtime(p.created_at).isoformat() if p.created_at else None,
-        }
-        for p in posts
-    ]
+    data = []
+    for post in posts:
+        replies_data = [
+            {
+                "id": r.id,
+                "author": r.author.username if r.author else None,
+                "content": r.content,
+                "created_at": localtime(r.created_at).isoformat(),
+                "updated_at": localtime(r.updated_at).isoformat(),
+                "upvotes_count": r.total_upvotes(),
+                "downvotes_count": r.total_downvotes(),
+            }
+            for r in post.replies.all()
+        ]
+
+        data.append({
+            "id": post.id,
+            "author": post.author.username if post.author else None,
+            "title": post.title,
+            "content": post.content,
+            "created_at": localtime(post.created_at).isoformat(),
+            "updated_at": localtime(post.updated_at).isoformat(),
+            "thumbnail_url": post.thumbnail_url or "",
+            "user_id": post.author.id if post.author else None,
+            "upvotes_count": int(getattr(post, "total_up", 0)),
+            "downvotes_count": int(getattr(post, "total_down", 0)),
+
+            "replies": replies_data,
+            "replies_count": len(replies_data),
+        })
 
     return JsonResponse(data, safe=False)
 
@@ -701,3 +729,72 @@ def get_post_detail_flutter(request, post_id):
         return JsonResponse(data)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post not found"}, status=404)
+
+def auth_person_forum(request):
+    return JsonResponse({
+        "is_authenticated": request.user.is_authenticated,
+        "user_id": request.user.id if request.user.is_authenticated else None,
+        "username": request.user.username if request.user.is_authenticated else None,
+    })
+
+# Admin Flutter endpoints
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_posts_flutter(request):
+    posts = Post.objects.all().select_related('author').order_by('-created_at')
+    data = []
+    for post in posts:
+        data.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content,
+            'author_username': post.author.username,
+            'total_upvotes': post.total_upvotes(),
+            'total_downvotes': post.total_downvotes(),
+            'replies_count': post.replies.count(),
+        })
+    return JsonResponse({'status': True, 'posts': data})
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_replies_flutter(request):
+    replies = Reply.objects.all().select_related('author', 'post').order_by('-created_at')
+    data = []
+    for reply in replies:
+        data.append({
+            'id': reply.id,
+            'content': reply.content,
+            'author_username': reply.author.username,
+            'post_title': reply.post.title,
+            'total_upvotes': reply.total_upvotes(),
+            'total_downvotes': reply.total_downvotes(),
+        })
+    return JsonResponse({'status': True, 'replies': data})
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_post_flutter(request, post_id):
+    if request.method == 'POST':
+        try:
+            post = get_object_or_404(Post, id=post_id)
+            post.delete()
+            return JsonResponse({'status': True, 'message': 'Post deleted'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
+@csrf_exempt
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_reply_flutter(request, reply_id):
+    if request.method == 'POST':
+        try:
+            reply = get_object_or_404(Reply, id=reply_id)
+            reply.delete()
+            return JsonResponse({'status': True, 'message': 'Reply deleted'})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)}, status=500)
+    return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)

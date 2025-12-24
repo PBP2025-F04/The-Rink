@@ -1,5 +1,6 @@
 from django.urls import path
-from booking_arena.views import * 
+from booking_arena.views import *
+from . import views
 app_name = 'booking_arena'
 
 urlpatterns = [
@@ -24,4 +25,12 @@ urlpatterns = [
     path('api/booking/create/', create_booking_flutter, name='create_booking_flutter'),
     path('api/booking/cancel/', cancel_booking_flutter, name='cancel_booking_flutter'),
     path('api/my-history/', my_history_flutter, name='my_history_flutter'),
+    path('api/delete/<uuid:arena_id>/', delete_arena_flutter, name='delete_arena_flutter'),
+
+    # Admin URLs
+    path('admin/arenas/', views.admin_arena_list, name='admin_arena_list'),
+    path('admin/arenas/add/', views.admin_arena_create, name='admin_arena_create'),
+    path('admin/arenas/<uuid:arena_id>/edit/', views.admin_arena_update, name='admin_arena_update'),
+    path('admin/arenas/<uuid:arena_id>/delete/', views.admin_arena_delete, name='admin_arena_delete'),
+    path('admin/bookings/', views.admin_booking_list, name='admin_booking_list'),
 ]
